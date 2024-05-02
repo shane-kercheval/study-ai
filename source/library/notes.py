@@ -8,7 +8,6 @@ import numpy as np
 from dataclasses import dataclass
 
 
-# enum Priority
 class Priority(str, Enum):
     low = 'low'
     medium = 'medium'
