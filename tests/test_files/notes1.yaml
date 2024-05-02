@@ -1,0 +1,28 @@
+uuid: 65A67658-8B85-41CF-8FCF-1A1D46F61690
+category: OMSCS
+ident: CS 6200
+name: Graduate Introduction to Operating Systems
+abbreviation: GIOS
+source: https://www.example.com
+tags:
+  - systems
+  - c
+  - networking
+notes:
+  - |
+    This
+    is
+    a
+    multiline
+    note.
+  - This is another note.
+  - text: This is a note with a reference.
+    reference: https://www.example.com
+    priority: high
+  - term: Term
+    definition: Definition
+    reference: https://www.example.com
+    tags:
+      - Exam 1
+      - Paper1
+    priority: high
