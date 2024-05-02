@@ -21,8 +21,8 @@ docker_open: notebook mlflow_ui zsh
 notebook:
 	open 'http://127.0.0.1:8888/?token=d4484563805c48c9b55f75eb8b28b3797c6757ad4871776d'
 
-zsh:
-	docker exec -it data-science-template-bash-1 /bin/zsh
+study:
+	docker exec -it study-ai-bash-1 /bin/zsh -c "python study.py cycle"
 
 docker_all:
 	docker compose run --no-deps --entrypoint "make all" bash
