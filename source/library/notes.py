@@ -3,8 +3,10 @@
 from abc import ABC, abstractmethod
 from textwrap import dedent
 from pydantic import BaseModel, field_validator
-import yaml
 from enum import Enum
+import numpy as np
+from dataclasses import dataclass
+
 
 # enum Priority
 class Priority(str, Enum):
@@ -18,9 +20,9 @@ class Note(ABC, BaseModel):
     reference: str | None = None
     tags: list[str] = []
 
-    def uuid(self):
+    def uuid(self) -> str:
         """Return a unique identifier for the note (e.g. a hash of the content)."""
-        return hash('-'.join([f"{k}={v}" for k, v in self.dict().items()]))
+        return str(hash('-'.join([f"{k}={v}" for k, v in self.dict().items()])))
 
     @abstractmethod
     def preview(self):
@@ -89,12 +91,10 @@ class QuestionAnswerNote(Note):
 
 
 class ClassNotes(BaseModel):
-    name: str
+    uuid: str
+    subject_metadata: dict = {}
+    note_metadata: dict = {}
     notes: list[Note] = []
-    ident: str | None = None
-    abbreviation: str | None = None
-    category: str | None = None
-    tags: list[str] = []
 
     @classmethod
     def from_dict(cls, data: dict):
@@ -118,9 +118,52 @@ class ClassNotes(BaseModel):
         return ClassNotes(**data)
 
 
-with open("../../tests/test_files/notes1.yaml", "r") as f:
-    notes = yaml.safe_load(f)
+@dataclass
+class History:
+    correct: int = 0
+    incorrect: int = 0
+
+    def beta_draw(self):
+        """
+        Draw a sample from the beta distribution. The interpretation is the probability of
+        "success" (in this case successfully answering the question correctly). The higher the
+        likelihood of success, the less likely we need to study this note.
+        """
+        return np.random.beta(self.correct + 1, self.incorrect + 1, 1)[0]
+
+    def correct_answer(self, correct: bool) -> None:
+        if correct:
+            self.correct += 1
+        else:
+            self.incorrect += 1
 
 
-class_notes = ClassNotes.from_dict(notes)
-print(class_notes)
+class TestBank:
+    def __init__(self, class_notes: list[ClassNotes], history: dict[str, History] | None = None):
+        self.test_bank = {}
+        for class_note in class_notes:
+            for note in class_note.notes:
+                uuid = class_note.uuid + note.uuid()
+                assert uuid not in self.test_bank, f"Duplicate UUID: {uuid}"
+                self.test_bank[uuid] = {
+                    'history': history[uuid] if history and uuid in history else History(),
+                    'subject_metadata': class_note.subject_metadata,
+                    'note_metadata': class_note.note_metadata,
+                    'note': note,
+                }
+
+    def draw(self) -> dict:
+        """Draw a note from the class notes."""
+        probabilities = {
+            k: v['history'].beta_draw()
+            for k, v in self.test_bank.items()
+        }
+        # softmax probabilities across all values
+        sum_probs = sum(probabilities.values())
+        probabilities = {k: v / sum_probs for k, v in probabilities.items()}
+        # draw a note
+        uuid = np.random.choice(list(probabilities.keys()), p=list(probabilities.values()))
+        return self.test_bank[uuid]
+
+    def get_history(self):
+        return {k: v['history'] for k, v in self.test_bank.items()}
