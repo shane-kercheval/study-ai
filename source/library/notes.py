@@ -5,6 +5,7 @@ from textwrap import dedent
 from pydantic import BaseModel, field_validator
 from enum import Enum
 import numpy as np
+import hashlib
 from dataclasses import dataclass
 
 
@@ -21,16 +22,17 @@ class Note(ABC, BaseModel):
 
     def uuid(self) -> str:
         """Return a unique identifier for the note (e.g. a hash of the content)."""
-        return str(hash('-'.join([f"{k}={v}" for k, v in self.dict().items()])))
-
-    @abstractmethod
-    def preview(self):
-        """Render the 'preview' e.g. the 'question' or 'term' to give context."""
+        content = '-'.join([f"{k}={v}" for k, v in self.dict().items()])
+        return hashlib.sha256(content.encode()).hexdigest()
 
     @abstractmethod
     def note(self):
         """Render the 'description' e.g. the 'answer' or 'definition' to provide more detail."""
 
+class Flashcard(Note):
+    @abstractmethod
+    def preview(self):
+        """Render the 'preview' e.g. the 'question' or 'term' to give context."""
 
 class TextNote(Note):
     text: str
@@ -47,7 +49,7 @@ class TextNote(Note):
         return self.text
 
 
-class DefinitionNote(Note):
+class DefinitionNote(Flashcard):
     term: str
     definition: str
 
@@ -68,7 +70,7 @@ class DefinitionNote(Note):
         return self.definition
 
 
-class QuestionAnswerNote(Note):
+class QuestionAnswerNote(Flashcard):
     question: str
     answer: str
 
@@ -90,10 +92,16 @@ class QuestionAnswerNote(Note):
 
 
 class ClassNotes(BaseModel):
-    uuid: str
+
     subject_metadata: dict = {}
     note_metadata: dict = {}
     notes: list[Note] = []
+
+    def uuid(self) -> str:
+        """Return a unique identifier for the class (e.g. a hash of the content)."""
+        subject_meta_content = '-'.join([f"{k}={v}" for k, v in self.subject_metadata.items()])
+        note_meta_content = '-'.join([f"{k}={v}" for k, v in self.note_metadata.items()])
+        return hashlib.sha256((subject_meta_content + note_meta_content).encode()).hexdigest()
 
     @classmethod
     def from_dict(cls, data: dict):
@@ -136,15 +144,30 @@ class History:
         else:
             self.incorrect += 1
 
+    def to_dict(self) -> dict:
+        return {
+            'correct': self.correct,
+            'incorrect': self.incorrect,
+        }
+
 
 class TestBank:
-    def __init__(self, class_notes: list[ClassNotes], history: dict[str, History] | None = None):
+    def __init__(
+            self,
+            class_notes: list[ClassNotes],
+            history: dict[str, History] | None = None,
+            flash_only: bool = False,
+        ):
+        """TODO."""
         self.test_bank = {}
         for class_note in class_notes:
             for note in class_note.notes:
-                uuid = class_note.uuid + note.uuid()
+                if flash_only and not isinstance(note, Flashcard):
+                    continue
+                uuid = class_note.uuid() + note.uuid()
                 assert uuid not in self.test_bank, f"Duplicate UUID: {uuid}"
                 self.test_bank[uuid] = {
+                    'uuid': uuid,
                     'history': history[uuid] if history and uuid in history else History(),
                     'subject_metadata': class_note.subject_metadata,
                     'note_metadata': class_note.note_metadata,
@@ -164,5 +187,10 @@ class TestBank:
         uuid = np.random.choice(list(probabilities.keys()), p=list(probabilities.values()))
         return self.test_bank[uuid]
 
-    def get_history(self):
+    def correct_answer(self, uuid: str, correct: bool) -> None:
+        """Update the history of the note based on the correctness of the answer."""
+        self.test_bank[uuid]['history'].correct_answer(correct)
+
+    @property
+    def history(self) -> dict[str, History]:
         return {k: v['history'] for k, v in self.test_bank.items()}
