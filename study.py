@@ -2,38 +2,56 @@ import glob
 import click
 import yaml
 import os
-import re
+from source.library.helpers import colorize_gray, colorize_markdown
 from source.library.notes import ClassNotes, Flashcard, History, TestBank
 
 @click.group()
 def cli():
     pass
 
+# @cli.command()
+# @click.option('--file', '-f', help='The YAML file to load notes from.')
+# def load(file):
+#     """Load notes from a YAML file."""
+#     if not os.path.exists(file):
+#         click.echo(f"File {file} does not exist.")
+#         return
+
+#     with open(file, 'r') as f:
+#         data = yaml.safe_load(f)
+
+#     class_notes = ClassNotes.from_dict(data)
+#     click.echo(f"Loaded {len(class_notes.notes)} notes from {file}.")
+
+
 @cli.command()
-@click.option('--file', '-f', help='The YAML file to load notes from.')
-def load(file):
-    """Load notes from a YAML file."""
-    if not os.path.exists(file):
-        click.echo(f"File {file} does not exist.")
-        return
-
-    with open(file, 'r') as f:
-        data = yaml.safe_load(f)
-
-    class_notes = ClassNotes.from_dict(data)
-    click.echo(f"Loaded {len(class_notes.notes)} notes from {file}.")
+def create_notes():
+    """Create yaml for notes from a text file."""
+    pass
 
 
-def colorize_markdown(text):
-    # Apply red color for text surrounded by **
-    text = re.sub(r'\*\*(.*?)\*\*', r'\033[31m\1\033[0m', text)
-    # Apply blue color for text surrounded by `
-    text = re.sub(r'`(.*?)`', r'\033[34m\1\033[0m', text)
-    return text
+@click.command()
+@click.option('--category', '-c', help='Only display notes from a specific class category.', default=None)
+@click.option('--ident', '-i', help='Only display notes from a specific class identity.', default=None)
+@click.option('--name', '-n', help='Only display notes from a specific class name.', default=None)
+@click.option('--abbr', '-a', help='Only display notes from a specific class abbreviation.', default=None)
+def search():
+    pass
 
-def colorize_gray(text):
-    # Apply gray color to all text
-    return f'\033[90m{text}\033[0m'
+
+@click.command()
+@click.option('--model', '-m', help='The model to use for chatting.', default='gpt-3.5')
+def chat():
+    pass
+
+
+@click.command()
+def scrape_pdf():
+    pass
+
+
+
+
 
 
 @cli.command()
