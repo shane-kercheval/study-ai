@@ -157,12 +157,24 @@ class TestBank:
             class_notes: list[ClassNotes],
             history: dict[str, History] | None = None,
             flash_only: bool = False,
+            class_category: str | None = None,
+            class_ident: str | None = None,
+            class_name: str | None = None,
+            class_abbr: str | None = None,
         ):
         """TODO."""
         self.test_bank = {}
         for class_note in class_notes:
             for note in class_note.notes:
                 if flash_only and not isinstance(note, Flashcard):
+                    continue
+                if class_category and class_note.subject_metadata.get('category') != class_category:
+                    continue
+                if class_ident and class_note.subject_metadata.get('ident') != class_ident:
+                    continue
+                if class_name and class_note.subject_metadata.get('name') != class_name:
+                    continue
+                if class_abbr and class_note.subject_metadata.get('abbr') != class_abbr:
                     continue
                 uuid = class_note.uuid() + note.uuid()
                 assert uuid not in self.test_bank, f"Duplicate UUID: {uuid}"
