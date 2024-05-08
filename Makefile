@@ -1,8 +1,14 @@
 ####
 # CLI
 ####
-study:
+study_docker:
 	docker exec -it study-ai-bash-1 /bin/zsh -c "python study.py cycle"
+
+study:
+	python study.py cycle
+
+flash:
+	python study.py cycle --flash_only
 
 ####
 # DOCKER
@@ -15,6 +21,15 @@ docker_run: docker_build
 
 docker_down:
 	docker compose down --remove-orphans
+
+####
+#
+####
+
+
+
+
+
 
 ####
 # Project

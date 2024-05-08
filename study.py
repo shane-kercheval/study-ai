@@ -2,7 +2,8 @@ import glob
 import click
 import yaml
 import os
-from source.library.notes import ClassNotes, TestBank
+import re
+from source.library.notes import ClassNotes, Flashcard, History, TestBank
 
 @click.group()
 def cli():
@@ -23,8 +24,6 @@ def load(file):
     click.echo(f"Loaded {len(class_notes.notes)} notes from {file}.")
 
 
-import re
-
 def colorize_markdown(text):
     # Apply red color for text surrounded by **
     text = re.sub(r'\*\*(.*?)\*\*', r'\033[31m\1\033[0m', text)
@@ -36,28 +35,70 @@ def colorize_gray(text):
     # Apply gray color to all text
     return f'\033[90m{text}\033[0m'
 
+
 @cli.command()
-def cycle():
-    """Cycle through specified notes from a YAML file."""
-    # load all yaml files in /code/data/notes via glob
+@click.option('--flash_only', '-f', help='Only display flashcards.', is_flag=True, default=False)
+@click.option('--category', '-c', help='Only display notes from a specific class category.', default=None)
+@click.option('--ident', '-i', help='Only display notes from a specific class identity.', default=None)
+@click.option('--name', '-n', help='Only display notes from a specific class name.', default=None)
+@click.option('--abbr', '-a', help='Only display notes from a specific class abbreviation.', default=None)
+def cycle(
+        flash_only: bool,
+        category: str,
+        ident: str,
+        name: str,
+        abbr: str,
+    ):
+    """Cycle through notes from one or more YAML files."""
+    if os.path.exists('/code/data/history.yaml'):
+        with open('/code/data/history.yaml', 'r') as f:
+            history = yaml.safe_load(f)
+            history = {k: History(**v) for k, v in history.items()}
+    else:
+        history = {}
+
     class_notes = []
+    # load all yaml files in /code/data/notes via glob
     for file in glob.glob('/code/data/notes/*.yaml'):
         with open(file, 'r') as f:
             data = yaml.safe_load(f)
         class_notes.append(ClassNotes.from_dict(data))
-    test_bank = TestBank(class_notes=class_notes)
+    test_bank = TestBank(
+        class_notes=class_notes,
+        history=history,
+        flash_only=flash_only,
+        class_category=category,
+        class_ident=ident,
+        class_name=name,
+        class_abbr=abbr,
+    )
     click.echo(f"Available notes: {len(test_bank.test_bank)}")
     click.echo("\n\n\n")
     while True:
         note = test_bank.draw()
-        click.echo(f"\n\n{colorize_markdown(note['note'].preview())}\n\n")
-        selected = click.prompt(colorize_gray("Use any key to reveal answer, Use q to quit"), type=str)
+        if isinstance(note['note'], Flashcard):
+            click.echo(f"\n\n{colorize_markdown(note['note'].preview())}\n\n")
+            selected = click.prompt(
+                colorize_gray("Press any key to reveal answer (q to quit)"),
+                type=str,
+                default='',
+                show_default=False,
+            )
+            if selected == 'q':
+                break
+
+        click.echo(f"\n\n{colorize_markdown(note['note'].note())}\n\n")
+        selected = ''
+        while selected not in ['y', 'n', 'q']:
+            selected = click.prompt(colorize_gray("Invalid input. Correct? (y/n) or q to quit"), type=str)
         if selected == 'q':
             break
-        click.echo(f"\n\n{colorize_markdown(note['note'].note())}\n\n")
-        selected = click.prompt(colorize_gray("Correct? (y/n)"), type=str)
-        
+        test_bank.correct_answer(uuid=note['uuid'], correct=selected == 'y')
 
+        # save history to a file
+        history.update({k: v.to_dict() for k, v in test_bank.history.items()})
+        with open('/code/data/history.yaml', 'w') as f:
+            yaml.safe_dump(history, f)
 
 
 if __name__ == '__main__':
