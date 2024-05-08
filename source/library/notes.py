@@ -164,17 +164,21 @@ class TestBank:
         ):
         """TODO."""
         self.test_bank = {}
+        class_attributes = {
+            'category': class_category,
+            'ident': class_ident,
+            'name': class_name,
+            'abbr': class_abbr
+        }
+
         for class_note in class_notes:
             for note in class_note.notes:
                 if flash_only and not isinstance(note, Flashcard):
                     continue
-                if class_category and class_note.subject_metadata.get('category') != class_category:
-                    continue
-                if class_ident and class_note.subject_metadata.get('ident') != class_ident:
-                    continue
-                if class_name and class_note.subject_metadata.get('name') != class_name:
-                    continue
-                if class_abbr and class_note.subject_metadata.get('abbr') != class_abbr:
+                if any(
+                    class_note.subject_metadata.get(attr) != value
+                    for attr, value in class_attributes.items() if value
+                    ):
                     continue
                 uuid = class_note.uuid() + note.uuid()
                 assert uuid not in self.test_bank, f"Duplicate UUID: {uuid}"
