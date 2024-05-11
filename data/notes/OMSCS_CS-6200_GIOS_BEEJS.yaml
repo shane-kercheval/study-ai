@@ -10,6 +10,7 @@ note_metadata:
     - systems
     - c
     - networking
+    - beejs
 notes:
   - term: What is a **socket**?
     definition: A way to speak to other programs using standard Unix file descriptors.
