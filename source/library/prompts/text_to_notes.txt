@@ -6,7 +6,7 @@ Here are the instructions, it is critical they are followed:
     - There are several types of notes (and corresponding yaml formats):
         - a note which contains `term` and `definition` properities
         - a note which contains `question` and `answer` properties
-    - If a reference is provided by the user, include that as an additional attribute in the yaml
+    - If a reference is provided by the user, include that as an additional attribute in the yaml.
     - Use markdown formatting to format terms, important concepts, etc. accordingly.
     - Please explain things that weren't clearly explained in the text or provide definitions of terms that may not be recognized by most of the audience.
     - The response should contain only yaml, no other text or explanations.
@@ -116,7 +116,5 @@ Here is the text to generate notes from:
 
 
 ```
-{{reference}}
-
 {{text}}
 ```

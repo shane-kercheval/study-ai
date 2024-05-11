@@ -2,26 +2,19 @@ import glob
 import click
 import yaml
 import os
+from textwrap import dedent
+from llm_workflow.openai import OpenAIChat, OpenAIServerChat
+from llm_workflow.hugging_face import HuggingFaceEndpointChat
 from source.library.helpers import colorize_gray, colorize_markdown
 from source.library.notes import ClassNotes, Flashcard, History, TestBank
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 @click.group()
 def cli():
     pass
-
-# @cli.command()
-# @click.option('--file', '-f', help='The YAML file to load notes from.')
-# def load(file):
-#     """Load notes from a YAML file."""
-#     if not os.path.exists(file):
-#         click.echo(f"File {file} does not exist.")
-#         return
-
-#     with open(file, 'r') as f:
-#         data = yaml.safe_load(f)
-
-#     class_notes = ClassNotes.from_dict(data)
-#     click.echo(f"Loaded {len(class_notes.notes)} notes from {file}.")
 
 
 @cli.command()
@@ -30,28 +23,55 @@ def create_notes():
     pass
 
 
-@click.command()
-@click.option('--category', '-c', help='Only display notes from a specific class category.', default=None)
-@click.option('--ident', '-i', help='Only display notes from a specific class identity.', default=None)
-@click.option('--name', '-n', help='Only display notes from a specific class name.', default=None)
-@click.option('--abbr', '-a', help='Only display notes from a specific class abbreviation.', default=None)
-def search():
-    pass
+# @cli.command()
+# @click.option('--category', '-c', help='Only display notes from a specific class category.', default=None)
+# @click.option('--ident', '-i', help='Only display notes from a specific class identity.', default=None)
+# @click.option('--name', '-n', help='Only display notes from a specific class name.', default=None)
+# @click.option('--abbr', '-a', help='Only display notes from a specific class abbreviation.', default=None)
+# def search():
+#     pass
 
 
-@click.command()
-@click.option('--model', '-m', help='The model to use for chatting.', default='gpt-3.5')
-def chat():
-    pass
+# @cli.command()
+# @click.option('--model', '-m', help='The model to use for chatting.', default='gpt-3.5')
+# def chat():
+#     pass
 
 
-@click.command()
-def scrape_pdf():
-    pass
+# @cli.command()
+# def scrape_pdf():
+#     pass
 
 
 
-
+@cli.command()
+@click.option('--model_type', '-mt', help="The model service to use, e.g. 'openai', 'openai_server', 'hugging_face_endpoint'", default='openai')  # noqa
+@click.option('--model_name', '-mn', help="The model name (or endpoint) to use, e.g. 'gpt-3.5-turbo-0125' or 'http://host.docker.internal:1234/v1'", default='gpt-3.5-turbo-0125')  # noqa
+@click.option('--temperature', '-t', help='The temperature to set on the model.', default=0.1)
+@click.option('--file', '-f', help='The file to use for text-to-notes.', default=None)
+def text_to_notes(model_type: str, model_name: str, temperature: float, file: str | None):
+    if model_type == 'openai':
+        model = OpenAIChat(model_name=model_name, temperature=temperature)
+    elif model_type == 'openai_server':
+        model = OpenAIServerChat(endpoint_url=model_name, temperature=temperature)
+    elif model_type == 'hugging_face_endpoint':
+        model = HuggingFaceEndpointChat(endpoint_url=model_name, temperature=temperature)
+    else:
+        raise NotImplementedError(f"Model type '{model_type}' not implemented.")
+        
+    model.streaming_callback = lambda x: click.echo(x.response, nl=False)
+    with open("/code/source/library/prompts/text_to_notes.txt") as f:
+        prompt_template = f.read()
+    if file:
+        with open(file) as f:
+            text = f.read()
+    else:
+        text = click.edit("<replace with text>")
+    prompt = dedent(prompt_template).strip().replace("{{text}}", text)
+    _ = model(prompt)
+    click.echo("\n\n")
+    if model.cost:
+        click.echo(f"\n\nCost: {model.cost}")
 
 
 @cli.command()
@@ -71,6 +91,8 @@ def cycle(
     if os.path.exists('/code/data/history.yaml'):
         with open('/code/data/history.yaml', 'r') as f:
             history = yaml.safe_load(f)
+            if history is None:
+                history = {}
             history = {k: History(**v) for k, v in history.items()}
     else:
         history = {}
