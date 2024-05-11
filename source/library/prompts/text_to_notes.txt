@@ -1,17 +1,18 @@
-Create notes for the text below. The notes will be used to study for an exam. It must contain all of the important information and details.
+Create notes for the text below. The notes will be used to study for an exam.
                 
 Here are the instructions, it is critical they are followed:
-    - The notes must be returned in yaml format.
+    - The notes must be returned in valid yaml format.
+    - The notes must contain ALL important information and details from the notes.
     - There are several types of notes (and corresponding yaml formats):
         - a note which contains `term` and `definition` properities
         - a note which contains `question` and `answer` properties
-    - if a reference is provided by the user, include that as an additional attribute in the yaml
+    - If a reference is provided by the user, include that as an additional attribute in the yaml
     - Use markdown formatting to format terms, important concepts, etc. accordingly.
     - Please explain things that weren't clearly explained in the text or provide definitions of terms that may not be recognized by most of the audience.
     - The response should contain only yaml, no other text or explanations.
 
 Here is an example of the notes that should be generated for the following text:
-                
+               
 Text: 
 
 ```
