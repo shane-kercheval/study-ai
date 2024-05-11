@@ -12,18 +12,159 @@ note_metadata:
     - networking
     - beejs
 notes:
-  - term: What is a **socket**?
-    definition: A way to speak to other programs using standard Unix file descriptors.
-    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket
-    # priority: high
-  - term: What is a file descriptor?
-    definition: |
-      An integer associated with an open file. But (and here's the catch), that file can be a `network connection`, a `FIFO`, a `pipe`, a `terminal`, a real on-the-disk `file`, or just about anything else.  Everything in Unix *is* a file.
-    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket
-  - text: |
-      A file descriptor is a **small, non-negative integer** that a Unix or Unix-like operating system uses as a handle to access a file or other input/output resources, such as pipes and network sockets. (ChatGPT)
+  # - term: What is a **socket**?
+  #   definition: A way to speak to other programs using standard Unix file descriptors.
+  #   reference: https://beej.us/guide/bgnet/html/#what-is-a-socket
+  #   # priority: high
+  # - term: What is a file descriptor?
+  #   definition: |
+  #     An integer associated with an open file. But (and here's the catch), that file can be a `network connection`, a `FIFO`, a `pipe`, a `terminal`, a real on-the-disk `file`, or just about anything else.  Everything in Unix *is* a file.
+  #   reference: https://beej.us/guide/bgnet/html/#what-is-a-socket
+  # - text: |
+  #     A file descriptor is a **small, non-negative integer** that a Unix or Unix-like operating system uses as a handle to access a file or other input/output resources, such as pipes and network sockets. (ChatGPT)
 
-      When a **file** or **resource** is opened by a process, the operating system creates an **entry** to represent that file or resource and returns a **file descriptor**, which can then be used in further system calls to read from, write to, or manipulate the file or resource.
+  #     When a **file** or **resource** is opened by a process, the operating system creates an **entry** to represent that file or resource and returns a **file descriptor**, which can then be used in further system calls to read from, write to, or manipulate the file or resource.
       
-      * File descriptors are used by the operating system to manage the details of input/output operations without exposing the underlying complexity to programs. Typically, file descriptors refer to: **File descriptor 0**: Standard input (stdin). **File descriptor 1**: Standard output. **File descriptor 2**: Standard error (stderr) Beyond these, any new files or resources opened by a process are assigned incrementally higher numbers for their file descriptors.
-    reference: ChatGPT
+  #     * File descriptors are used by the operating system to manage the details of input/output operations without exposing the underlying complexity to programs. Typically, file descriptors refer to: **File descriptor 0**: Standard input (stdin). **File descriptor 1**: Standard output. **File descriptor 2**: Standard error (stderr) Beyond these, any new files or resources opened by a process are assigned incrementally higher numbers for their file descriptors.
+  #   reference: ChatGPT
+
+
+
+  - term: What is a `socket`?
+    definition: A **way to speak to other programs** using standard Unix **file descriptors**.
+    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 2
+  - term: What is a `file descriptor`?
+    definition: |
+      An **integer** associated with an **open file**.
+    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 2
+  - question: What are file descriptors used for and what types of things can be file descriptors?
+    answer: |
+      When Unix programs do any sort of **I/O**, they do it by reading or writing to a **file descriptor**. That file can be a **network connection**, a **FIFO**, a **pipe**, a **terminal**, a real on-the-disk **file**, or just about anything else. Everything in Unix is a file.
+    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 2
+  - question: What are the two types of sockets?
+    answer: |
+      One is `Stream` Sockets; the other is `Datagram` Sockets, which may hereafter be referred to as `SOCK_STREAM` and `SOCK_DGRAM`, respectively.
+
+      **Datagram** sockets are sometimes called **connectionless sockets**. (Though they can be `connect()`’d if you really want.)
+    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 2.1
+  - term: What are `stream` sockets?
+    definition: |
+      Stream sockets are **reliable** **two-way** **connected communication streams**. If you output two items into the socket in the order “1, 2”, they will arrive in the order “1, 2” at the opposite end. They will also be **error-free**.
+    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 2.1
+  - question: What are `stream` sockets used for?
+    answer: |
+      Stream sockets are used for applications that require the **reliable**, **sequenced**, and **error-free** transmission of data. These are crucial characteristics for various network applications such as **Telnet** (allows users to log into remote applications; largly replaced by SSH), **SSH** (Secure Shell), and **web browsers** using **HTTP** (Hypertext Transfer Protocol). These applications depend on stream sockets to ensure that data, such as typed characters or web page requests, is transmitted in the exact order it was sent and without errors. This is achieved using the `Transmission Control Protocol` (`TCP`), which is a key part of the TCP/IP suite responsible for managing data integrity.
+    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 2.1
+  - term: What are `datagram` sockets?
+    definition: |
+      Datagram sockets are an implementation of socket communication that use IP for routing, but they use the `User Datagram Protocol` (`U                                              DP`) instead of TCP (Transmission Control Protocol).
+
+      **If you send a datagram, it may (or may not) arrive. Each packet may arrive out of order. If it arrives, the data within the packet will be error-free.**
+
+      Unlike TCP, **UDP** is a **connectionless** protocol that does not establish a persistent connection between endpoints before data is sent. Datagram sockthat **each packet (or datagram) is sent independently** and may follow different paths to reach its destination. Each datagram **carries its own address information**, allowing it to be routed independently across the network.
+    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 2.1
+  - question: What are `datagram` sockets used for?
+    answer: |
+      UDP and datagram sockets are **preferred in scenarios where the overhead of establishing a connection would impede performance**. They are commonly used in applications like **streaming media** (audio and video), **online multiplayer games**, **voice over IP** (VoIP), and other **real-time** services. The protocol is also useful in environments where a lightweight or quick communication method is needed, even at the cost of potential packet loss.
+    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 2.1
+  - question: What is the benefit of UDP vs TCP?
+    answer: |
+      UDP is **faster** and has **lower overhead** than TCP because it **lacks the error-checking and sequencing functionalities that ensure packets are delivered in order and without errors**.
+    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 2.1
+  - question: How do applications that use UDP, like **TFTP**, ensure data isn't lost?
+    answer: |
+      While UDP itself does not provide mechanisms for handling lost packets or ensuring order and reliability, higher-level protocols or application-layer implementations can add these features. For example, TFTP (Trivial File Transfer Protocol) uses UDP but adds a simple control mechanism whereby the receiver must send an acknowledgment (ACK) for each received packet. If the sender does not receive an ACK within a certain time frame, it will retransmit the packet. This ensures reliability in the delivery of files, even over a connectionless and potentially unreliable network layer.
+    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 2.1
+
+  - term: What is `Data Encapsulation`?
+    definition: |
+      **Data Encapsulation** is the process of wrapping data in headers and sometimes footers by various protocols as it moves through the network layers. Each layer adds its own header information to the data, and upon reaching the destination, the headers are successively removed to reveal the original data.
+    reference: https://beej.us/guide/bgnet/html/#low-level-nonsense-and-network-theory; chapter 2.2
+  - term: What is the `Layered Network Model` (ISO/OSI)?
+    definition: |
+      The **Layered Network Model** (ISO/OSI) is a system that describes network functionality in a hierarchical manner with distinct layers, each responsible for specific functions. This model allows for the separation of concerns and abstraction of network details, enabling easier development and maintenance of network applications.
+    reference: https://beej.us/guide/bgnet/html/#low-level-nonsense-and-network-theory; chapter 2.2
+  - question: What are the layers of the `Layered Network Model` (ISO/OSI)?
+    answer: |
+      The layers of the **Layered Network Model** (ISO/OSI) are:
+      - Application
+      - Presentation
+      - Session
+      - Transport
+      - Network
+      - Data Link
+      - Physical
+    reference: https://beej.us/guide/bgnet/html/#low-level-nonsense-and-network-theory; chapter 2.2
+  - term: What is the `Host-to-Host Transport Layer` responsible for?
+    definition: |
+      The **Host-to-Host Transport Layer** is responsible for ensuring reliable data transmission between hosts using protocols like **TCP** (Transmission Control Protocol) and **UDP** (User Datagram Protocol).
+    reference: https://beej.us/guide/bgnet/html/#low-level-nonsense-and-network-theory; chapter 2.2
+  - term: What is the `Internet Layer` responsible for?
+    definition: |
+      The **Internet Layer** is responsible for **IP** (Internet Protocol) addressing and routing packets across different networks.
+    reference: https://beej.us/guide/bgnet/html/#low-level-nonsense-and-network-theory; chapter 2.2
+  - term: What is the `Network Access Layer` responsible for?
+    definition: |
+      The **Network Access Layer** is responsible for **Ethernet**, **Wi-Fi**, or other hardware-specific protocols for transmitting data over the physical network.
+    reference: https://beej.us/guide/bgnet/html/#low-level-nonsense-and-network-theory; chapter 2.2
+
+
+
+notes:
+  - term: What is `IPv4`?
+    definition: |
+      The **Internet Protocol Version 4** is a network routing system that uses addresses made up of four bytes (or four "octets") and is commonly written in "dots and numbers" form, such as `192.0.2.111`.
+    reference: https://beej.us/guide/bgnet/html/#ip-addresses-structs-and-data-munging; chapter 3.1
+  - term: What is `IPv6`?
+    definition: |
+      **IPv6** is the next version of the Internet Protocol developed to address the limitations of IPv4, providing significantly more addresses by using 128 bits for addressing (compared to IPv4's 32 bits). IPv6 addresses are represented in hexadecimal form, separated by colons, and can be compressed for readability.
+    reference: https://beej.us/guide/bgnet/html/#ip-addresses-structs-and-data-munging; chapter 3.1
+  - term: What are `subnets`?
+    definition: |
+      **Subnets** are used for organizational purposes to divide IP addresses into network and host portions. The network portion is defined by a netmask, which is bitwise-ANDed with the IP address to extract the network number.
+    reference: https://beej.us/guide/bgnet/html/#ip-addresses-structs-and-data-munging; chapter 3.1.1
+  - term: What are `port numbers`?
+    definition: |
+      **Port numbers** are 16-bit numbers used by TCP (stream sockets) and UDP (datagram sockets) to differentiate between different services on a computer with a single IP address. They act as local addresses for connections, similar to room numbers in a hotel.
+    reference: https://beej.us/guide/bgnet/html/#ip-addresses-structs-and-data-munging; chapter 3.1.2
+  
+
+  - term: "IP Addresses"
+    definition: "Unique identifiers for devices connected to a network, used for routing traffic."
+    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 3
+
+  - term: "IPv4"
+    definition: "Internet Protocol Version 4, uses 32-bit addresses, commonly written in dot-decimal notation (e.g., 192.0.2.111)."
+    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 3.1
+
+  - term: "IPv6"
+    definition: "Internet Protocol Version 6, developed to address IPv4 exhaustion, uses 128-bit addresses, represented in hexadecimal and separated by colons."
+    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 3.1
+
+  - term: "Subnets"
+    definition: "Segments of a network, where the IP address is divided into a network portion and a host portion to improve routing and management."
+    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 3.1.1
+
+  - term: "Netmask"
+    definition: "A bitmask used to determine what subnet an IP address belongs to, by separating the network and host portions."
+    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 3.1.1
+
+  - term: "Port Numbers"
+    definition: "16-bit numbers used alongside IP addresses to identify specific services or processes on a device."
+    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 3.1.2
+
+  - question: "What led to the development of IPv6?"
+    answer: "The exhaustion of IPv4 addresses, as predicted by Vint Cerf, necessitated the development of IPv6 to provide a vastly larger address space."
+    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 3.1
+
+  - question: "How are IPv6 addresses simplified in notation?"
+    answer: "IPv6 addresses can compress zeros using double colons and omit leading zeros in each byte pair for brevity."
+    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 3.1
+
+  - question: "What is the purpose of subnets?"
+    answer: "Subnets help organize a network into manageable parts, allowing for efficient routing and management by separating network and host identifiers."
+    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 3.1.1
+
+  - question: "How do port numbers function in network communications?"
+    answer: "Port numbers identify specific applications or services on a device, allowing multiple services to operate through a single IP address."
+    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 3.1.2
