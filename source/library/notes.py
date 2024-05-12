@@ -67,7 +67,7 @@ class DefinitionNote(Flashcard):
         return self.term
 
     def note(self):
-        return self.definition
+        return self.term + self.definition
 
 
 class QuestionAnswerNote(Flashcard):
@@ -88,41 +88,46 @@ class QuestionAnswerNote(Flashcard):
         return self.question
 
     def note(self):
-        return self.answer  
+        return self.question + self.answer
 
 
-class ClassNotes(BaseModel):
+class ClassNote(BaseModel):
 
     subject_metadata: dict = {}
     note_metadata: dict = {}
-    notes: list[Note] = []
+    note: Note
 
     def uuid(self) -> str:
         """Return a unique identifier for the class (e.g. a hash of the content)."""
         subject_meta_content = '-'.join([f"{k}={v}" for k, v in self.subject_metadata.items()])
         note_meta_content = '-'.join([f"{k}={v}" for k, v in self.note_metadata.items()])
-        return hashlib.sha256((subject_meta_content + note_meta_content).encode()).hexdigest()
+        return hashlib.sha256((subject_meta_content + note_meta_content).encode()).hexdigest() + note.uuid()  # noqa
 
-    @classmethod
-    def from_dict(cls, data: dict):
-        """Create a ClassNotes object from a dictionary."""
-        notes = []
-        for note in data['notes']:
-            if isinstance(note, str):
-                notes.append(TextNote(text=note))
-            elif isinstance(note, dict):
-                if 'text' in note:
-                    notes.append(TextNote(**note))
-                elif 'term' in note and 'definition' in note:
-                    notes.append(DefinitionNote(**note))
-                elif 'question' in note and 'answer' in note:
-                    notes.append(QuestionAnswerNote(**note))
-                else:
-                    raise ValueError(f"Invalid note type: {note}")
+def parse(data: dict) -> list[ClassNote]:
+    """Create a list of ClassNote objects from a dictionary."""
+    notes = []
+    for note_dict in data['notes']:
+        if isinstance(note_dict, str):
+            note = TextNote(text=note_dict)
+        elif isinstance(note_dict, dict):
+            if 'text' in note_dict:
+                note = TextNote(**note_dict)
+            elif 'term' in note_dict and 'definition' in note_dict:
+                note = DefinitionNote(**note_dict)
+            elif 'question' in note_dict and 'answer' in note_dict:
+                note = QuestionAnswerNote(**note_dict)
             else:
-                raise ValueError(f"Invalid note type: {note}")
-        data['notes'] = notes
-        return ClassNotes(**data)
+                raise ValueError(f"Invalid note type: {note_dict}")
+        else:
+            raise ValueError(f"Invalid note type: {note_dict}")
+        class_note = ClassNote(
+            subject_metadata=data['subject_metadata'],
+            note_metadata=data['note_metadata'],
+            note=note,
+        )
+        notes.append(class_note)
+    return notes
+
 
 
 @dataclass
@@ -154,7 +159,7 @@ class History:
 class TestBank:
     def __init__(
             self,
-            class_notes: list[ClassNotes],
+            notes: list[ClassNote],
             history: dict[str, History] | None = None,
             flash_only: bool = False,
             class_category: str | None = None,
@@ -171,7 +176,7 @@ class TestBank:
             'abbr': class_abbr
         }
 
-        for class_note in class_notes:
+        for class_note in notes:
             for note in class_note.notes:
                 if flash_only and not isinstance(note, Flashcard):
                     continue
@@ -185,8 +190,6 @@ class TestBank:
                 self.test_bank[uuid] = {
                     'uuid': uuid,
                     'history': history[uuid] if history and uuid in history else History(),
-                    'subject_metadata': class_note.subject_metadata,
-                    'note_metadata': class_note.note_metadata,
                     'note': note,
                 }
 

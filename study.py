@@ -74,6 +74,16 @@ def text_to_notes(model_type: str, model_name: str, temperature: float, file: st
         click.echo(f"\n\nCost: {model.cost}")
 
 
+def load_notes(path: str) -> list[ClassNotes]:
+    class_notes = []
+    # load all yaml files in /code/data/notes via glob
+    for file in glob.glob(path):
+        with open(file, 'r') as f:
+            data = yaml.safe_load(f)
+        class_notes.append(ClassNotes.from_dict(data))
+    return class_notes
+
+
 @cli.command()
 @click.option('--flash_only', '-f', help='Only display flashcards.', is_flag=True, default=False)
 @click.option('--category', '-c', help='Only display notes from a specific class category.', default=None)
@@ -97,12 +107,7 @@ def cycle(
     else:
         history = {}
 
-    class_notes = []
-    # load all yaml files in /code/data/notes via glob
-    for file in glob.glob('/code/data/notes/*.yaml'):
-        with open(file, 'r') as f:
-            data = yaml.safe_load(f)
-        class_notes.append(ClassNotes.from_dict(data))
+    class_notes = load_notes('/code/data/notes/*.yaml')
     test_bank = TestBank(
         class_notes=class_notes,
         history=history,
