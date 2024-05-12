@@ -58,7 +58,7 @@ def text_to_notes(model_type: str, model_name: str, temperature: float, file: st
         model = HuggingFaceEndpointChat(endpoint_url=model_name, temperature=temperature)
     else:
         raise NotImplementedError(f"Model type '{model_type}' not implemented.")
-        
+
     model.streaming_callback = lambda x: click.echo(x.response, nl=False)
     with open("/code/source/library/prompts/text_to_notes.txt") as f:
         prompt_template = f.read()
@@ -134,7 +134,6 @@ def cycle(
         if selected == 'q':
             break
         test_bank.correct_answer(uuid=note['uuid'], correct=selected == 'y')
-
         # save history to a file
         history.update({k: v.to_dict() for k, v in test_bank.history.items()})
         with open('/code/data/history.yaml', 'w') as f:
