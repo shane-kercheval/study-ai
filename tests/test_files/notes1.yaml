@@ -5,24 +5,26 @@ subject_metadata:
   name: Graduate Introduction to Operating Systems
   abbreviation: GIOS
 note_metadata:
-  source: Beej's Guide to Network Programming
-  url: https://beej.us/guide/bgnet/pdf/bgnet_usl_c_1.pdf
+  source_name: Beej's Guide to Network Programming
+  source_reference: https://beej.us/guide/bgnet/pdf/bgnet_usl_c_1.pdf
   tags:
     - systems
     - c
     - networking
 notes:
-  - term: What is a **socket**?
-    definition: A way to speak to other programs using standard Unix file descriptors.
-    # reference: https://beej.us/guide/bgnet/html/#what-is-a-socket
-    # priority: high
-  - term: What is a file descriptor?
-    definition: |
-      An integer associated with an open file. But (and here's the catch), that file can be a `network connection`, a `FIFO`, a `pipe`, a `terminal`, a real on-the-disk `file`, or just about anything else.  Everything in Unix *is* a file.
-
-      A file descriptor is a **small, non-negative integer** that a Unix or Unix-like operating system uses as a handle to access a file or other input/output resources, such as pipes and network sockets. (ChatGPT)
+  - term: What is an `x`?
+    definition: An `x` is not a `y`.
+    reference: This is the reference
+    priority: high
+  - term: What is a `y`?
+    definition: A `y` is not an `x`.
+    reference: This is another reference.
+    priority: medium
+  - question: What is a `z`?
+    answer: |
+      This is a multi-line definition of `z`.
   - text: |
-      When a **file** or **resource** is opened by a process, the operating system creates an **entry** to represent that file or resource and returns a **file descriptor**, which can then be used in further system calls to read from, write to, or manipulate the file or resource.
-      
-      * File descriptors are used by the operating system to manage the details of input/output operations without exposing the underlying complexity to programs. Typically, file descriptors refer to: **File descriptor 0**: Standard input (stdin). **File descriptor 1**: Standard output. **File descriptor 2**: Standard error (stderr) Beyond these, any new files or resources opened by a process are assigned incrementally higher numbers for their file descriptors.
+      This is a multi-line text note.
+
+      It has multiple lines.
     reference: ChatGPT

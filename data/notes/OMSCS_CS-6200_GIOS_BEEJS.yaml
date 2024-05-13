@@ -1,11 +1,11 @@
-subject_metadata:
+subject_metdata:
   category: OMSCS
   ident: CS 6200
   name: Graduate Introduction to Operating Systems
   abbreviation: GIOS
 note_metadata:
-  source: Beej's Guide to Network Programming
-  url: https://beej.us/guide/bgnet/pdf/bgnet_usl_c_1.pdf
+  source_name: Beej's Guide to Network Programming
+  source_reference: https://beej.us/guide/bgnet/pdf/bgnet_usl_c_1.pdf
   tags:
     - systems
     - c
