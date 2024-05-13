@@ -5,21 +5,21 @@ from textwrap import dedent
 from source.library.notes import Flashcard, Priority, TextNote, parse
 
 
-def test__parse():
-    import yaml
-    with open("/code/tests/test_files/notes1.yaml") as _handle:
-        yaml_data = yaml.safe_load(_handle)
-    notes = parse(yaml_data)
-    for note, note_dict in zip(notes, yaml_data['notes'], strict=True):
+def test__parse(fake_notes):
+    original_notes = deepcopy(fake_notes)
+    notes = parse(fake_notes)
+    assert len(notes) == len(fake_notes['notes'])
+    assert original_notes == fake_notes  # ensure the original dict is not modified
+    for note, note_dict in zip(notes, fake_notes['notes'], strict=True):
         # assert actual == expected
-        assert dict(note.subject_metadata) == yaml_data['subject_metadata']
+        assert dict(note.subject_metadata) == fake_notes['subject_metadata']
         # the note_metadata has additional values (e.g. reference, priority) that are found on
         # individual notes in the dict/yaml
         note_metadata = deepcopy(dict(note.note_metadata))
         actual_reference = note_metadata.pop('reference', None)
         actual_priority = note_metadata.pop('priority', 'medium')
         # after removing reference/priority, the remaining values should match the original yaml
-        assert note_metadata == yaml_data['note_metadata']
+        assert note_metadata == fake_notes['note_metadata']
         if isinstance(note, TextNote):
             assert note.text() == dedent(note_dict['text']).strip()
         elif isinstance(note, Flashcard):
@@ -39,5 +39,4 @@ def test__parse():
         assert note.note_metadata.reference == note_dict.get('reference', None)
         assert note.note_metadata.priority == Priority[actual_priority]
         assert Priority[actual_priority] == Priority[note_dict.get('priority', 'medium')]
-        assert note.note_metadata.tags == yaml_data['note_metadata']['tags']
-
+        assert note.note_metadata.tags == fake_notes['note_metadata']['tags']
