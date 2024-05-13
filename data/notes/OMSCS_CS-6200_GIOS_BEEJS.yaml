@@ -20,9 +20,9 @@ notes:
     definition: |
       An **integer** associated with an **open file**.
     reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 2
-  - question: What are file descriptors used for and what types of things can be file descriptors?
+  - question: What are `file descriptors` used for and what types of things can be file descriptors?
     answer: |
-      When Unix programs do any sort of **I/O**, they do it by reading or writing to a **file descriptor**. That file can be a **network connection**, a **FIFO**, a **pipe**, a **terminal**, a real on-the-disk **file**, or just about anything else. Everything in Unix is a file.
+      When Unix programs do any sort of **I/O**, they do it by reading or writing to a **file descriptor**. That file can be a **network connection**, a **FIFO**, a **pipe**, a **terminal**, a real on-the-disk **file**, or just about anything else. **Everything in Unix is a file**.
     reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 2
   - question: What are the two types of sockets?
     answer: |
