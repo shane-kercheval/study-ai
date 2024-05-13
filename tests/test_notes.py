@@ -36,8 +36,8 @@ def test__parse():
             assert note.text() == expected_preview + expected_answer
     
         assert note.note_metadata.reference == actual_reference
-        assert actual_reference == note_dict.get('reference', None)
+        assert note.note_metadata.reference == note_dict.get('reference', None)
         assert note.note_metadata.priority == Priority[actual_priority]
         assert Priority[actual_priority] == Priority[note_dict.get('priority', 'medium')]
-        # TODO check tags
+        assert note.note_metadata.tags == yaml_data['note_metadata']['tags']
 
