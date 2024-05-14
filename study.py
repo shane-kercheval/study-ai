@@ -132,7 +132,7 @@ def cycle(
             if selected == 'q':
                 break
 
-        click.echo(f"\n\n{colorize_markdown(note['note'].note())}\n\n")
+        click.echo(f"\n\n{colorize_markdown(note['note'].text())}\n\n")
         selected = ''
         while selected not in ['y', 'n', 'q']:
             selected = click.prompt(colorize_gray("Invalid input. Correct? (y/n) or q to quit"), type=str)
