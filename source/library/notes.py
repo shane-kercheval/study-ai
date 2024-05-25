@@ -214,7 +214,7 @@ class History:
     correct: int = 0
     incorrect: int = 0
 
-    def beta_draw(self, seed: int | None = None) -> float:
+    def success_probability(self, seed: int | None = None) -> float:
         """
         Draw a random sample from the beta distribution. The interpretation of the value returned
         is the probability of "success" (in this case successfully answering the question
@@ -288,7 +288,12 @@ class TestBank:
         itself.
         """
         probabilities = {
-            k: v['history'].beta_draw()
+            # success_probability gives the probability of success (correct answer), but the higher
+            # the probability of success, the less likely we need to study this note, so we
+            # subtract the value from 1 to get the probability of incorrectly answering the
+            # question. The higher the probability of incorrectly answering the question, the more
+            # likely we need to study this note.
+            k: 1 - v['history'].success_probability()
             for k, v in self.notes.items()
         }
         # softmax probabilities across all values

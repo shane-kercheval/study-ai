@@ -107,12 +107,12 @@ def test__history__answer():  # noqa
     assert history.to_dict() == history_copy.to_dict()
 
 
-def test__history__beta_draw_no_history():  # noqa
+def test__history__success_probability_no_history():  # noqa
     # The average probability of a draw associated with no history, over many draws should be close
     # to 0.5 (50/50 chance of being correct/incorrect)
     history = History()
-    # test that beta_draw works on 0 correct & 0 incorrect
-    draws = [history.beta_draw() for _ in range(10000)]
+    # test that success_probability works on 0 correct & 0 incorrect
+    draws = [history.success_probability() for _ in range(10000)]
     assert all(0 <= draw <= 1 for draw in draws)
     # should be a wide probability distribution for a new note with no history
     assert any(draw < 0.1 for draw in draws)
@@ -120,31 +120,31 @@ def test__history__beta_draw_no_history():  # noqa
     assert np.isclose(np.mean(draws), 0.5, atol=0.05)
 
 
-def test__history__beta_draw_confident_history():  # noqa
+def test__history__success_probability_confident_history():  # noqa
     # The probability of a draw associated with an instance with a lot of history should be very
     # close to the actual probability of being correct
     history = History(correct=100000, incorrect=100000)
-    draws = [history.beta_draw() for _ in range(10000)]
+    draws = [history.success_probability() for _ in range(10000)]
     assert all(np.isclose(draw, 0.5, atol=0.01) for draw in draws)
 
     history = History(correct=100000, incorrect=0)
-    draws = [history.beta_draw() for _ in range(10000)]
+    draws = [history.success_probability() for _ in range(10000)]
     assert all(np.isclose(draw, 1, atol=0.01) for draw in draws)
 
     history = History(correct=0, incorrect=100000)
-    draws = [history.beta_draw() for _ in range(10000)]
+    draws = [history.success_probability() for _ in range(10000)]
     assert all(np.isclose(draw, 0, atol=0.01) for draw in draws)
 
 
-def test__history__beta_draw_no_history__seed():  # noqa
+def test__history__success_probability_no_history__seed():  # noqa
     # The average probability of a draw associated with no history, over many draws should be close
     # to 0.5 (50/50 chance of being correct/incorrect)
     history = History()
-    # test that beta_draw works on 0 correct & 0 incorrect
-    draw = history.beta_draw(seed=42)
+    # test that success_probability works on 0 correct & 0 incorrect
+    draw = history.success_probability(seed=42)
     assert 0 <= draw <= 1
-    assert draw == history.beta_draw(seed=42)
-    assert draw == history.beta_draw(seed=42)
+    assert draw == history.success_probability(seed=42)
+    assert draw == history.success_probability(seed=42)
 
 
 def test__TestBank__no_history__expect_equal_draws(fake_notes):  # noqa
@@ -192,4 +192,40 @@ def test__TestBank__no_history__answer__history_updates_correctly(fake_notes):  
         assert test_bank.history()[expected_uuids[index]].incorrect == 1
 
 
+def test__TestBank__with_history__expect_draw_counts_to_correspond_with_history(fake_notes, fake_history):  # noqa
+    """
+    Test that the TestBank draws notes with probability corresponding to the history of the
+    notes.
+    """
+    notes = parse(fake_notes)
+    expected_uuids = {n.uuid() for n in notes}
+    assert set(fake_history.keys()) == expected_uuids
+    for history in fake_history.values():
+        assert history.correct + history.incorrect == 100000
 
+    test_bank = TestBank(notes=notes, history=fake_history)
+    assert len(test_bank) == len(notes)
+    assert set(test_bank.notes.keys()) == expected_uuids
+
+    # each note is associated with a beta distribution that has been updated 100,000 times
+    # so the probability from success_probability should be very close to the actual probability of
+    # getting the answer correct (which is inverse to the relative frequency it should be drawn)
+    # we subtract from 1 because the beta distribution is the probability of getting the answer
+    # correct, but we want the probability of drawing the note
+    def prob_incorrect(history: History) -> float:
+        correct = history.correct + 1
+        incorrect = history.incorrect + 1
+        return 1 - (correct / (correct + incorrect))
+
+    expected_prob_of_draw = {uuid: prob_incorrect(history) for uuid, history in fake_history.items()}  # noqa
+    expected_prob_of_draw = {
+        uuid: prob / sum(expected_prob_of_draw.values())
+        for uuid, prob in expected_prob_of_draw.items()
+    }
+    assert np.isclose(sum(expected_prob_of_draw.values()), 1, atol=0.0001)
+    draws = [test_bank.draw().uuid() for _ in range(len(test_bank) * 5000)]
+    counts = {uuid: draws.count(uuid) for uuid in expected_uuids}
+    # test that the counts are roughly equal to the expected probability of draw
+    # we are using large number of draws to ensure that the counts are close to the expected
+    for uuid in expected_uuids:
+        assert np.isclose(counts[uuid] / len(draws), expected_prob_of_draw[uuid], atol=0.01)
