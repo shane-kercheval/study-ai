@@ -212,13 +212,14 @@ class History:
     correct: int = 0
     incorrect: int = 0
 
-    def beta_draw(self) -> float:
+    def beta_draw(self, seed: int | None = None) -> float:
         """
         Draw a sample from the beta distribution. The interpretation is the probability of
         "success" (in this case successfully answering the question correctly). The higher the
         likelihood of success, the less likely we need to study this note.
         """
-        return np.random.beta(self.correct + 1, self.incorrect + 1, 1)[0]
+        rng = np.random.default_rng(seed)
+        return rng.random.beta(self.correct + 1, self.incorrect + 1, 1)[0]
 
     def answer(self, correct: bool) -> None:
         """Update the history based on the correctness of the answer."""

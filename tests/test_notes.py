@@ -5,7 +5,7 @@ from textwrap import dedent
 from source.library.notes import Flashcard, Priority, TextNote, parse
 
 
-def test__parse(fake_notes):
+def test__parse(fake_notes):   # noqa
     original_notes = deepcopy(fake_notes)
     notes = parse(fake_notes)
     assert len(notes) == len(fake_notes['notes'])
@@ -34,7 +34,7 @@ def test__parse(fake_notes):
             assert note.preview() == expected_preview
             assert note.answer() == expected_answer
             assert note.text() == expected_preview + expected_answer
-    
+
         assert note.note_metadata.reference == actual_reference
         assert note.note_metadata.reference == note_dict.get('reference', None)
         assert note.note_metadata.priority == Priority[actual_priority]

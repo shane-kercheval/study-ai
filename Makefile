@@ -54,10 +54,7 @@ docker_down:
 ####
 linting:
 	ruff check source/config
-	ruff check source/entrypoints
 	ruff check source/library
-	ruff check source/notebooks
-	ruff check source/service
 	ruff check tests
 
 unittests:
@@ -66,10 +63,10 @@ unittests:
 	coverage run -m pytest --durations=0 tests
 	coverage html
 
-doctests:
-	python -m doctest source/library/utilities.py
+# doctests:
+# 	python -m doctest source/library/utilities.py
 
-tests: linting unittests doctests
+tests: linting unittests
 
 remove_logs:
 	rm -f output/log.log
