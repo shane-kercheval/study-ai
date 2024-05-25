@@ -138,8 +138,8 @@ def cycle(
             )
             if user_response == 'q':
                 break
-
-        click.echo(f"\n\n{colorize_markdown(note.text())}\n\n")
+        text = note.answer() if isinstance(note, Flashcard) else note.text()
+        click.echo(f"\n\n{colorize_markdown(text)}\n\n")
         user_response = ''
         while user_response not in ['y', 'n', 'q']:
             user_response = click.prompt(

@@ -103,7 +103,7 @@ class DefinitionNote(Flashcard):
 
     def text(self) -> str:
         """Return the term and definition together to represent the full text."""
-        return self._term + self._definition
+        return self._term + " " + self._definition
 
 
 class QuestionAnswerNote(Flashcard):
@@ -128,7 +128,7 @@ class QuestionAnswerNote(Flashcard):
 
     def text(self) -> str:
         """Return the question and answer together to represent the full text."""
-        return self._question + self._answer
+        return self._question + " " + self._answer
 
 
 def dict_to_notes(data: dict) -> list[Note]:

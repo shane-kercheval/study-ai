@@ -72,7 +72,7 @@ def test__parse(fake_notes):   # noqa
                 raise ValueError("Invalid note format.")
             assert note.preview() == expected_preview
             assert note.answer() == expected_answer
-            assert note.text() == expected_preview + expected_answer
+            assert note.text() == expected_preview + " " + expected_answer
         assert note.note_metadata.reference == actual_reference
         assert note.note_metadata.reference == note_dict.get('reference', None)
         assert note.note_metadata.priority == Priority[actual_priority]

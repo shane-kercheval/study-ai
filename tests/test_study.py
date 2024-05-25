@@ -48,6 +48,18 @@ def test__filter_notes__abbr():  # noqa
     assert notes[0].subject_metadata.abbreviation == "GIOS - filtered"
 
 
+def test__cycle__defaults():  # noqa
+    # tests loading in all notes saved in the default notes path
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ['cycle'],
+        # 'q' will work regardless of note type that is drawn
+        input='q\n',
+    )
+    assert result.exit_code == 0
+
+
 def test__cycle__defaults__no_history():  # noqa
     runner = CliRunner()
     result = runner.invoke(
@@ -72,6 +84,7 @@ def test__cycle__flash_only__no_history():  # noqa
         input='1\nq\n',
     )
     assert result.exit_code == 0
+
 
 def test__cycle__flash_only__with_history():  # noqa
     notes_path = "/code/tests/test_files/fake_notes.yaml"
