@@ -172,4 +172,3 @@ def test__cycle__flash_only__with_history():  # noqa
 
     finally:
         os.remove(temp_history_path)
-
