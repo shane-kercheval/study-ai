@@ -2,7 +2,7 @@
 import pytest
 import yaml
 
-from source.library.notes import History
+from study import load_history
 
 
 @pytest.fixture()
@@ -14,6 +14,4 @@ def fake_notes() -> dict:
 @pytest.fixture()
 def fake_history() -> dict:
     """Return a dictionary of fake history."""
-    with open("/code/tests/test_files/fake_history.yaml") as h:
-        history = yaml.safe_load(h)
-        return {uuid: History(**history[uuid]) for uuid in history}
+    return load_history("/code/tests/test_files/fake_history.yaml")

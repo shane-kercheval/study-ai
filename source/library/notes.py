@@ -131,7 +131,7 @@ class QuestionAnswerNote(Flashcard):
         return self._question + self._answer
 
 
-def parse(data: dict) -> list[Note]:
+def dict_to_notes(data: dict) -> list[Note]:
     """
     Creates a list of Note objects from a dictionary/yaml.
 
@@ -246,7 +246,7 @@ class History:
         }
 
 
-class TestBank:
+class NoteBank:
     """Represents a collection of notes that can be drawn from to create a quiz."""
 
     def __init__(
@@ -308,6 +308,15 @@ class TestBank:
         """Update the history of the note based on the correctness of the answer."""
         self.notes[uuid]['history'].answer(correct)
 
-    def history(self) -> dict[str, History]:
-        """Return the history of the notes."""
-        return {k: v['history'] for k, v in self.notes.items()}
+    def history(self, to_dict: bool = False) -> dict[str, History] | dict[str, dict[str, int]]:
+        """
+        Return the history of the notes.
+
+        Args:
+            to_dict:
+                If True, return the history as a dictionary of dictionaries. If False, return the
+                history as a dictionary of History objects.
+        """
+        if to_dict:
+            return {uuid: v['history'].to_dict() for uuid, v in self.notes.items()}
+        return {uuid: v['history'] for uuid, v in self.notes.items()}

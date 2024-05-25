@@ -3,6 +3,7 @@
 from copy import deepcopy
 from textwrap import dedent
 import numpy as np
+import pytest
 from source.library.notes import (
     DefinitionNote,
     Flashcard,
@@ -12,9 +13,10 @@ from source.library.notes import (
     QuestionAnswerNote,
     SubjectMetadata,
     TextNote,
-    TestBank,
-    parse,
+    NoteBank,
+    dict_to_notes,
 )
+from study import load_notes
 
 
 def test__Note__uuid__default_values():  # noqa
@@ -41,7 +43,7 @@ def test__Note__uuid__additional_values():  # noqa
 
 def test__parse(fake_notes):   # noqa
     original_notes = deepcopy(fake_notes)
-    notes = parse(fake_notes)
+    notes = dict_to_notes(fake_notes)
     assert len(notes) == len(fake_notes['notes'])
     assert original_notes == fake_notes  # ensure the original dict is not modified
 
@@ -147,12 +149,13 @@ def test__history__success_probability_no_history__seed():  # noqa
     assert draw == history.success_probability(seed=42)
 
 
-def test__TestBank__no_history__expect_equal_draws(fake_notes):  # noqa
+@pytest.mark.parametrize("history", [None, {}])
+def test__TestBank__no_history__expect_equal_draws(fake_notes, history):  # noqa
     """
     Test that the TestBank draws notes with roughly equal probability when no history is
     present.
     """
-    test_bank = TestBank(notes=parse(fake_notes))
+    test_bank = NoteBank(notes=dict_to_notes(fake_notes), history=history)
     assert len(test_bank) == len(fake_notes['notes'])
     draws = [test_bank.draw().uuid() for _ in range(len(test_bank) * 1000)]
     expected_uuids = {note['note'].uuid() for note in test_bank.notes.values()}
@@ -167,15 +170,16 @@ def test__TestBank__no_history__expect_equal_draws(fake_notes):  # noqa
         for count in counts.values()
     )
     # test history() method returns correct uuids and counts
+    assert {uuid: h.to_dict() for uuid, h in test_bank.history().items()} == test_bank.history(to_dict=True)  # noqa
     history = test_bank.history()
     assert history.keys() == expected_uuids
     assert all(history[uuid].correct == 0 for uuid in expected_uuids)
     assert all(history[uuid].incorrect == 0 for uuid in expected_uuids)
 
-
-def test__TestBank__no_history__answer__history_updates_correctly(fake_notes):  # noqa
+@pytest.mark.parametrize("history", [None, {}])
+def test__TestBank__no_history__answer__history_updates_correctly(fake_notes, history):  # noqa
     """Test that the history is updated correctly when answering questions."""
-    test_bank = TestBank(notes=parse(fake_notes))
+    test_bank = NoteBank(notes=dict_to_notes(fake_notes), history=history)
     assert len(test_bank) == len(fake_notes['notes'])
     expected_uuids = [note['note'].uuid() for note in test_bank.notes.values()]
     assert all(test_bank.history()[uuid].correct == 0 for uuid in expected_uuids)
@@ -190,6 +194,7 @@ def test__TestBank__no_history__answer__history_updates_correctly(fake_notes):  
         test_bank.answer(expected_uuids[index], correct=True)
         assert test_bank.history()[expected_uuids[index]].correct == 2
         assert test_bank.history()[expected_uuids[index]].incorrect == 1
+        assert {uuid: h.to_dict() for uuid, h in test_bank.history().items()} == test_bank.history(to_dict=True)  # noqa
 
 
 def test__TestBank__with_history__expect_draw_counts_to_correspond_with_history(fake_notes, fake_history):  # noqa
@@ -197,13 +202,13 @@ def test__TestBank__with_history__expect_draw_counts_to_correspond_with_history(
     Test that the TestBank draws notes with probability corresponding to the history of the
     notes.
     """
-    notes = parse(fake_notes)
+    notes = dict_to_notes(fake_notes)
     expected_uuids = {n.uuid() for n in notes}
     assert set(fake_history.keys()) == expected_uuids
     for history in fake_history.values():
         assert history.correct + history.incorrect == 100000
 
-    test_bank = TestBank(notes=notes, history=fake_history)
+    test_bank = NoteBank(notes=notes, history=fake_history)
     assert len(test_bank) == len(notes)
     assert set(test_bank.notes.keys()) == expected_uuids
 
@@ -229,3 +234,11 @@ def test__TestBank__with_history__expect_draw_counts_to_correspond_with_history(
     # we are using large number of draws to ensure that the counts are close to the expected
     for uuid in expected_uuids:
         assert np.isclose(counts[uuid] / len(draws), expected_prob_of_draw[uuid], atol=0.01)
+
+
+def test__TestBank__duplicates_should_raise_exception():  # noqa
+    original_notes = load_notes("/code/tests/test_files/*fake_notes.yaml")
+    assert len({n.uuid() for n in original_notes}) < len(original_notes)
+    with pytest.raises(AssertionError):
+        NoteBank(notes=original_notes, history=None)
+
