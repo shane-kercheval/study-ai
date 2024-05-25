@@ -299,64 +299,10 @@ class TestBank:
         uuid = rng.choice(list(probabilities.keys()), p=list(probabilities.values()))
         return self.notes[uuid]['note']
 
+    def answer(self, uuid: str, correct: bool) -> None:
+        """Update the history of the note based on the correctness of the answer."""
+        self.notes[uuid]['history'].answer(correct)
+
     def history(self) -> dict[str, History]:
         """Return the history of the notes."""
         return {k: v['history'] for k, v in self.notes.items()}
-
-# class TestBank:
-#     def __init__(
-#             self,
-#             notes: list[SubjectNote],
-#             history: dict[str, History] | None = None,
-#             flash_only: bool = False,
-#             class_category: str | None = None,
-#             class_ident: str | None = None,
-#             class_name: str | None = None,
-#             class_abbr: str | None = None,
-#         ):
-#         """TODO."""
-#         self.test_bank = {}
-#         class_attributes = {
-#             'category': class_category,
-#             'ident': class_ident,
-#             'name': class_name,
-#             'abbr': class_abbr
-#         }
-
-#         for class_note in notes:
-#             for note in class_note.notes:
-#                 if flash_only and not isinstance(note, Flashcard):
-#                     continue
-#                 if any(
-#                     class_note.subject_metadata.get(attr) != value
-#                     for attr, value in class_attributes.items() if value
-#                     ):
-#                     continue
-#                 uuid = class_note.uuid() + note.uuid()
-#                 assert uuid not in self.test_bank, f"Duplicate UUID: {uuid}"
-#                 self.test_bank[uuid] = {
-#                     'uuid': uuid,
-#                     'history': history[uuid] if history and uuid in history else History(),
-#                     'note': note,
-#                 }
-
-#     def draw(self) -> dict:
-#         """Draw a note from the class notes."""
-#         probabilities = {
-#             k: v['history'].beta_draw()
-#             for k, v in self.test_bank.items()
-#         }
-#         # softmax probabilities across all values
-#         sum_probs = sum(probabilities.values())
-#         probabilities = {k: v / sum_probs for k, v in probabilities.items()}
-#         # draw a note
-#         uuid = np.random.choice(list(probabilities.keys()), p=list(probabilities.values()))
-#         return self.test_bank[uuid]
-
-#     def correct_answer(self, uuid: str, correct: bool) -> None:
-#         """Update the history of the note based on the correctness of the answer."""
-#         self.test_bank[uuid]['history'].correct_answer(correct)
-
-#     @property
-#     def history(self) -> dict[str, History]:
-#         return {k: v['history'] for k, v in self.test_bank.items()}

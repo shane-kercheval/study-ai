@@ -147,11 +147,15 @@ def test__history__beta_draw_no_history__seed():  # noqa
     assert draw == history.beta_draw(seed=42)
 
 
-def test__TestBank__no_history(fake_notes):  # noqa
+def test__TestBank__no_history__expect_equal_draws(fake_notes):  # noqa
+    """
+    Test that the TestBank draws notes with roughly equal probability when no history is
+    present.
+    """
     test_bank = TestBank(notes=parse(fake_notes))
     assert len(test_bank) == len(fake_notes['notes'])
     draws = [test_bank.draw().uuid() for _ in range(len(test_bank) * 1000)]
-    expected_uuids = {note['uuid'] for note in test_bank.notes.values()}
+    expected_uuids = {note['note'].uuid() for note in test_bank.notes.values()}
     assert set(draws) == expected_uuids
     # Each note should be drawn roughly the same number of times
     # get counts of each uuid
@@ -167,3 +171,25 @@ def test__TestBank__no_history(fake_notes):  # noqa
     assert history.keys() == expected_uuids
     assert all(history[uuid].correct == 0 for uuid in expected_uuids)
     assert all(history[uuid].incorrect == 0 for uuid in expected_uuids)
+
+
+def test__TestBank__no_history__answer__history_updates_correctly(fake_notes):  # noqa
+    """Test that the history is updated correctly when answering questions."""
+    test_bank = TestBank(notes=parse(fake_notes))
+    assert len(test_bank) == len(fake_notes['notes'])
+    expected_uuids = [note['note'].uuid() for note in test_bank.notes.values()]
+    assert all(test_bank.history()[uuid].correct == 0 for uuid in expected_uuids)
+    assert all(test_bank.history()[uuid].incorrect == 0 for uuid in expected_uuids)
+    for index in range(len(test_bank)):
+        test_bank.answer(expected_uuids[index], correct=True)
+        assert test_bank.history()[expected_uuids[index]].correct == 1
+        assert test_bank.history()[expected_uuids[index]].incorrect == 0
+        test_bank.answer(expected_uuids[index], correct=False)
+        assert test_bank.history()[expected_uuids[index]].correct == 1
+        assert test_bank.history()[expected_uuids[index]].incorrect == 1
+        test_bank.answer(expected_uuids[index], correct=True)
+        assert test_bank.history()[expected_uuids[index]].correct == 2
+        assert test_bank.history()[expected_uuids[index]].incorrect == 1
+
+
+
