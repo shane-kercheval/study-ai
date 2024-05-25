@@ -40,7 +40,7 @@ notes:
     reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 2.1
   - term: What are `datagram` sockets?
     definition: |
-      Datagram sockets are an implementation of socket communication that use IP for routing, but they use the `User Datagram Protocol` (`U                                              DP`) instead of TCP (Transmission Control Protocol).
+      Datagram sockets are an implementation of socket communication that use IP for routing, but they use the `User Datagram Protocol` (`UDP`) instead of TCP (Transmission Control Protocol).
 
       **If you send a datagram, it may (or may not) arrive. Each packet may arrive out of order. If it arrives, the data within the packet will be error-free.**
 
