@@ -2,9 +2,11 @@
 
 from copy import deepcopy
 from textwrap import dedent
+import numpy as np
 from source.library.notes import (
     DefinitionNote,
     Flashcard,
+    History,
     Priority,
     QuestionAnswerNote,
     TextNote,
@@ -51,3 +53,59 @@ def test__parse(fake_notes):   # noqa
         assert note.note_metadata.tags == fake_notes['note_metadata']['tags']
     assert expected_test_types == found_test_types
 
+
+def test_history__answer():  # noqa
+    history = History()
+    assert history.correct == 0
+    assert history.incorrect == 0
+    assert history.to_dict() == {'correct': 0, 'incorrect': 0}
+    history.answer(correct=True)
+    assert history.correct == 1
+    assert history.incorrect == 0
+    assert history.to_dict() == {'correct': 1, 'incorrect': 0}
+    history.answer(correct=False)
+    assert history.correct == 1
+    assert history.incorrect == 1
+    assert history.to_dict() == {'correct': 1, 'incorrect': 1}
+    history.answer(correct=True)
+    assert history.correct == 2
+    assert history.incorrect == 1
+    assert history.to_dict() == {'correct': 2, 'incorrect': 1}
+    history.answer(correct=False)
+    assert history.correct == 2
+    assert history.incorrect == 2
+    assert history.to_dict() == {'correct': 2, 'incorrect': 2}
+
+    history_copy = History(**history.to_dict())
+    assert history.correct == history_copy.correct
+    assert history.incorrect == history_copy.incorrect
+    assert history.to_dict() == history_copy.to_dict()
+
+
+def test_history__beta_draw_no_history():  # noqa
+    # The average probability of a draw associated with no history, over many draws should be close
+    # to 0.5 (50/50 chance of being correct/incorrect)
+    history = History()
+    # test that beta_draw works on 0 correct & 0 incorrect
+    draws = [history.beta_draw() for _ in range(10000)]
+    assert all(0 <= draw <= 1 for draw in draws)
+    # should be a wide probability distribution for a new note with no history
+    assert any(draw < 0.1 for draw in draws)
+    assert any(draw > 0.9 for draw in draws)
+    assert np.isclose(np.mean(draws), 0.5, atol=0.05)
+
+
+def test_history__beta_draw_confident_history():  # noqa
+    # The probability of a draw associated with an instance with a lot of history should be very
+    # close to the actual probability of being correct
+    history = History(correct=100000, incorrect=100000)
+    draws = [history.beta_draw() for _ in range(10000)]
+    assert all(np.isclose(draw, 0.5, atol=0.01) for draw in draws)
+
+    history = History(correct=100000, incorrect=0)
+    draws = [history.beta_draw() for _ in range(10000)]
+    assert all(np.isclose(draw, 1, atol=0.01) for draw in draws)
+
+    history = History(correct=0, incorrect=100000)
+    draws = [history.beta_draw() for _ in range(10000)]
+    assert all(np.isclose(draw, 0, atol=0.01) for draw in draws)

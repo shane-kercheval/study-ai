@@ -214,12 +214,20 @@ class History:
 
     def beta_draw(self, seed: int | None = None) -> float:
         """
-        Draw a sample from the beta distribution. The interpretation is the probability of
-        "success" (in this case successfully answering the question correctly). The higher the
-        likelihood of success, the less likely we need to study this note.
+        Draw a random sample from the beta distribution. The interpretation of the value returned
+        is the probability of "success" (in this case successfully answering the question
+        correctly). The higher the likelihood of success, the less likely we need to study this
+        note.
+
+        With no history (0 correct, 0 incorrect; alpha=1, beta=1), the distribution is uniform. As
+        the number of correct answers increases, the distribution shifts to the right (higher
+        probability of success). As the number of incorrect answers increases, the distribution
+        shifts to the left (lower probability of success). As the number of correct and incorrect
+        answers increase, the distribution becomes more peaked around the true probability of
+        success.
         """
         rng = np.random.default_rng(seed)
-        return rng.random.beta(self.correct + 1, self.incorrect + 1, 1)[0]
+        return rng.beta(self.correct + 1, self.incorrect + 1, 1)[0]
 
     def answer(self, correct: bool) -> None:
         """Update the history based on the correctness of the answer."""
