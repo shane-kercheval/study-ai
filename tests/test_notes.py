@@ -2,7 +2,14 @@
 
 from copy import deepcopy
 from textwrap import dedent
-from source.library.notes import Flashcard, Priority, TextNote, parse
+from source.library.notes import (
+    DefinitionNote,
+    Flashcard,
+    Priority,
+    QuestionAnswerNote,
+    TextNote,
+    parse,
+)
 
 
 def test__parse(fake_notes):   # noqa
@@ -10,8 +17,11 @@ def test__parse(fake_notes):   # noqa
     notes = parse(fake_notes)
     assert len(notes) == len(fake_notes['notes'])
     assert original_notes == fake_notes  # ensure the original dict is not modified
+
+    expected_test_types = {TextNote, DefinitionNote, QuestionAnswerNote}
+    found_test_types = set()
     for note, note_dict in zip(notes, fake_notes['notes'], strict=True):
-        # assert actual == expected
+        found_test_types.add(type(note))
         assert dict(note.subject_metadata) == fake_notes['subject_metadata']
         # the note_metadata has additional values (e.g. reference, priority) that are found on
         # individual notes in the dict/yaml
@@ -34,9 +44,10 @@ def test__parse(fake_notes):   # noqa
             assert note.preview() == expected_preview
             assert note.answer() == expected_answer
             assert note.text() == expected_preview + expected_answer
-
         assert note.note_metadata.reference == actual_reference
         assert note.note_metadata.reference == note_dict.get('reference', None)
         assert note.note_metadata.priority == Priority[actual_priority]
         assert Priority[actual_priority] == Priority[note_dict.get('priority', 'medium')]
         assert note.note_metadata.tags == fake_notes['note_metadata']['tags']
+    assert expected_test_types == found_test_types
+

@@ -70,7 +70,7 @@ class TextNote(Note):
 
 
 class Flashcard(Note):
-    """A Flashcard is a Note that has a 'preview' and a 'answer'."""
+    """A Flashcard is an abstract Note that has a 'preview' and a 'answer'."""
 
     @abstractmethod
     def preview(self) -> str:
