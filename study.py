@@ -117,7 +117,7 @@ def cycle(
         class_name=name,
         class_abbr=abbr,
     )
-    click.echo(f"Available notes: {len(test_bank.test_bank)}")
+    click.echo(f"Available notes: {len(test_bank.notes)}")
     click.echo("\n\n\n")
     while True:
         note = test_bank.draw()

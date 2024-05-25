@@ -1,8 +1,8 @@
 uuid: 65A67658-8B85-41CF-8FCF-1A1D46F61690
 subject_metadata:
-  category: OMSCS
   ident: CS 6200
   name: Graduate Introduction to Operating Systems
+  category: OMSCS
   abbreviation: GIOS
 note_metadata:
   source_name: Beej's Guide to Network Programming
@@ -11,6 +11,7 @@ note_metadata:
     - systems
     - c
     - networking
+    - beejs
 notes:
   - term: What is an `x`?
     definition: An `x` is not a `y`.

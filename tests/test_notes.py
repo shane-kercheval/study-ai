@@ -7,11 +7,36 @@ from source.library.notes import (
     DefinitionNote,
     Flashcard,
     History,
+    NoteMetadata,
     Priority,
     QuestionAnswerNote,
+    SubjectMetadata,
     TextNote,
+    TestBank,
     parse,
 )
+
+
+def test__Note__uuid__default_values():  # noqa
+    # test with subset of metadata fields
+    note = TextNote(
+        text="test text",
+        subject_metadata=SubjectMetadata(name='test category'),
+        note_metadata=NoteMetadata(source_name='test source'),
+    )
+    # uuid should be deterministic across machines and runs
+    assert note.uuid() == 'bfa717e88b323890fc19c2d8a29b44d145b8c841a5fdf22ceb5bc1aba1fc5d1f'
+
+
+def test__Note__uuid__additional_values():  # noqa
+    # test with subset of metadata fields
+    note = TextNote(
+        text="test text",
+        subject_metadata=SubjectMetadata(name='test category', ident='test ident'),
+        note_metadata=NoteMetadata(source_name='test source', source_reference='test reference', tags=['tag1', 'tag2']),  # noqa
+    )
+    # uuid should be deterministic across machines and runs
+    assert note.uuid() == '80484b1c2633e9ab82e599937a43ef77e177d498f7749b4b468a5b4d74cf70c3'
 
 
 def test__parse(fake_notes):   # noqa
@@ -54,7 +79,7 @@ def test__parse(fake_notes):   # noqa
     assert expected_test_types == found_test_types
 
 
-def test_history__answer():  # noqa
+def test__history__answer():  # noqa
     history = History()
     assert history.correct == 0
     assert history.incorrect == 0
@@ -82,7 +107,7 @@ def test_history__answer():  # noqa
     assert history.to_dict() == history_copy.to_dict()
 
 
-def test_history__beta_draw_no_history():  # noqa
+def test__history__beta_draw_no_history():  # noqa
     # The average probability of a draw associated with no history, over many draws should be close
     # to 0.5 (50/50 chance of being correct/incorrect)
     history = History()
@@ -95,7 +120,7 @@ def test_history__beta_draw_no_history():  # noqa
     assert np.isclose(np.mean(draws), 0.5, atol=0.05)
 
 
-def test_history__beta_draw_confident_history():  # noqa
+def test__history__beta_draw_confident_history():  # noqa
     # The probability of a draw associated with an instance with a lot of history should be very
     # close to the actual probability of being correct
     history = History(correct=100000, incorrect=100000)
@@ -109,3 +134,36 @@ def test_history__beta_draw_confident_history():  # noqa
     history = History(correct=0, incorrect=100000)
     draws = [history.beta_draw() for _ in range(10000)]
     assert all(np.isclose(draw, 0, atol=0.01) for draw in draws)
+
+
+def test__history__beta_draw_no_history__seed():  # noqa
+    # The average probability of a draw associated with no history, over many draws should be close
+    # to 0.5 (50/50 chance of being correct/incorrect)
+    history = History()
+    # test that beta_draw works on 0 correct & 0 incorrect
+    draw = history.beta_draw(seed=42)
+    assert 0 <= draw <= 1
+    assert draw == history.beta_draw(seed=42)
+    assert draw == history.beta_draw(seed=42)
+
+
+def test__TestBank__no_history(fake_notes):  # noqa
+    test_bank = TestBank(notes=parse(fake_notes))
+    assert len(test_bank) == len(fake_notes['notes'])
+    draws = [test_bank.draw().uuid() for _ in range(len(test_bank) * 1000)]
+    expected_uuids = {note['uuid'] for note in test_bank.notes.values()}
+    assert set(draws) == expected_uuids
+    # Each note should be drawn roughly the same number of times
+    # get counts of each uuid
+    counts = {uuid: draws.count(uuid) for uuid in expected_uuids}
+    # check that the counts are roughly equal
+    expected_count = len(draws) / len(expected_uuids)
+    assert all(
+        0.9 * expected_count <= count <= 1.1 * expected_count
+        for count in counts.values()
+    )
+    # test history() method returns correct uuids and counts
+    history = test_bank.history()
+    assert history.keys() == expected_uuids
+    assert all(history[uuid].correct == 0 for uuid in expected_uuids)
+    assert all(history[uuid].incorrect == 0 for uuid in expected_uuids)

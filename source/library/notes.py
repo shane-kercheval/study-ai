@@ -21,17 +21,17 @@ class Priority(str, Enum):
 class SubjectMetadata(BaseModel):
     """Metadata about the subject of the note."""
 
-    category: str
-    ident: str
     name: str
-    abbreviation: str
+    ident: str | None = None
+    category: str | None = None
+    abbreviation: str | None = None
 
 
 class NoteMetadata(BaseModel):
     """Metadata about the note."""
 
     source_name: str
-    source_reference: str  # e.g. url or book information
+    source_reference: str | None = None  # e.g. url or book information
     reference: str | None = None  # e.g. url or chapeter/page number
     priority: Priority = Priority.medium
     tags: list[str] = []
@@ -47,8 +47,8 @@ class Note(ABC):
 
     def uuid(self) -> str:
         """Return a unique identifier for the class (e.g. a hash of the content)."""
-        subject_meta_content = '-'.join([f"{k}={v}" for k, v in self.subject_metadata.items()])
-        note_meta_content = '-'.join([f"{k}={v}" for k, v in self.note_metadata.items()])
+        subject_meta_content = '-'.join([f"{k}={v}" for k, v in dict(self.subject_metadata).items()])  # noqa
+        note_meta_content = '-'.join([f"{k}={v}" for k, v in dict(self.note_metadata).items()])
         text = subject_meta_content + note_meta_content + self.text()
         return hashlib.sha256(text.encode()).hexdigest()
 
@@ -60,7 +60,7 @@ class Note(ABC):
 class TextNote(Note):
     """A TextNote is a Note that has only text."""
 
-    def __init__(self, subject_metadata: SubjectMetadata, note_metadata: NoteMetadata, text: str):
+    def __init__(self, text: str, subject_metadata: SubjectMetadata, note_metadata: NoteMetadata):
         super().__init__(subject_metadata=subject_metadata, note_metadata=note_metadata)
         self._text = dedent(text).strip()
 
@@ -86,8 +86,9 @@ class DefinitionNote(Flashcard):
 
     def __init__(
             self,
+            term: str, definition: str,
             subject_metadata: SubjectMetadata, note_metadata: NoteMetadata,
-            term: str, definition: str):
+            ):
         super().__init__(subject_metadata=subject_metadata, note_metadata=note_metadata)
         self._term = dedent(term).strip()
         self._definition = dedent(definition).strip()
@@ -110,8 +111,9 @@ class QuestionAnswerNote(Flashcard):
 
     def __init__(
             self,
+            question: str, answer: str,
             subject_metadata: SubjectMetadata, note_metadata: NoteMetadata,
-            question: str, answer: str):
+            ):
         super().__init__(subject_metadata=subject_metadata, note_metadata=note_metadata)
         self._question = dedent(question).strip()
         self._answer = dedent(answer).strip()
@@ -243,6 +245,63 @@ class History:
             'incorrect': self.incorrect,
         }
 
+
+class TestBank:
+    """Represents a collection of notes that can be drawn from to create a quiz."""
+
+    def __init__(
+            self,
+            notes: list[Note],
+            history: dict[str, History] | None = None,
+        ):
+        """
+        Initialize the test bank with notes and history.
+
+        Args:
+            notes:
+                A list of notes to be included in the test bank.
+            history:
+                A dictionary of History objects for each note. The key is the UUID of the note
+                and the value is the History object.
+        """
+        self.notes = {}
+        for note in notes:
+            uuid = note.uuid()
+            assert uuid not in self.notes, f"Duplicate UUID: {uuid}"
+            self.notes[uuid] = {
+                'uuid': uuid,
+                'history': history[uuid] if history and uuid in history else History(),
+                'note': note,
+            }
+
+    def __len__(self) -> int:
+        """Return the number of notes in the test bank."""
+        return len(self.notes)
+
+    def draw(self, seed: int | None = None) -> Note:
+        """
+        Draw a note from the test bank. The probability of drawing a note is based on the history
+        of the note. The more times the note has been answered correctly, the less likely we need
+        to study this note.
+
+        Returns a dictionary with the UUID of the note, the history of the note, and the note
+        itself.
+        """
+        probabilities = {
+            k: v['history'].beta_draw()
+            for k, v in self.notes.items()
+        }
+        # softmax probabilities across all values
+        sum_probs = sum(probabilities.values())
+        probabilities = {k: v / sum_probs for k, v in probabilities.items()}
+        # draw a note
+        rng = np.random.default_rng(seed)
+        uuid = rng.choice(list(probabilities.keys()), p=list(probabilities.values()))
+        return self.notes[uuid]['note']
+
+    def history(self) -> dict[str, History]:
+        """Return the history of the notes."""
+        return {k: v['history'] for k, v in self.notes.items()}
 
 # class TestBank:
 #     def __init__(
