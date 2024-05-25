@@ -1,4 +1,4 @@
-"""Test utilities.py."""
+"""Test notes.py."""
 
 from copy import deepcopy
 from textwrap import dedent
