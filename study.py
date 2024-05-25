@@ -156,27 +156,6 @@ def cycle(
             yaml.safe_dump(history, f)
 
 
-
-# @cli.command()
-# @click.option('--category', '-c', help='Only display notes from a specific class category.', default=None)
-# @click.option('--ident', '-i', help='Only display notes from a specific class identity.', default=None)
-# @click.option('--name', '-n', help='Only display notes from a specific class name.', default=None)
-# @click.option('--abbr', '-a', help='Only display notes from a specific class abbreviation.', default=None)
-# def search():
-#     pass
-
-
-# @cli.command()
-# @click.option('--model', '-m', help='The model to use for chatting.', default='gpt-3.5')
-# def chat():
-#     pass
-
-
-# @cli.command()
-# def scrape_pdf():
-#     pass
-
-
 @cli.command()
 @click.option('--model_type', '-mt', help="The model service to use, e.g. 'openai', 'openai_server', 'hugging_face_endpoint'", default='openai')  # noqa
 @click.option('--model_name', '-mn', help="The model name (or endpoint) to use, e.g. 'gpt-3.5-turbo-0125' or 'http://host.docker.internal:1234/v1'", default='gpt-3.5-turbo-0125')  # noqa
@@ -207,6 +186,25 @@ def text_to_notes(model_type: str, model_name: str, temperature: float, file: st
     if model.cost:
         click.echo(f"\n\nCost: {model.cost}")
 
+
+# @cli.command()
+# @click.option('--category', '-c', help='Only display notes from a specific class category.', default=None)
+# @click.option('--ident', '-i', help='Only display notes from a specific class identity.', default=None)
+# @click.option('--name', '-n', help='Only display notes from a specific class name.', default=None)
+# @click.option('--abbr', '-a', help='Only display notes from a specific class abbreviation.', default=None)
+# def search():
+#     pass
+
+
+# @cli.command()
+# @click.option('--model', '-m', help='The model to use for chatting.', default='gpt-3.5')
+# def chat():
+#     pass
+
+
+# @cli.command()
+# def scrape_pdf():
+#     pass
 
 
 if __name__ == '__main__':
