@@ -1,0 +1,31 @@
+subject_metadata:
+  ident: CS 6200 - filtered
+  name: Graduate Introduction to Operating Systems - filtered
+  category: OMSCS - filtered
+  abbreviation: GIOS - filtered
+note_metadata:
+  source_name: Beej's Guide to Network Programming
+  source_reference: https://beej.us/guide/bgnet/pdf/bgnet_usl_c_1.pdf
+  tags:
+    - systems
+    - c
+    - networking
+    - beejs
+notes:
+  - term: What is an `x`?
+    definition: An `x` is not a `y`.
+    reference: This is the reference
+    priority: high
+  - term: What is a `y`?
+    definition: A `y` is not an `x`.
+    reference: This is another reference.
+    priority: medium
+  - question: What is a `z`?
+    answer: |
+      This is a multi-line definition of `z`.
+  - text: |
+      This is a multi-line text note.
+
+      It has multiple lines.
+    reference: ChatGPT
+    priority: low

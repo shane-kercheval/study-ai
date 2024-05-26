@@ -1,212 +1,370 @@
-# load yaml file
+"""Classes for creating and managing notes."""
 
 from abc import ABC, abstractmethod
+from copy import deepcopy
+from functools import cache
 from textwrap import dedent
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel
 from enum import Enum
 import numpy as np
 import hashlib
 from dataclasses import dataclass
 
+from source.library.helpers import softmax_dict
+
 
 class Priority(str, Enum):
+    """Priority of the note, which is used to determine how often to study the note."""
+
     low = 'low'
     medium = 'medium'
     high = 'high'
 
 
-class Note(ABC, BaseModel):
-    priority: Priority = Priority.medium
-    reference: str | None = None
+class SubjectMetadata(BaseModel):
+    """Metadata about the subject of the note."""
+
+    name: str
+    ident: str | None = None
+    category: str | None = None
+    abbreviation: str | None = None
+
+
+class NoteMetadata(BaseModel):
+    """Metadata about the note."""
+
+    source_name: str
+    source_reference: str | None = None  # e.g. url or book information
+    reference: str | None = None  # e.g. url or chapeter/page number
     tags: list[str] = []
 
+
+class Note(ABC):
+    """Abstract class that represents a note."""
+
+    def __init__(
+            self,
+            subject_metadata: SubjectMetadata,
+            note_metadata: NoteMetadata,
+            priority: Priority = Priority.medium,
+            ):
+        """Initialize the note with metadata."""
+        self.subject_metadata = subject_metadata
+        self.note_metadata = note_metadata
+        if not isinstance(priority, Priority):
+            raise ValueError(f"priority must be a Priority enum: {priority}")
+        self.priority = priority
+
+    @cache
     def uuid(self) -> str:
-        """Return a unique identifier for the note (e.g. a hash of the content)."""
-        content = '-'.join([f"{k}={v}" for k, v in self.dict().items()])
-        return hashlib.sha256(content.encode()).hexdigest()
+        """Return a unique identifier for the class (e.g. a hash of the content)."""
+        subject_meta_content = '-'.join([f"{k}={v}" for k, v in dict(self.subject_metadata).items()])  # noqa
+        note_meta_content = '-'.join([f"{k}={v}" for k, v in dict(self.note_metadata).items()])
+        text = subject_meta_content + note_meta_content + self.text()
+        return hashlib.sha256(text.encode()).hexdigest()
 
     @abstractmethod
-    def note(self):
-        """Render the 'description' e.g. the 'answer' or 'definition' to provide more detail."""
+    def text(self) -> str:
+        """Render all of the text of the note."""
 
-class Flashcard(Note):
-    @abstractmethod
-    def preview(self):
-        """Render the 'preview' e.g. the 'question' or 'term' to give context."""
 
 class TextNote(Note):
-    text: str
+    """A TextNote is a Note that has only text."""
 
-    @field_validator('text')
-    @classmethod
-    def text_validator(cls, t: str) -> str:
-        return dedent(t).strip()
+    def __init__(
+            self,
+            text: str,
+            subject_metadata: SubjectMetadata,
+            note_metadata: NoteMetadata,
+            priority: Priority = Priority.medium,
+            ):
+        super().__init__(
+            subject_metadata=subject_metadata,
+            note_metadata=note_metadata,
+            priority=priority,
+        )
+        self._text = dedent(text).strip()
 
-    def preview(self):
-        return self.text
+    def text(self) -> str:
+        """Return the text of the note."""
+        return self._text
 
-    def note(self):
-        return self.text
+
+class Flashcard(Note):
+    """A Flashcard is an abstract Note that has a 'preview' and a 'answer'."""
+
+    @abstractmethod
+    def preview(self) -> str:
+        """Render the 'preview' e.g. the 'question' or 'term' to give context."""
+
+    @abstractmethod
+    def answer(self) -> str:
+        """Render the 'answer' or 'definition' of the flashcard."""
 
 
 class DefinitionNote(Flashcard):
-    term: str
-    definition: str
+    """A DefinitionNote is a Flashcard that has a term and a definition."""
 
-    @field_validator('term')
-    @classmethod
-    def term_validator(cls, t: str) -> str:
-        return dedent(t).strip()
-    
-    @field_validator('definition')
-    @classmethod
-    def definition_validator(cls, d: str) -> str:
-        return dedent(d).strip()
+    def __init__(
+            self,
+            term: str, definition: str,
+            subject_metadata: SubjectMetadata,
+            note_metadata: NoteMetadata,
+            priority: Priority = Priority.medium,
+            ):
+        super().__init__(
+            subject_metadata=subject_metadata,
+            note_metadata=note_metadata,
+            priority=priority,
+        )
+        self._term = dedent(term).strip()
+        self._definition = dedent(definition).strip()
 
-    def preview(self):
-        return self.term
+    def preview(self) -> str:
+        """Return the term as the preview."""
+        return self._term
 
-    def note(self):
-        return self.definition
+    def answer(self) -> str:
+        """Return the definition as the answer."""
+        return self._definition
+
+    def text(self) -> str:
+        """Return the term and definition together to represent the full text."""
+        return self._term + " " + self._definition
 
 
 class QuestionAnswerNote(Flashcard):
-    question: str
-    answer: str
+    """A QuestionAnswerNote is a Flashcard that has a question and an answer."""
 
-    @field_validator('question')
-    @classmethod
-    def term_validator(cls, q: str) -> str:
-        return dedent(q).strip()
-    
-    @field_validator('answer')
-    @classmethod
-    def definition_validator(cls, a: str) -> str:
-        return dedent(a).strip()
+    def __init__(
+            self,
+            question: str, answer: str,
+            subject_metadata: SubjectMetadata, note_metadata: NoteMetadata,
+            priority: Priority = Priority.medium,
+            ):
+        super().__init__(
+            subject_metadata=subject_metadata,
+            note_metadata=note_metadata,
+            priority=priority,
+        )
+        self._question = dedent(question).strip()
+        self._answer = dedent(answer).strip()
 
-    def preview(self):
-        return self.question
+    def preview(self) -> str:
+        """Return the question as the preview."""
+        return self._question
 
-    def note(self):
-        return self.answer  
+    def answer(self) -> str:
+        """Return the answer."""
+        return self._answer
+
+    def text(self) -> str:
+        """Return the question and answer together to represent the full text."""
+        return self._question + " " + self._answer
 
 
-class ClassNotes(BaseModel):
+def dict_to_notes(data: dict) -> list[Note]:
+    """
+    Creates a list of Note objects from a dictionary/yaml.
 
-    subject_metadata: dict = {}
-    note_metadata: dict = {}
-    notes: list[Note] = []
-
-    def uuid(self) -> str:
-        """Return a unique identifier for the class (e.g. a hash of the content)."""
-        subject_meta_content = '-'.join([f"{k}={v}" for k, v in self.subject_metadata.items()])
-        note_meta_content = '-'.join([f"{k}={v}" for k, v in self.note_metadata.items()])
-        return hashlib.sha256((subject_meta_content + note_meta_content).encode()).hexdigest()
-
-    @classmethod
-    def from_dict(cls, data: dict):
-        """Create a ClassNotes object from a dictionary."""
-        notes = []
-        for note in data['notes']:
-            if isinstance(note, str):
-                notes.append(TextNote(text=note))
-            elif isinstance(note, dict):
-                if 'text' in note:
-                    notes.append(TextNote(**note))
-                elif 'term' in note and 'definition' in note:
-                    notes.append(DefinitionNote(**note))
-                elif 'question' in note and 'answer' in note:
-                    notes.append(QuestionAnswerNote(**note))
-                else:
-                    raise ValueError(f"Invalid note type: {note}")
+    An example yaml file:
+    ```
+    subject_metadata:
+      category: OMSCS
+      ident: CS 6200
+      name: Graduate Introduction to Operating Systems
+      abbreviation: GIOS
+    note_metadata:
+      source_name: Beej's Guide to Network Programming
+      source_reference: https://beej.us/guide/bgnet/pdf/bgnet_usl_c_1.pdf
+      tags:
+        - systems
+        - c
+        - networking
+        - beejs
+    notes:
+      - term: What is a `socket`?
+        definition: A **way to speak to other programs** using standard Unix **file descriptors**.
+        reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 2
+      - term: What is a `file descriptor`?
+        definition: An **integer** associated with an **open file**.
+        reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 2
+    ```
+    """
+    data = deepcopy(data)  # don't modify the original data
+    notes = []
+    for note_dict in data['notes']:
+        reference = note_dict.pop('reference', None)
+        priority = note_dict.pop('priority', 'medium')
+        priority = Priority[priority]
+        subject_metadata = SubjectMetadata(**data['subject_metadata'])
+        note_metadata = NoteMetadata(
+            **data['note_metadata'] | {'reference': reference},
+        )
+        if isinstance(note_dict, str):
+            note = TextNote(text=note_dict)
+        elif isinstance(note_dict, dict):
+            if 'text' in note_dict:
+                note = TextNote(
+                    **note_dict,
+                    subject_metadata=subject_metadata,
+                    note_metadata=note_metadata,
+                    priority=priority,
+                )
+            elif 'term' in note_dict and 'definition' in note_dict:
+                note = DefinitionNote(
+                    **note_dict,
+                    subject_metadata=subject_metadata,
+                    note_metadata=note_metadata,
+                    priority=priority,
+                )
+            elif 'question' in note_dict and 'answer' in note_dict:
+                note = QuestionAnswerNote(
+                    **note_dict,
+                    subject_metadata=subject_metadata,
+                    note_metadata=note_metadata,
+                    priority=priority,
+                )
             else:
-                raise ValueError(f"Invalid note type: {note}")
-        data['notes'] = notes
-        return ClassNotes(**data)
+                raise ValueError(f"Invalid note type: {note_dict}")
+        else:
+            raise ValueError(f"Invalid note type: {note_dict}")
+        notes.append(note)
+    return notes
 
 
 @dataclass
 class History:
+    """
+    Represents past quizes of a note, which includes the number of times the note has been answered
+    correctly and incorrectly. This information is used to determine the probability of drawing the
+    note in the future.
+
+    The probability of drawing the note is based on the beta distribution, which is a distribution
+    over the interval [0, 1]. The beta distribution is basically a distribution over probabilities.
+    The more times the note has been answered correctly, the higher the probability that the user
+    will answer the question correctly in the future, so the less likely we need to study this
+    note.
+    """
+
     correct: int = 0
     incorrect: int = 0
 
-    def beta_draw(self):
+    def probability_correct(self, seed: int | None = None) -> float:
         """
-        Draw a sample from the beta distribution. The interpretation is the probability of
-        "success" (in this case successfully answering the question correctly). The higher the
-        likelihood of success, the less likely we need to study this note.
-        """
-        return np.random.beta(self.correct + 1, self.incorrect + 1, 1)[0]
+        Draw a random sample from the beta distribution. The interpretation of the value returned
+        is the probability of "success" (in this case successfully answering the question
+        correctly). The higher the likelihood of success, the less likely we need to study this
+        note.
 
-    def correct_answer(self, correct: bool) -> None:
+        With no history (0 correct, 0 incorrect; alpha=1, beta=1), the distribution is uniform. As
+        the number of correct answers increases, the distribution shifts to the right (higher
+        probability of success). As the number of incorrect answers increases, the distribution
+        shifts to the left (lower probability of success). As the number of correct and incorrect
+        answers increase, the distribution becomes more peaked around the true probability of
+        success.
+        """
+        rng = np.random.default_rng(seed)
+        return rng.beta(self.correct + 1, self.incorrect + 1, 1)[0]
+
+    def answer(self, correct: bool) -> None:
+        """Update the history based on the correctness of the answer."""
         if correct:
             self.correct += 1
         else:
             self.incorrect += 1
 
     def to_dict(self) -> dict:
+        """Return the history as a dictionary."""
         return {
             'correct': self.correct,
             'incorrect': self.incorrect,
         }
 
 
-class TestBank:
+class NoteBank:
+    """Represents a collection of notes that can be drawn from to create a quiz."""
+
     def __init__(
             self,
-            class_notes: list[ClassNotes],
+            notes: list[Note],
             history: dict[str, History] | None = None,
-            flash_only: bool = False,
-            class_category: str | None = None,
-            class_ident: str | None = None,
-            class_name: str | None = None,
-            class_abbr: str | None = None,
         ):
-        """TODO."""
-        self.test_bank = {}
-        class_attributes = {
-            'category': class_category,
-            'ident': class_ident,
-            'name': class_name,
-            'abbr': class_abbr
-        }
+        """
+        Initialize the test bank with notes and history.
 
-        for class_note in class_notes:
-            for note in class_note.notes:
-                if flash_only and not isinstance(note, Flashcard):
-                    continue
-                if any(
-                    class_note.subject_metadata.get(attr) != value
-                    for attr, value in class_attributes.items() if value
-                    ):
-                    continue
-                uuid = class_note.uuid() + note.uuid()
-                assert uuid not in self.test_bank, f"Duplicate UUID: {uuid}"
-                self.test_bank[uuid] = {
-                    'uuid': uuid,
-                    'history': history[uuid] if history and uuid in history else History(),
-                    'subject_metadata': class_note.subject_metadata,
-                    'note_metadata': class_note.note_metadata,
-                    'note': note,
-                }
+        Args:
+            notes:
+                A list of notes to be included in the test bank.
+            history:
+                A dictionary of History objects for each note. The key is the UUID of the note
+                and the value is the History object.
+        """
+        self.notes = {}
+        for note in notes:
+            uuid = note.uuid()
+            assert uuid not in self.notes, f"Duplicate UUID: {uuid}"
+            self.notes[uuid] = {
+                'uuid': uuid,
+                'history': history[uuid] if history and uuid in history else History(),
+                'note': note,
+            }
 
-    def draw(self) -> dict:
-        """Draw a note from the class notes."""
-        probabilities = {
-            k: v['history'].beta_draw()
-            for k, v in self.test_bank.items()
-        }
-        # softmax probabilities across all values
-        sum_probs = sum(probabilities.values())
-        probabilities = {k: v / sum_probs for k, v in probabilities.items()}
+    def __len__(self) -> int:
+        """Return the number of notes in the test bank."""
+        return len(self.notes)
+
+    def draw(
+            self,
+            seed: int | None = None,
+            priority_weights: dict[Priority, float] | None = None,
+            ) -> Note:
+        """
+        Draw a note from the test bank. The probability of drawing a note is based on the history
+        of the note. The more times the note has been answered correctly, the less likely we need
+        to study this note.
+
+        Returns a dictionary with the UUID of the note, the history of the note, and the note
+        itself.
+
+        # TODO: implement priority_weights.
+        """
+        probabilities = {}
+        # probability_correct gives the probability of success (correct answer), but the higher
+        # the probability of success, the less likely we need to study this note, so we
+        # subtract the value from 1 to get the probability of incorrectly answering the
+        # question. The higher the probability of incorrectly answering the question, the more
+        # likely we need to study this note.
+        if priority_weights:
+            priority_weights = softmax_dict(priority_weights)
+            for k, v in self.notes.items():
+                probability_incorrect = 1 - v['history'].probability_correct()
+                probabilities[k] = probability_incorrect * priority_weights[ v['note'].priority]
+        else:
+            probabilities = {
+                k: 1 - v['history'].probability_correct()
+                for k, v in self.notes.items()
+            }
+        probabilities = softmax_dict(probabilities)
+        assert np.isclose(sum(probabilities.values()), 1), f"Invalid probabilities: {probabilities}"  # noqa
         # draw a note
-        uuid = np.random.choice(list(probabilities.keys()), p=list(probabilities.values()))
-        return self.test_bank[uuid]
+        rng = np.random.default_rng(seed)
+        uuid = rng.choice(list(probabilities.keys()), p=list(probabilities.values()))
+        return self.notes[uuid]['note']
 
-    def correct_answer(self, uuid: str, correct: bool) -> None:
+    def answer(self, uuid: str, correct: bool) -> None:
         """Update the history of the note based on the correctness of the answer."""
-        self.test_bank[uuid]['history'].correct_answer(correct)
+        self.notes[uuid]['history'].answer(correct)
 
-    @property
-    def history(self) -> dict[str, History]:
-        return {k: v['history'] for k, v in self.test_bank.items()}
+    def history(self, to_dict: bool = False) -> dict[str, History] | dict[str, dict[str, int]]:
+        """
+        Return the history of the notes.
+
+        Args:
+            to_dict:
+                If True, return the history as a dictionary of dictionaries. If False, return the
+                history as a dictionary of History objects.
+        """
+        if to_dict:
+            return {uuid: v['history'].to_dict() for uuid, v in self.notes.items()}
+        return {uuid: v['history'] for uuid, v in self.notes.items()}

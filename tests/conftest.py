@@ -1,31 +1,24 @@
 """Defines test fixtures for pytest unit-tests."""
 import pytest
-from source.library.datasets_base import DatasetsBase, DataPersistence
+import yaml
 
-
-class TestDatasets(DatasetsBase):
-    """Creates a fake/mock dataset."""
-
-    dataset_1: DataPersistence
-    other_dataset_2: DataPersistence
-    dataset_3_csv: DataPersistence
+from study import load_history
 
 
 @pytest.fixture()
-def datasets_fake_cache() -> TestDatasets:
-    """Returns fake dataset with cache turned on."""
-    import yaml
-    file_name = '/code/tests/test_files/test_datasets/datasets_cache.yml'
-    with open(file_name) as handle:
-        yaml_data = yaml.safe_load(handle)
-    return TestDatasets(dataset_info=yaml_data)
+def fake_notes() -> dict:
+    """Return a dictionary of fake notes."""
+    with open("/code/tests/test_files/fake_notes.yaml") as h:
+        return yaml.safe_load(h)
 
 
 @pytest.fixture()
-def datasets_fake_no_cache() -> TestDatasets:
-    """Returns fake dataset with cache turned off."""
-    import yaml
-    file_name = '/code/tests/test_files/test_datasets/datasets_no_cache.yml'
-    with open(file_name) as handle:
-        yaml_data = yaml.safe_load(handle)
-    return TestDatasets(dataset_info=yaml_data)
+def fake_history() -> dict:
+    """Return a dictionary of fake history."""
+    return load_history("/code/tests/test_files/fake_history.yaml")
+
+
+@pytest.fixture()
+def fake_history_equal() -> dict:
+    """Return a dictionary of fake history."""
+    return load_history("/code/tests/test_files/fake_history_equal.yaml")

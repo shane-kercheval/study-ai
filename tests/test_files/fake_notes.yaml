@@ -1,0 +1,35 @@
+subject_metadata:
+  ident: CS 6200
+  name: Graduate Introduction to Operating Systems
+  category: OMSCS
+  abbreviation: GIOS
+note_metadata:
+  source_name: Beej's Guide to Network Programming
+  source_reference: https://beej.us/guide/bgnet/pdf/bgnet_usl_c_1.pdf
+  tags:
+    - systems
+    - c
+    - networking
+    - beejs
+notes:
+  # uuid: 20375daf2eaa0404b63f21d484a279232d1ddcb5d4a57e53777bf4f47c4c348d
+  - term: What is an `x`?
+    definition: An `x` is not a `y`.
+    reference: This is the reference
+    priority: high
+  # uuid: 6e0e0e3430335bc1c03efcb374be0d53d35ae65b04ed617733eb35a7c3f5f73a
+  - term: What is a `y`?
+    definition: A `y` is not an `x`.
+    reference: This is another reference.
+    priority: medium
+  # uuid: e8c9b37f10ecb5c1ccd49ea3f71a3866690fee7ea036a4a569e05f7d8bf3fa99
+  - question: What is a `z`?
+    answer: |
+      This is a multi-line definition of `z`.
+  # uuid: 043c67dc2fee6d04a16f1a2b61fb9de296521366d716a46c1698f934e075ffd9
+  - text: |
+      This is a multi-line text note.
+
+      It has multiple lines.
+    reference: ChatGPT
+    priority: low
