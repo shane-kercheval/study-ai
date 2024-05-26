@@ -18,12 +18,16 @@ def test__cosine_similarity() -> None:
     assert cosine_similarity(x, y) == 1.0
 
 
-def test__VectorDatabase__(fake_notes) -> None:  # noqa
+def test__VectorDatabase__creation_and_adding_notes(fake_notes) -> None:  # noqa
+    """
+    Test creating a VectorDatabase and adding notes to it. Tests adding new notes, and updating
+    existing notes.
+    """
     notes = dict_to_notes(fake_notes)
     db_path = 'temp___test_vector_database.parquet'
     try:
         db = VectorDatabase(db_path=db_path)
-        db.add(notes=notes[:-1], save=False)
+        db.add(notes=notes[:-1], save=False)  # add all but the last note
         assert db.df['uuid'].tolist() == [note.uuid() for note in notes[:-1]]
         assert db.df['text'].tolist() == [note.text() for note in notes[:-1]]
         assert db.df.apply(lambda x: np.array(x['embedding']).shape[0] > 1, axis=1).all()
