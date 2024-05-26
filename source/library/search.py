@@ -1,19 +1,15 @@
-"""Classes and functions for creating/searching local vector database."""
-# store vector database as parquet file (relatively small 'database' size, low overhead)
-# create embeddings using SentenceTransformer
-# use `all-MiniLM-L6-v2` model to generate embeddings; https://www.sbert.net/docs/pretrained_models.html
-# relatively high quality, high speed, small model size
-# it can be given a list of Note objects and will generate embeddings for each note, if the
-# embedding doesn't already exist in the database
-# the database will store uuid, text, and embedding for each note
-# if the text is updated, the embedding will need to be updated as well
+"""
+Classes and functions for creating/searching local vector database.
 
-
+The VectorDatabase class is used to store and search a vector database. The database stores
+uuid, text, and embedding for each note. The database can be saved to disk as a parquet file.
+The database can be searched using a query string, and the top k most similar vectors will be
+returned.
+"""
 import os
 import numpy as np
 import pandas as pd
 from sentence_transformers import SentenceTransformer
-
 from source.library.notes import Note
 
 
@@ -26,7 +22,21 @@ class VectorDatabase:
     """Class to store and search a vector database."""
 
     def __init__(self, db_path: str, model_name: str = 'all-MiniLM-L6-v2') -> None:
-        """Initialize the vector database."""
+        """
+        Initializes the vector database.
+
+        Args:
+            db_path:
+                The path to the parquet file that stores the database. If the file does not exist,
+                an empty database will be created.
+            model_name:
+                The name of the SentenceTransformer model to use for generating embeddings.
+                By default, the SentenceTransformer model `all-MiniLM-L6-v2` is used to generate
+                embeddings. `all-MiniLM-L6-v2` is a relatively high quality, high speed, small
+                model size.
+                See https://www.sbert.net/docs/pretrained_models.html for more information on the
+                available models.
+        """
         self._model = None
         self.model_name = model_name
         self.db_path = db_path
@@ -44,9 +54,25 @@ class VectorDatabase:
             self._model = SentenceTransformer(self.model_name)
         return self._model
 
-
     def add(self, notes: list[Note], save: bool = True) -> dict[str, str]:
-        """Add notes to the vector database."""
+        """
+        Add notes to the vector database.
+
+        If a note with the same uuid is already in the database, new embeddings will be generated
+        only if the text has changed. If the text has changed, the text and embedding will be
+        updated. If the note is not in the database, new embeddings will be generated and the note
+        will be added to the database.
+
+        A dictionary of changes is returned, where the key is the uuid of the note and the value is
+        'added' if the note was added to the database, or 'updated' if the note was already in the
+        database and the text/embeddings were updated.
+
+        Args:
+            notes:
+                The list of notes to add to the database.
+            save:
+                If True, save the database to disk after adding the notes.
+        """
         new_notes = []
         changes = {}
         for note in notes:
@@ -75,7 +101,18 @@ class VectorDatabase:
         return changes
 
     def search(self, query: str, top_k: int = 5) -> pd.DataFrame:
-        """Search the vector database for the top k most similar vectors."""
+        """
+        Search the vector database for the top k most similar vectors.
+
+        Returns a DataFrame with the top k most similar vectors to the query along with the cosine
+        similarity for each match.
+
+        Args:
+            query:
+                The query string to search for.
+            top_k:
+                The number of most similar vectors to return.
+        """
         query_embedding = self.model.encode(query)
         self._data['cosine_similarity'] = self._data['embedding'].\
             apply(lambda x: cosine_similarity(query_embedding, x))
