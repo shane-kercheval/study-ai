@@ -45,9 +45,10 @@ class VectorDatabase:
         return self._model
 
 
-    def add(self, notes: list[Note], save: bool = True) -> None:
+    def add(self, notes: list[Note], save: bool = True) -> dict[str, str]:
         """Add notes to the vector database."""
         new_notes = []
+        changes = {}
         for note in notes:
             note_index = self.df['uuid'] == note.uuid()
             assert note_index.sum() <= 1  # ensure there is at most one note with the same uuid
@@ -62,13 +63,16 @@ class VectorDatabase:
                 self.df.loc[note_index, 'text'] = note.text()
                 # need to use `at` instead of `loc` to set the value with a sequence
                 self.df.at[self.df.index[note_index][0], 'embedding'] = embedding  # noqa: PD008
+                changes[note.uuid()] = 'updated'
             else:
                 new_notes.append(
                     {'uuid': note.uuid(), 'text': note.text(), 'embedding': embedding},
                 )
+                changes[note.uuid()] = 'added'
         self.df = pd.concat([self.df, pd.DataFrame(new_notes)], ignore_index=True)
         if save:
             self.save()
+        return changes
 
     def search(self, query: str, top_k: int = 5) -> pd.DataFrame:
         """Search the vector database for the top k most similar vectors."""

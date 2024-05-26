@@ -28,7 +28,7 @@ notes:
     answer: |
       One is `Stream` Sockets; the other is `Datagram` Sockets, which may hereafter be referred to as `SOCK_STREAM` and `SOCK_DGRAM`, respectively.
 
-      **Datagram** sockets are sometimes called **connectionless sockets**. (Though they can be `connect()`’d if you really want.)
+      **Datagram** sockets are sometimes called **connectionless sockets**. (Though they can be `connect()`'d if you really want.)
     reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 2.1
   - term: What are `stream` sockets?
     definition: |
