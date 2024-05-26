@@ -71,6 +71,9 @@ def test__VectorDatabase__creation_and_adding_notes(fake_notes) -> None:  # noqa
         assert not np.allclose(embedding_note_1, db.df.loc[db.df['uuid'] == notes[0].uuid(), 'embedding'].tolist()[0])  # noqa
         assert np.allclose(embedding_note_2, db.df.loc[db.df['uuid'] == notes[1].uuid(), 'embedding'].tolist()[0])  # noqa
         assert np.allclose(embedding_note_3, db.df.loc[db.df['uuid'] == notes[2].uuid(), 'embedding'].tolist()[0])  # noqa
+
+        changes = db.add(notes=notes, save=True)  # no changes should be made
+        assert changes == {}
     finally:
         if os.path.exists(db_path):
             os.remove(db_path)
