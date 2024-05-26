@@ -11,7 +11,14 @@ def fake_notes() -> dict:
     with open("/code/tests/test_files/fake_notes.yaml") as h:
         return yaml.safe_load(h)
 
+
 @pytest.fixture()
 def fake_history() -> dict:
     """Return a dictionary of fake history."""
     return load_history("/code/tests/test_files/fake_history.yaml")
+
+
+@pytest.fixture()
+def fake_history_equal() -> dict:
+    """Return a dictionary of fake history."""
+    return load_history("/code/tests/test_files/fake_history_equal.yaml")

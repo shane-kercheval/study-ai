@@ -2,12 +2,15 @@
 
 from abc import ABC, abstractmethod
 from copy import deepcopy
+from functools import cache
 from textwrap import dedent
 from pydantic import BaseModel
 from enum import Enum
 import numpy as np
 import hashlib
 from dataclasses import dataclass
+
+from source.library.helpers import softmax_dict
 
 
 class Priority(str, Enum):
@@ -33,18 +36,26 @@ class NoteMetadata(BaseModel):
     source_name: str
     source_reference: str | None = None  # e.g. url or book information
     reference: str | None = None  # e.g. url or chapeter/page number
-    priority: Priority = Priority.medium
     tags: list[str] = []
 
 
 class Note(ABC):
     """Abstract class that represents a note."""
 
-    def __init__(self, subject_metadata: SubjectMetadata, note_metadata: NoteMetadata):
+    def __init__(
+            self,
+            subject_metadata: SubjectMetadata,
+            note_metadata: NoteMetadata,
+            priority: Priority = Priority.medium,
+            ):
         """Initialize the note with metadata."""
         self.subject_metadata = subject_metadata
         self.note_metadata = note_metadata
+        if not isinstance(priority, Priority):
+            raise ValueError(f"priority must be a Priority enum: {priority}")
+        self.priority = priority
 
+    @cache
     def uuid(self) -> str:
         """Return a unique identifier for the class (e.g. a hash of the content)."""
         subject_meta_content = '-'.join([f"{k}={v}" for k, v in dict(self.subject_metadata).items()])  # noqa
@@ -60,8 +71,18 @@ class Note(ABC):
 class TextNote(Note):
     """A TextNote is a Note that has only text."""
 
-    def __init__(self, text: str, subject_metadata: SubjectMetadata, note_metadata: NoteMetadata):
-        super().__init__(subject_metadata=subject_metadata, note_metadata=note_metadata)
+    def __init__(
+            self,
+            text: str,
+            subject_metadata: SubjectMetadata,
+            note_metadata: NoteMetadata,
+            priority: Priority = Priority.medium,
+            ):
+        super().__init__(
+            subject_metadata=subject_metadata,
+            note_metadata=note_metadata,
+            priority=priority,
+        )
         self._text = dedent(text).strip()
 
     def text(self) -> str:
@@ -87,9 +108,15 @@ class DefinitionNote(Flashcard):
     def __init__(
             self,
             term: str, definition: str,
-            subject_metadata: SubjectMetadata, note_metadata: NoteMetadata,
+            subject_metadata: SubjectMetadata,
+            note_metadata: NoteMetadata,
+            priority: Priority = Priority.medium,
             ):
-        super().__init__(subject_metadata=subject_metadata, note_metadata=note_metadata)
+        super().__init__(
+            subject_metadata=subject_metadata,
+            note_metadata=note_metadata,
+            priority=priority,
+        )
         self._term = dedent(term).strip()
         self._definition = dedent(definition).strip()
 
@@ -113,8 +140,13 @@ class QuestionAnswerNote(Flashcard):
             self,
             question: str, answer: str,
             subject_metadata: SubjectMetadata, note_metadata: NoteMetadata,
+            priority: Priority = Priority.medium,
             ):
-        super().__init__(subject_metadata=subject_metadata, note_metadata=note_metadata)
+        super().__init__(
+            subject_metadata=subject_metadata,
+            note_metadata=note_metadata,
+            priority=priority,
+        )
         self._question = dedent(question).strip()
         self._answer = dedent(answer).strip()
 
@@ -163,10 +195,11 @@ def dict_to_notes(data: dict) -> list[Note]:
     notes = []
     for note_dict in data['notes']:
         reference = note_dict.pop('reference', None)
-        priority = note_dict.pop('priority', Priority.medium)
+        priority = note_dict.pop('priority', 'medium')
+        priority = Priority[priority]
         subject_metadata = SubjectMetadata(**data['subject_metadata'])
         note_metadata = NoteMetadata(
-            **data['note_metadata'] | {'reference': reference, 'priority': priority},
+            **data['note_metadata'] | {'reference': reference},
         )
         if isinstance(note_dict, str):
             note = TextNote(text=note_dict)
@@ -176,18 +209,21 @@ def dict_to_notes(data: dict) -> list[Note]:
                     **note_dict,
                     subject_metadata=subject_metadata,
                     note_metadata=note_metadata,
+                    priority=priority,
                 )
             elif 'term' in note_dict and 'definition' in note_dict:
                 note = DefinitionNote(
                     **note_dict,
                     subject_metadata=subject_metadata,
                     note_metadata=note_metadata,
+                    priority=priority,
                 )
             elif 'question' in note_dict and 'answer' in note_dict:
                 note = QuestionAnswerNote(
                     **note_dict,
                     subject_metadata=subject_metadata,
                     note_metadata=note_metadata,
+                    priority=priority,
                 )
             else:
                 raise ValueError(f"Invalid note type: {note_dict}")
@@ -214,7 +250,7 @@ class History:
     correct: int = 0
     incorrect: int = 0
 
-    def success_probability(self, seed: int | None = None) -> float:
+    def probability_correct(self, seed: int | None = None) -> float:
         """
         Draw a random sample from the beta distribution. The interpretation of the value returned
         is the probability of "success" (in this case successfully answering the question
@@ -278,7 +314,11 @@ class NoteBank:
         """Return the number of notes in the test bank."""
         return len(self.notes)
 
-    def draw(self, seed: int | None = None) -> Note:
+    def draw(
+            self,
+            seed: int | None = None,
+            priority_weights: dict[Priority, float] | None = None,
+            ) -> Note:
         """
         Draw a note from the test bank. The probability of drawing a note is based on the history
         of the note. The more times the note has been answered correctly, the less likely we need
@@ -286,19 +326,27 @@ class NoteBank:
 
         Returns a dictionary with the UUID of the note, the history of the note, and the note
         itself.
+
+        # TODO: implement priority_weights.
         """
-        probabilities = {
-            # success_probability gives the probability of success (correct answer), but the higher
-            # the probability of success, the less likely we need to study this note, so we
-            # subtract the value from 1 to get the probability of incorrectly answering the
-            # question. The higher the probability of incorrectly answering the question, the more
-            # likely we need to study this note.
-            k: 1 - v['history'].success_probability()
-            for k, v in self.notes.items()
-        }
-        # softmax probabilities across all values
-        sum_probs = sum(probabilities.values())
-        probabilities = {k: v / sum_probs for k, v in probabilities.items()}
+        probabilities = {}
+        # probability_correct gives the probability of success (correct answer), but the higher
+        # the probability of success, the less likely we need to study this note, so we
+        # subtract the value from 1 to get the probability of incorrectly answering the
+        # question. The higher the probability of incorrectly answering the question, the more
+        # likely we need to study this note.
+        if priority_weights:
+            priority_weights = softmax_dict(priority_weights)
+            for k, v in self.notes.items():
+                probability_incorrect = 1 - v['history'].probability_correct()
+                probabilities[k] = probability_incorrect * priority_weights[ v['note'].priority]
+        else:
+            probabilities = {
+                k: 1 - v['history'].probability_correct()
+                for k, v in self.notes.items()
+            }
+        probabilities = softmax_dict(probabilities)
+        assert np.isclose(sum(probabilities.values()), 1), f"Invalid probabilities: {probabilities}"  # noqa
         # draw a note
         rng = np.random.default_rng(seed)
         uuid = rng.choice(list(probabilities.keys()), p=list(probabilities.values()))

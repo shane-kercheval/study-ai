@@ -13,3 +13,9 @@ def colorize_gray(text: str) -> str:
     """Colorizes text (used as the output in the terminal) to gray."""
     # Apply gray color to all text
     return f'\033[90m{text}\033[0m'
+
+
+def softmax_dict(d: dict) -> dict:
+    """Return a dictionary with softmax values."""
+    total = sum(d.values())
+    return {k: v / total for k, v in d.items()}
