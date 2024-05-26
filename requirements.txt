@@ -2,8 +2,11 @@ click
 coverage
 helpsk
 llm-workflow
+pandas
+pyarrow
 pydantic
 pytest
 python-dotenv
 PyYAML
 ruff
+sentence-transformers

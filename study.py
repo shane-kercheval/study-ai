@@ -40,7 +40,13 @@ def cycle(
         notes_path: str,
         history_path: str,
     ) -> None:
-    """Cycle through notes from one or more YAML files."""
+    """
+    Cycle through notes/flashcards from one or more YAML files. The history of the notes will be
+    saved to a YAML file. The frequency of notes will be based on the historical accuracy of
+    correctly answers.
+
+    Press any key to reveal the answer. Press 'q' to quit.
+    """
     history = None
     if os.path.exists(history_path):
         with open(history_path) as f:

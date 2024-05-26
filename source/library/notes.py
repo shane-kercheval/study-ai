@@ -9,7 +9,6 @@ from enum import Enum
 import numpy as np
 import hashlib
 from dataclasses import dataclass
-
 from source.library.utilities import softmax_dict
 
 
