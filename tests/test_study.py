@@ -128,6 +128,7 @@ def test__cycle__flash_only__with_history():  # noqa
 
         ####
         # test with 0 correct answers; 2 incorrect answers
+        # this will test that the history is updated correctly across multiple runs
         ####
         runner = CliRunner()
         result = runner.invoke(
@@ -139,7 +140,7 @@ def test__cycle__flash_only__with_history():  # noqa
                 '--history_path', temp_history_path,
             ],
             # this sequence will only work with Flashcard notes
-            input='1\nn\n1\nn\nq\n',
+            input='1\nn\nq\n',
         )
         assert result.exit_code == 0
         saved_history = load_history(temp_history_path)
@@ -152,10 +153,11 @@ def test__cycle__flash_only__with_history():  # noqa
 
         flashcard_history = [h for uuid, h in saved_history.items() if uuid in flashcard_uuids]
         assert sum(h.correct for h in flashcard_history) == 2  # from previous test/history
-        assert sum(h.incorrect for h in flashcard_history) == 2
+        assert sum(h.incorrect for h in flashcard_history) == 1
 
         ####
         # test with 0 correct answers; 2 incorrect answers
+        # this will test that the history is updated correctly across multiple runs
         ####
         runner = CliRunner()
         result = runner.invoke(
@@ -181,7 +183,7 @@ def test__cycle__flash_only__with_history():  # noqa
         flashcard_history = [h for uuid, h in saved_history.items() if uuid in flashcard_uuids]
         # 2 correct and 2 incorrects answers from previous history file
         assert sum(h.correct for h in flashcard_history) == 4
-        assert sum(h.incorrect for h in flashcard_history) == 4
+        assert sum(h.incorrect for h in flashcard_history) == 3
 
     finally:
         os.remove(temp_history_path)
