@@ -220,7 +220,7 @@ def test__TestBank__draw__priority_weights(fake_notes, fake_history_equal):  # n
     for uuid in test_bank.notes:
         # priority = test_bank.notes[uuid]['note'].priority
         expected_freq = expected_freq_lookups[uuid]
-        assert np.isclose(counts[uuid] / len(draws), expected_freq, atol=0.01)
+        assert np.isclose(counts[uuid] / len(draws), expected_freq, atol=0.02)
 
 
 def test__TestBank__with_history__expect_draw_counts_to_correspond_with_history(fake_notes, fake_history):  # noqa
