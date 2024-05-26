@@ -70,7 +70,8 @@ def cycle(
         history={k: History(**v) for k, v in history.items()},
     )
     click.echo(f"Available notes: {len(test_bank.notes)}")
-    click.echo("\n\n\n")
+    click.echo("--------------------------")
+    click.echo("\n")
     while True:
         note = test_bank.draw()
         if isinstance(note, Flashcard):
@@ -159,11 +160,14 @@ def search(notes_path: str, db_path: str, similarity_threshold: float, top_k: in
         click.echo("The following changes were made to the database:")
         for uuid, change in changes.items():
             click.echo(f"   `{uuid}`: {change}")
-    click.echo("\n")
+    else:
+        # load cached model so first search is faster
+        db.model
     # query = click.prompt("Enter a search query")
     # results = db.search(query=query)
     # click.echo(results)
     while True:
+        click.echo("\n")
         query = click.prompt("Enter a search query or 'q' to quit")
         if query == 'q':
             break
@@ -184,10 +188,8 @@ def search(notes_path: str, db_path: str, similarity_threshold: float, top_k: in
                 click.echo(f"{cosine_sim_text}; uuid: {note.uuid}")
                 click.echo(f"{note.subject_metadata.category} - {note.subject_metadata.ident} - {note.subject_metadata.abbreviation} - {note.subject_metadata.name}")  # noqa
                 click.echo(f"{note.note_metadata.source_name}")
-                click.echo(f"\n{colorize_markdown(note.text())}")
+                click.echo(f"\n{colorize_markdown(str(note))}")
                 click.echo("--------------------------\n")
-
-        click.echo("\n\n")
 
 
 # @cli.command()

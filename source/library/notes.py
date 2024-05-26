@@ -68,6 +68,10 @@ class Note(ABC):
     def text(self) -> str:
         """Render all of the text of the note."""
 
+    @abstractmethod
+    def __str__(self) -> str:
+        """Return a string representation of the note."""
+
 
 class TextNote(Note):
     """A TextNote is a Note that has only text."""
@@ -89,6 +93,10 @@ class TextNote(Note):
         self._text = dedent(text).strip()
 
     def text(self) -> str:
+        """Return the text of the note."""
+        return self._text
+
+    def __str__(self) -> str:
         """Return the text of the note."""
         return self._text
 
@@ -137,6 +145,9 @@ class DefinitionNote(Flashcard):
         """Return the term and definition together to represent the full text."""
         return self._term + " " + self._definition
 
+    def __str__(self) -> str:
+        """Return the term and definition together to represent the full text."""
+        return f"{self._term}:\n    {self._definition}"
 
 class QuestionAnswerNote(Flashcard):
     """A QuestionAnswerNote is a Flashcard that has a question and an answer."""
@@ -168,6 +179,10 @@ class QuestionAnswerNote(Flashcard):
     def text(self) -> str:
         """Return the question and answer together to represent the full text."""
         return self._question + " " + self._answer
+
+    def __str__(self) -> str:
+        """Return the term and definition together to represent the full text."""
+        return f"{self._question}:\n    {self._answer}"
 
 
 def add_uuids_to_dict(data: dict) -> dict:
