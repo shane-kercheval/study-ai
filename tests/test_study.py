@@ -8,41 +8,41 @@ from study import cli, filter_notes, load_history, load_notes
 
 
 def test__load_notes():  # noqa
-    notes = load_notes("/code/tests/test_files/fake_notes.yaml")
+    notes = load_notes("tests/test_files/fake_notes.yaml")
     assert isinstance(notes, list)
     assert len(notes) > 1
     assert isinstance(notes[0], Note)
 
 
 def test__filter_notes__flashcards():  # noqa
-    original_notes = load_notes("/code/tests/test_files/fake_notes_.yaml")
+    original_notes = load_notes("tests/test_files/fake_notes_.yaml")
     notes = filter_notes(original_notes, flash_only=True)
     assert all(isinstance(note, Flashcard) for note in notes)
 
 
 def test__filter_notes__category():  # noqa
-    original_notes = load_notes("/code/tests/test_files/fake_notes*.yaml")
+    original_notes = load_notes("tests/test_files/fake_notes*.yaml")
     notes = filter_notes(original_notes, category="OMSCS - filtered")
     assert len(notes) == len(original_notes) / 2
     assert all(note.subject_metadata.category == "OMSCS - filtered" for note in notes)
 
 
 def test__filter_notes__ident():  # noqa
-    original_notes = load_notes("/code/tests/test_files/fake_notes*.yaml")
+    original_notes = load_notes("tests/test_files/fake_notes*.yaml")
     notes = filter_notes(original_notes, ident="CS 6200 - filtered")
     assert len(notes) == len(original_notes) / 2
     assert notes[0].subject_metadata.ident == "CS 6200 - filtered"
 
 
 def test__filter_notes__name():  # noqa
-    original_notes = load_notes("/code/tests/test_files/fake_notes*.yaml")
+    original_notes = load_notes("tests/test_files/fake_notes*.yaml")
     notes = filter_notes(original_notes, name="Graduate Introduction to Operating Systems - filtered")  # noqa
     assert len(notes) == len(original_notes) / 2
     assert notes[0].subject_metadata.name == "Graduate Introduction to Operating Systems - filtered"  # noqa
 
 
 def test__filter_notes__abbr():  # noqa
-    original_notes = load_notes("/code/tests/test_files/fake_notes*.yaml")
+    original_notes = load_notes("tests/test_files/fake_notes*.yaml")
     notes = filter_notes(original_notes, abbr="GIOS - filtered")
     assert len(notes) == len(original_notes) / 2
     assert notes[0].subject_metadata.abbreviation == "GIOS - filtered"
@@ -64,7 +64,7 @@ def test__cycle__defaults__no_history():  # noqa
     runner = CliRunner()
     result = runner.invoke(
         cli,
-        ['cycle', '--notes_path', '/code/tests/test_files/fake_notes.yaml'],
+        ['cycle', '--notes_path', 'tests/test_files/fake_notes.yaml'],
         # 'q' will work regardless of note type that is drawn
         input='q\n',
     )
@@ -78,7 +78,7 @@ def test__cycle__flash_only__no_history():  # noqa
         [
             'cycle',
             '--flash_only',
-            '--notes_path', '/code/tests/test_files/fake_notes.yaml',
+            '--notes_path', 'tests/test_files/fake_notes.yaml',
         ],
         # this sequence will only work with Flashcard notes
         input='1\nq\n',
@@ -87,9 +87,9 @@ def test__cycle__flash_only__no_history():  # noqa
 
 
 def test__cycle__flash_only__with_history():  # noqa
-    notes_path = "/code/tests/test_files/fake_notes.yaml"
-    fake_history_path = "/code/tests/test_files/fake_history_no_history.yaml"
-    temp_history_path = "/code/tests/test_files/temp___fake_history.yaml"
+    notes_path = "tests/test_files/fake_notes.yaml"
+    fake_history_path = "tests/test_files/fake_history_no_history.yaml"
+    temp_history_path = "tests/test_files/temp___fake_history.yaml"
     shutil.copy(fake_history_path, temp_history_path)
 
     orginal_notes = load_notes(notes_path)
