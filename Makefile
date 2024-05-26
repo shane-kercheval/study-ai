@@ -7,6 +7,9 @@ study_docker:
 study:
 	python study.py cycle
 
+study_gios:
+	python study.py cycle --a GIOS
+
 flash:
 	python study.py cycle --flash_only
 
