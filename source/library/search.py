@@ -35,7 +35,7 @@ class VectorDatabase:
             assert set(self._data.columns) == {'uuid', 'text', 'embedding'}
         else:
             self._data = pd.DataFrame(columns=['uuid', 'text', 'embedding'])
-            self._data['embedding'] = self._data['embedding'].astype(object)  # allow for list of floats
+            self._data['embedding'] = self._data['embedding'].astype(object)  # allow for sequence
 
     @property
     def model(self) -> SentenceTransformer:
