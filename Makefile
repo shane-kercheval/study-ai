@@ -41,19 +41,9 @@ docker_down:
 	docker compose down --remove-orphans
 
 ####
-#
-####
-
-
-
-
-
-
-####
 # Project
 ####
 linting:
-	ruff check source/config
 	ruff check source/library
 	ruff check tests
 
@@ -67,15 +57,3 @@ unittests:
 # 	python -m doctest source/library/utilities.py
 
 tests: linting unittests
-
-remove_logs:
-	rm -f output/log.log
-
-## Run entire workflow.
-all: tests remove_logs data explore
-
-## Delete all generated files (e.g. virtual)
-clean:
-	rm -f data/raw/*.pkl
-	rm -f data/raw/*.csv
-	rm -f data/processed/*
