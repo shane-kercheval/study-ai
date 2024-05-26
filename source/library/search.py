@@ -31,11 +31,11 @@ class VectorDatabase:
         self.model_name = model_name
         self.db_path = db_path
         if os.path.exists(db_path):
-            self.df = pd.read_parquet(db_path)
-            assert set(self.df.columns) == {'uuid', 'text', 'embedding'}
+            self._data = pd.read_parquet(db_path)
+            assert set(self._data.columns) == {'uuid', 'text', 'embedding'}
         else:
-            self.df = pd.DataFrame(columns=['uuid', 'text', 'embedding'])
-            self.df['embedding'] = self.df['embedding'].astype(object)  # allow for list of floats
+            self._data = pd.DataFrame(columns=['uuid', 'text', 'embedding'])
+            self._data['embedding'] = self._data['embedding'].astype(object)  # allow for list of floats
 
     @property
     def model(self) -> SentenceTransformer:
@@ -50,26 +50,26 @@ class VectorDatabase:
         new_notes = []
         changes = {}
         for note in notes:
-            note_index = self.df['uuid'] == note.uuid
+            note_index = self._data['uuid'] == note.uuid
             assert note_index.sum() <= 1  # ensure there is at most one note with the same uuid
             note_exists = note_index.any()
             # if the note is already in the database and the text hasn't changed, skip
-            if note_exists and note.text() == self.df.loc[note_index, 'text'].tolist()[0]:
+            if note_exists and note.text() == self._data.loc[note_index, 'text'].tolist()[0]:
                 continue
             embedding = self.model.encode(note.text())
             if note_exists:
                 # if the note is already in the database but the text has changed, update the text
                 # and embedding; otherwise append the note to the new_notes list
-                self.df.loc[note_index, 'text'] = note.text()
+                self._data.loc[note_index, 'text'] = note.text()
                 # need to use `at` instead of `loc` to set the value with a sequence
-                self.df.at[self.df.index[note_index][0], 'embedding'] = embedding  # noqa: PD008
+                self._data.at[self._data.index[note_index][0], 'embedding'] = embedding  # noqa: PD008
                 changes[note.uuid] = 'updated'
             else:
                 new_notes.append(
                     {'uuid': note.uuid, 'text': note.text(), 'embedding': embedding},
                 )
                 changes[note.uuid] = 'added'
-        self.df = pd.concat([self.df, pd.DataFrame(new_notes)], ignore_index=True)
+        self._data = pd.concat([self._data, pd.DataFrame(new_notes)], ignore_index=True)
         if save:
             self.save()
         return changes
@@ -77,13 +77,12 @@ class VectorDatabase:
     def search(self, query: str, top_k: int = 5) -> pd.DataFrame:
         """Search the vector database for the top k most similar vectors."""
         query_embedding = self.model.encode(query)
-        self.df['cosine_distance'] = self.df['embedding'].apply(
-            lambda x: cosine_similarity([query_embedding], [x])[0][0],
-        )
-        results = self.df.sort_values('cosine_distance', ascending=False).head(top_k).copy()
-        self.df = self.df.drop(columns='cosine_distance')
+        self._data['cosine_similarity'] = self._data['embedding'].\
+            apply(lambda x: cosine_similarity(query_embedding, x))
+        results = self._data.sort_values('cosine_similarity', ascending=False).head(top_k).copy()
+        self._data = self._data.drop(columns='cosine_similarity')
         return results
 
     def save(self) -> None:
         """Save the vector database to disk."""
-        self.df.to_parquet(self.db_path, index=False)
+        self._data.to_parquet(self.db_path, index=False)
