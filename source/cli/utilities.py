@@ -1,25 +1,35 @@
 """Contains helper functions that are used in the main program."""
 import glob
 import re
-
 import yaml
+from ruamel.yaml import YAML as RYAML
+from source.library.notes import Flashcard, History, Note, add_uuids_to_dict, dict_to_notes
 
-from source.library.notes import Flashcard, History, Note, dict_to_notes
 
-
-def load_notes(path: str) -> list[Note]:
+def load_notes(path: str, generate_save_uuids: bool = True) -> list[Note]:
     """
     Load notes from multiple yaml files.
+
+    Uses ruamel.yaml to preserve formatting when saving the yaml files.
 
     Args:
         path:
             The path to the yaml files. The expected format is the same as the glob module.
+        generate_save_uuids:
+            If True, generate UUIDs for notes and save to the original yaml files.
     """
     class_notes = []
+    ryaml = RYAML()
+    ryaml.preserve_quotes = True
+    ryaml.width = 100000  # don't wrap lines
     # load all yaml files in data/notes via glob
     for f in glob.glob(path):
         with open(f) as handle:
-            data = yaml.safe_load(handle)
+            data = ryaml.load(handle)
+        if generate_save_uuids:
+            data = add_uuids_to_dict(data)
+            with open(f, 'w') as handle:
+                ryaml.dump(data, handle)
         class_notes.extend(dict_to_notes(data))
     return class_notes
 

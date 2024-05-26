@@ -50,7 +50,7 @@ class VectorDatabase:
         new_notes = []
         changes = {}
         for note in notes:
-            note_index = self.df['uuid'] == note.uuid()
+            note_index = self.df['uuid'] == note.uuid
             assert note_index.sum() <= 1  # ensure there is at most one note with the same uuid
             note_exists = note_index.any()
             # if the note is already in the database and the text hasn't changed, skip
@@ -63,12 +63,12 @@ class VectorDatabase:
                 self.df.loc[note_index, 'text'] = note.text()
                 # need to use `at` instead of `loc` to set the value with a sequence
                 self.df.at[self.df.index[note_index][0], 'embedding'] = embedding  # noqa: PD008
-                changes[note.uuid()] = 'updated'
+                changes[note.uuid] = 'updated'
             else:
                 new_notes.append(
-                    {'uuid': note.uuid(), 'text': note.text(), 'embedding': embedding},
+                    {'uuid': note.uuid, 'text': note.text(), 'embedding': embedding},
                 )
-                changes[note.uuid()] = 'added'
+                changes[note.uuid] = 'added'
         self.df = pd.concat([self.df, pd.DataFrame(new_notes)], ignore_index=True)
         if save:
             self.save()

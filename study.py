@@ -91,7 +91,7 @@ def cycle(
             )
         if user_response == 'q':
             break
-        test_bank.answer(uuid=note.uuid(), correct=user_response == 'y')
+        test_bank.answer(uuid=note.uuid, correct=user_response == 'y')
         # we need to modify/save our original history dictionary because test_bank may be a subset
         # of the original notes and we want to keep the history of all notes
         history.update(test_bank.history(to_dict=True))

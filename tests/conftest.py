@@ -13,6 +13,13 @@ def fake_notes() -> dict:
 
 
 @pytest.fixture()
+def invalid_notes_no_uuids() -> dict:
+    """Return a dictionary of fake notes."""
+    with open("tests/test_files/invalid_notes_no_uuids.yaml") as h:
+        return yaml.safe_load(h)
+
+
+@pytest.fixture()
 def fake_history() -> dict:
     """Return a dictionary of fake history."""
     return load_history("tests/test_files/fake_history.yaml")
