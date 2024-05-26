@@ -9,6 +9,7 @@ def colorize_markdown(text: str) -> str:
     # Apply blue color for text surrounded by `
     return re.sub(r'`(.*?)`', r'\033[34m\1\033[0m', text)
 
+
 def colorize_gray(text: str) -> str:
     """Colorizes text (used as the output in the terminal) to gray."""
     # Apply gray color to all text
@@ -16,6 +17,6 @@ def colorize_gray(text: str) -> str:
 
 
 def softmax_dict(d: dict) -> dict:
-    """Return a dictionary with softmax values."""
+    """Return a dictionary with softmax applied to values."""
     total = sum(d.values())
     return {k: v / total for k, v in d.items()}
