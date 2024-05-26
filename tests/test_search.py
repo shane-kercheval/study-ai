@@ -23,13 +23,6 @@ def test__VectorDatabase__creation_and_adding_notes(fake_notes) -> None:  # noqa
     Test creating a VectorDatabase and adding notes to it. Tests adding new notes, and updating
     existing notes. Also tests loading the database from disk and checking that the notes were
     saved correctly.
-
-    Note that this test would break if Note removed cacheing from the uuid method because updating
-    the text of the note would not trigger an update of the uuid.
-    Related, we don't want our VectorDatabase to have implicit knowledge of the Note class, so we
-    assume also test that the text for a particular uuid hasn't changed, since the uuid
-    implementation could change in the future to allow uuids to remain static even if the text
-    changes.
     """
     notes = dict_to_notes(fake_notes)
     db_path = 'temp___test_vector_database.parquet'
@@ -48,7 +41,7 @@ def test__VectorDatabase__creation_and_adding_notes(fake_notes) -> None:  # noqa
         embedding_note_2 = db.df.loc[db.df['uuid'] == notes[1].uuid, 'embedding'].to_numpy()[0]
         embedding_note_3 = db.df.loc[db.df['uuid'] == notes[2].uuid, 'embedding'].to_numpy()[0]
 
-        notes[0]._term = 'new term'  # doesn't trigger uuid update; uuid is cached in Note object
+        notes[0]._term = 'new term'
         changes = db.add(notes=notes, save=True)  # update 1st note, add 4th note; save database
         assert changes[notes[0].uuid] == 'updated'
         assert changes[notes[3].uuid] == 'added'
