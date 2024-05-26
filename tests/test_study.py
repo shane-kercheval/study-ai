@@ -4,7 +4,8 @@ import shutil
 import os
 from click.testing import CliRunner
 from source.library.notes import Flashcard, Note
-from study import cli, filter_notes, load_history, load_notes
+from source.cli.utilities import filter_notes, load_history, load_notes
+from study import cli
 
 
 def test__load_notes():  # noqa

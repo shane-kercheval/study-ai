@@ -1,6 +1,6 @@
 """Test the helper functions in the library module."""
 
-from source.library.helpers import softmax_dict
+from source.library.utilities import softmax_dict
 
 
 def test__softmax_dict():  # noqa

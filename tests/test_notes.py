@@ -4,7 +4,7 @@ from copy import deepcopy
 from textwrap import dedent
 import numpy as np
 import pytest
-from source.library.helpers import softmax_dict
+from source.library.utilities import softmax_dict
 from source.library.notes import (
     DefinitionNote,
     Flashcard,

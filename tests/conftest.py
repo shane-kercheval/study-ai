@@ -2,7 +2,7 @@
 import pytest
 import yaml
 
-from study import load_history
+from source.cli.utilities import load_history
 
 
 @pytest.fixture()

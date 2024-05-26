@@ -44,6 +44,7 @@ docker_down:
 ####
 linting:
 	ruff check source/library
+	ruff check source/cli
 	ruff check tests
 
 unittests:

@@ -36,8 +36,9 @@ jobs:
           pip install -r requirements.txt
       - name: linting
         run: |
-          ruff check source/library/
-          ruff check tests/
+          ruff check source/library
+          ruff check source/cli
+          ruff check tests
       - name: tests
         run: |
           pytest tests

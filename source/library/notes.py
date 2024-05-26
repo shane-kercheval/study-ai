@@ -10,7 +10,7 @@ import numpy as np
 import hashlib
 from dataclasses import dataclass
 
-from source.library.helpers import softmax_dict
+from source.library.utilities import softmax_dict
 
 
 class Priority(str, Enum):

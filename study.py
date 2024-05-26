@@ -1,78 +1,15 @@
 """CLI for studying notes."""
-import glob
 import click
 import yaml
 import os
 from textwrap import dedent
 from llm_workflow.openai import OpenAIChat, OpenAIServerChat
 from llm_workflow.hugging_face import HuggingFaceEndpointChat
-from source.library.helpers import colorize_gray, colorize_markdown
-from source.library.notes import Flashcard, History, Note, NoteBank, dict_to_notes
+from source.cli.utilities import colorize_gray, colorize_markdown, filter_notes, load_notes
+from source.library.notes import Flashcard, History, NoteBank
 from dotenv import load_dotenv
 
 load_dotenv()
-
-
-def load_notes(path: str) -> list[Note]:
-    """
-    Load notes from multiple yaml files.
-
-    Args:
-        path:
-            The path to the yaml files. The expected format is the same as the glob module.
-    """
-    class_notes = []
-    # load all yaml files in data/notes via glob
-    for f in glob.glob(path):
-        with open(f) as handle:
-            data = yaml.safe_load(handle)
-        class_notes.extend(dict_to_notes(data))
-    return class_notes
-
-
-def load_history(file_path: str) -> dict:
-    """Load history from a yaml file."""
-    with open(file_path) as h:
-        history = yaml.safe_load(h)
-        return {uuid: History(**history[uuid]) for uuid in history}
-
-
-def filter_notes(
-        notes: list[Note],
-        flash_only: bool = False,
-        category: str | None = None,
-        ident: str | None = None,
-        name: str | None = None,
-        abbr: str | None = None,
-        ) -> list[Note]:
-    """
-    Filter notes based on various criteria.
-
-    Args:
-        notes:
-            The list of notes to filter.
-        flash_only:
-            If True, only return FlashCard instances.
-        category:
-            The category (in SubjectMetadata) to filter on.
-        ident:
-            The identity (in SubjectMetadata) to filter on.
-        name:
-            The name (in SubjectMetadata) to filter on.
-        abbr:
-            The abbreviation (in SubjectMetadata) to filter on.
-    """
-    if flash_only:
-        notes = [note for note in notes if isinstance(note, Flashcard)]
-    if category:
-        notes = [note for note in notes if note.subject_metadata.category == category]
-    if ident:
-        notes = [note for note in notes if note.subject_metadata.ident == ident]
-    if name:
-        notes = [note for note in notes if note.subject_metadata.name == name]
-    if abbr:
-        notes = [note for note in notes if note.subject_metadata.abbreviation == abbr]
-    return notes
 
 
 @click.group()
