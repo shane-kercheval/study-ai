@@ -27,7 +27,6 @@ text_to_notes_file:
 		# --model_type openai_server \
 		# --model_name http://host.docker.internal:1234/v1 \
 
-
 ####
 # DOCKER
 ####

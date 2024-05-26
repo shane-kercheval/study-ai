@@ -22,7 +22,7 @@ def load_notes(path: str) -> list[Note]:
             The path to the yaml files. The expected format is the same as the glob module.
     """
     class_notes = []
-    # load all yaml files in /code/data/notes via glob
+    # load all yaml files in data/notes via glob
     for f in glob.glob(path):
         with open(f) as handle:
             data = yaml.safe_load(handle)
@@ -92,8 +92,8 @@ def create_notes() -> None:
 @click.option('--ident', '-i', help='Only display notes from a specific class identity.', default=None)  # noqa
 @click.option('--name', '-n', help='Only display notes from a specific class name.', default=None)
 @click.option('--abbr', '-a', help='Only display notes from a specific class abbreviation.', default=None)  # noqa
-@click.option('--notes_path', '-p', help='The path to the notes yaml file(s).', default='/code/data/notes/*.yaml')  # noqa
-@click.option('--history_path', '-h', help='The path to the history yaml file.', default='/code/data/history.yaml')  # noqa
+@click.option('--notes_path', '-p', help='The path to the notes yaml file(s).', default='data/notes/*.yaml')  # noqa
+@click.option('--history_path', '-h', help='The path to the history yaml file.', default='data/history.yaml')  # noqa
 def cycle(
         flash_only: bool,
         category: str,
@@ -173,7 +173,7 @@ def text_to_notes(model_type: str, model_name: str, temperature: float, file: st
         raise NotImplementedError(f"Model type '{model_type}' not implemented.")
 
     model.streaming_callback = lambda x: click.echo(x.response, nl=False)
-    with open("/code/source/library/prompts/text_to_notes.txt") as f:
+    with open("source/library/prompts/text_to_notes.txt") as f:
         prompt_template = f.read()
     if file:
         with open(file) as f:
