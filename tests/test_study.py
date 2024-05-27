@@ -120,12 +120,11 @@ def test__cycle__flash_only__with_history():  # noqa
         # exist and have not been removed.
         assert set(saved_history.keys()) == expected_uuids
         for uuid in non_flashcard_uuids:
-            assert saved_history[uuid].correct == 0
-            assert saved_history[uuid].incorrect == 0
+            assert saved_history[uuid].answers == []
 
         flashcard_history = [h for uuid, h in saved_history.items() if uuid in flashcard_uuids]
-        assert sum(h.correct for h in flashcard_history) == 2
-        assert sum(h.incorrect for h in flashcard_history) == 0
+        assert sum(sum(h.answers) for h in flashcard_history) == 2  # 2 correct answers
+        assert sum(len(h.answers) for h in flashcard_history) == 2  # 2 total answers
 
         ####
         # test with 0 correct answers; 2 incorrect answers
@@ -149,12 +148,11 @@ def test__cycle__flash_only__with_history():  # noqa
         # exist and have not been removed.
         assert set(saved_history.keys()) == expected_uuids
         for uuid in non_flashcard_uuids:
-            assert saved_history[uuid].correct == 0
-            assert saved_history[uuid].incorrect == 0
+            assert saved_history[uuid].answers == []
 
         flashcard_history = [h for uuid, h in saved_history.items() if uuid in flashcard_uuids]
-        assert sum(h.correct for h in flashcard_history) == 2  # from previous test/history
-        assert sum(h.incorrect for h in flashcard_history) == 1
+        assert sum(sum(h.answers) for h in flashcard_history) == 2  # from previous test/history
+        assert sum(len(h.answers) for h in flashcard_history) == 3  # 3 total answers
 
         ####
         # test with 0 correct answers; 2 incorrect answers
@@ -178,13 +176,12 @@ def test__cycle__flash_only__with_history():  # noqa
         # exist and have not been removed.
         assert set(saved_history.keys()) == expected_uuids
         for uuid in non_flashcard_uuids:
-            assert saved_history[uuid].correct == 0
-            assert saved_history[uuid].incorrect == 0
+            assert saved_history[uuid].answers == []
 
         flashcard_history = [h for uuid, h in saved_history.items() if uuid in flashcard_uuids]
         # 2 correct and 2 incorrects answers from previous history file
-        assert sum(h.correct for h in flashcard_history) == 4
-        assert sum(h.incorrect for h in flashcard_history) == 3
+        assert sum(sum(h.answers) for h in flashcard_history) == 4
+        assert sum(len(h.answers) for h in flashcard_history) == 7  # 7 total answers
 
     finally:
         os.remove(temp_history_path)

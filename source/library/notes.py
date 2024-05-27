@@ -7,7 +7,6 @@ import uuid
 from pydantic import BaseModel
 from enum import Enum
 import numpy as np
-from dataclasses import dataclass
 from source.library.utilities import softmax_dict
 
 
@@ -264,29 +263,51 @@ def dict_to_notes(data: dict) -> list[Note]:
     return notes
 
 
-@dataclass
 class History:
     """
-    Represents past quizes of a note, which includes the number of times the note has been answered
-    correctly and incorrectly. This information is used to determine the probability of drawing the
-    note in the future.
+    Represents past quizzes of a note, which includes a history of whether the note has been
+    answered correctly or incorrectly. This information is used to determine the probability of
+    drawing the note in the future.
 
     The probability of drawing the note is based on the beta distribution, which is a distribution
     over the interval [0, 1]. The beta distribution is basically a distribution over probabilities.
-    The more times the note has been answered correctly, the higher the probability that the user
-    will answer the question correctly in the future, so the less likely we need to study this
-    note.
+    The more recent the correct answer, the higher the probability that the user will answer the
+    question correctly in the future, so the less likely we need to study this note.
     """
 
-    correct: int = 0
-    incorrect: int = 0
-
-    def probability_correct(self, seed: int | None = None) -> float:
+    def __init__(self, answers: list[bool] | None = None) -> None:
         """
-        Draw a random sample from the beta distribution. The interpretation of the value returned
+        Args:
+            answers:
+                A list of booleans representing whether the note was answered correctly (True) or
+                incorrectly (False). The most recent answer is at the end of the list.
+        """
+        self.answers = answers or []
+
+    # @property
+    # def correct(self) -> int:
+    #     """Return the number of correct answers, according to the last n answers."""
+    #     return sum(self.answers[-self.last_n:])
+
+    # @property
+    # def incorrect(self) -> int:
+    #     """Return the number of incorrect answers, according to the last n answers."""
+    #     return sum((not h) for h in self.answers[-self.last_n:])
+
+    def probability_correct(
+            self,
+            last_n: int | None = None,
+            weights: list[float] | None = None,
+            seed: int | None = None,
+            ) -> float:
+        """
+        Draws a random sample from the beta distribution. The interpretation of the value returned
         is the probability of "success" (in this case successfully answering the question
         correctly). The higher the likelihood of success, the less likely we need to study this
         note.
+
+        If `weights` is None, the answers are weighted equally. If `weights` is provided, the
+        answers are weighted according to the weights (e.g. to give more weight to recent answers).
 
         With no history (0 correct, 0 incorrect; alpha=1, beta=1), the distribution is uniform. As
         the number of correct answers increases, the distribution shifts to the right (higher
@@ -294,23 +315,49 @@ class History:
         shifts to the left (lower probability of success). As the number of correct and incorrect
         answers increase, the distribution becomes more peaked around the true probability of
         success.
+
+        Args:
+            last_n:
+                The number of most recent answers to consider when calculating the probability of
+                answering the question correctly. If None, all answers are considered.
+            weights:
+                A list of weights to apply to the answers (e.g. in order to give more weight to the
+                most recent answers). The length of the list must be equal to `last_n`. The default
+                is None, which gives equal weight to all answers. The values of the weights are
+                normalized to sum to 1, and the number of resulting correct/incorrect answers are
+                then normalized to the original number of correct/incorrect answers.
+            seed:
+                The seed to use for the random number generator.
         """
+        answers = self.answers[-last_n:] if last_n else self.answers
+        # # Apply a weighting system that gives more weight to recent answers
+        # weights = np.arange(1, len(self.answers) + 1)
+        # correct = sum(h * w for h, w in zip(self.answers, weights))
+        # incorrect = sum((not h) * w for h, w in zip(self.answers, weights))
+        if weights:
+            assert len(weights) == len(answers), "Invalid weights length"
+            # the weighted correct/incorrect should add up to the original number of
+            # correct/incorrect answers
+            # so if the person has answered 20 times, the sum of the weights should be 20
+            total_weights = sum(weights)
+            weights = [w / total_weights for w in weights]
+            assert np.isclose(sum(weights), 1), f"Invalid weight calculation: {weights}"
+            correct = sum(h * w for h, w in zip(answers, weights)) * len(answers)
+            incorrect = sum((not h) * w for h, w in zip(answers, weights)) * len(answers)
+            assert np.isclose(correct + incorrect, len(answers)), "Invalid answer calculation"
+        else:
+            correct = sum(answers)
+            incorrect = len(answers) - correct
         rng = np.random.default_rng(seed)
-        return rng.beta(self.correct + 1, self.incorrect + 1, 1)[0]
+        return rng.beta(correct + 1, incorrect + 1, 1)[0]
 
     def answer(self, correct: bool) -> None:
         """Update the history based on the correctness of the answer."""
-        if correct:
-            self.correct += 1
-        else:
-            self.incorrect += 1
+        self.answers.append(correct)
 
     def to_dict(self) -> dict:
         """Return the history as a dictionary."""
-        return {
-            'correct': self.correct,
-            'incorrect': self.incorrect,
-        }
+        return {'answers': self.answers}
 
 
 class NoteBank:
@@ -347,8 +394,10 @@ class NoteBank:
 
     def draw(
             self,
-            seed: int | None = None,
             priority_weights: dict[Priority, float] | None = None,
+            last_n: int | None = None,
+            history_weights: list[float] | None = None,
+            seed: int | None = None,
             ) -> Note:
         """
         Draw a note from the test bank. The probability of drawing a note is based on the history
@@ -358,7 +407,20 @@ class NoteBank:
         Returns a dictionary with the UUID of the note, the history of the note, and the note
         itself.
 
-        # TODO: implement priority_weights.
+        Args:
+            seed:
+                The seed to use for the random number generator.
+            priority_weights:
+                A dictionary of weights to apply to the priority of the note. The higher the
+                weight, the more likely the note will be drawn. The length of the dictionary must
+                be equal to the number of priorities.
+            last_n:
+                The number of most recent answers to consider when calculating the probability of
+                answering the question correctly. If None, all answers are considered.
+            history_weights:
+                A list of weights to apply to the answers (e.g. in order to give more weight to the
+                most recent answers). The length of the list must be equal to `last_n`. The default
+                is None, which gives equal weight to all answers.
         """
         probabilities = {}
         # probability_correct gives the probability of success (correct answer), but the higher
@@ -369,11 +431,15 @@ class NoteBank:
         if priority_weights:
             priority_weights = softmax_dict(priority_weights)
             for k, v in self.notes.items():
-                probability_incorrect = 1 - v['history'].probability_correct()
+                probability_incorrect = 1 - v['history'].probability_correct(
+                    last_n=last_n, weights=history_weights, seed=seed,
+                )
                 probabilities[k] = probability_incorrect * priority_weights[ v['note'].priority]
         else:
             probabilities = {
-                k: 1 - v['history'].probability_correct()
+                k: 1 - v['history'].probability_correct(
+                        last_n=last_n, weights=history_weights, seed=seed,
+                    )
                 for k, v in self.notes.items()
             }
         probabilities = softmax_dict(probabilities)

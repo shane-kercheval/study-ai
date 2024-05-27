@@ -76,7 +76,7 @@ def cycle(
         click.echo(colorize_gray(f"{note.uuid}"))
         click.echo(colorize_gray(f"{note.subject_metadata.category} - {note.subject_metadata.ident} - {note.subject_metadata.abbreviation} - {note.subject_metadata.name}"))  # noqa  
         click.echo(colorize_gray(f"{note.note_metadata.source_name}"))
-        if isinstance(note, Flashcard):  
+        if isinstance(note, Flashcard):
             click.echo(f"\n\n{colorize_markdown(note.preview())}\n\n")
             user_response = click.prompt(
                 colorize_gray("Press any key to reveal answer (q to quit)"),

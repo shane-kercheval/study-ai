@@ -67,29 +67,17 @@ def test__Note__str(fake_notes):  # noqa
 
 def test__history__answer():  # noqa
     history = History()
-    assert history.correct == 0
-    assert history.incorrect == 0
-    assert history.to_dict() == {'correct': 0, 'incorrect': 0}
+    assert history.to_dict() == {'answers': []}
     history.answer(correct=True)
-    assert history.correct == 1
-    assert history.incorrect == 0
-    assert history.to_dict() == {'correct': 1, 'incorrect': 0}
+    assert history.to_dict() == {'answers': [1]}
     history.answer(correct=False)
-    assert history.correct == 1
-    assert history.incorrect == 1
-    assert history.to_dict() == {'correct': 1, 'incorrect': 1}
+    assert history.to_dict() == {'answers': [1, 0]}
     history.answer(correct=True)
-    assert history.correct == 2
-    assert history.incorrect == 1
-    assert history.to_dict() == {'correct': 2, 'incorrect': 1}
+    assert history.to_dict() == {'answers': [1, 0, 1]}
     history.answer(correct=False)
-    assert history.correct == 2
-    assert history.incorrect == 2
-    assert history.to_dict() == {'correct': 2, 'incorrect': 2}
-
+    assert history.to_dict() == {'answers': [1, 0, 1, 0]}
+    # test to_dict() creates the same values
     history_copy = History(**history.to_dict())
-    assert history.correct == history_copy.correct
-    assert history.incorrect == history_copy.incorrect
     assert history.to_dict() == history_copy.to_dict()
 
 
@@ -98,7 +86,7 @@ def test__history__success_probability_no_history():  # noqa
     # to 0.5 (50/50 chance of being correct/incorrect)
     history = History()
     # test that success_probability works on 0 correct & 0 incorrect
-    draws = [history.probability_correct() for _ in range(10000)]
+    draws = [history.probability_correct() for _ in range(10_000)]
     assert all(0 <= draw <= 1 for draw in draws)
     # should be a wide probability distribution for a new note with no history
     assert any(draw < 0.1 for draw in draws)
@@ -109,16 +97,16 @@ def test__history__success_probability_no_history():  # noqa
 def test__history__success_probability_confident_history():  # noqa
     # The probability of a draw associated with an instance with a lot of history should be very
     # close to the actual probability of being correct
-    history = History(correct=100000, incorrect=100000)
-    draws = [history.probability_correct() for _ in range(10000)]
+    history = History([True] * 50_000 + [False] * 50_000)
+    draws = [history.probability_correct() for _ in range(1_000)]
     assert all(np.isclose(draw, 0.5, atol=0.01) for draw in draws)
 
-    history = History(correct=100000, incorrect=0)
-    draws = [history.probability_correct() for _ in range(10000)]
+    history = History([True] * 100_000)
+    draws = [history.probability_correct() for _ in range(1_000)]
     assert all(np.isclose(draw, 1, atol=0.01) for draw in draws)
 
-    history = History(correct=0, incorrect=100000)
-    draws = [history.probability_correct() for _ in range(10000)]
+    history = History([False] * 100_000)
+    draws = [history.probability_correct() for _ in range(1_000)]
     assert all(np.isclose(draw, 0, atol=0.01) for draw in draws)
 
 
@@ -131,6 +119,48 @@ def test__history__success_probability_no_history__seed():  # noqa
     assert 0 <= draw <= 1
     assert draw == history.probability_correct(seed=42)
     assert draw == history.probability_correct(seed=42)
+
+
+def test__history__last_n__1():  # noqa
+    history = History([True] * 100_000 + [False])
+    # even though we have a lot of history (all correct answers), only the last 2 answer should be
+    # considered (1 True and 1 False); so the probability of getting the answer correct should be
+    # on average ~0.5 with a wide distribution
+    draws = [history.probability_correct(last_n=2) for _ in range(10_000)]
+    assert all(0 <= draw <= 1 for draw in draws)
+    # should be a wide probability distribution for a new note with no history
+    assert any(draw < 0.1 for draw in draws)
+    assert any(draw > 0.9 for draw in draws)
+    assert np.isclose(np.mean(draws), 0.5, atol=0.05)
+
+
+def test__history__last_n__20():  # noqa
+    history = History([True] * 10 + [False] * 10)
+    # ensure that the weights are applied correctly when considering all answers
+    draws = [history.probability_correct() for _ in range(10_000)]
+    assert np.isclose(np.mean(draws), 0.5, atol=0.05)
+    # ensure that the weights are applied correctly when considering only the last 10 answers
+    draws = [history.probability_correct(last_n=10) for _ in range(10_000)]
+    # now we are only considering the last 10 answers, which are all False
+    assert np.mean(draws) < 0.1
+
+
+def test__history__weights():  # noqa
+    history = History([True] * 10 + [False] * 10)
+    with pytest.raises(AssertionError):
+        # invalid number of weights
+        history.probability_correct(weights=[1])
+    weights = list(range(len(history.answers)))
+    draws = [history.probability_correct(weights=weights) for _ in range(10_000)]
+    # The probability of correct is now much less than 0.5 since the weights give more importance
+    # to the later answers which are False/incorrect
+    assert np.mean(draws) < 0.3
+
+    weights = list(reversed(weights))
+    # The probability of correct is now much greater than 0.5 since the weights give more
+    # importance to the earlier answers which are True/correct
+    draws = [history.probability_correct(weights=weights) for _ in range(10_000)]
+    assert np.mean(draws) > 0.7
 
 
 @pytest.mark.parametrize("history", [None, {}])
@@ -158,8 +188,7 @@ def test__TestBank__no_history__expect_equal_draws(fake_notes, history):  # noqa
     assert {uuid: h.to_dict() for uuid, h in test_bank.history().items()} == test_bank.history(to_dict=True)  # noqa
     history = test_bank.history()
     assert history.keys() == expected_uuids
-    assert all(history[uuid].correct == 0 for uuid in expected_uuids)
-    assert all(history[uuid].incorrect == 0 for uuid in expected_uuids)
+    assert all(history[uuid].answers == [] for uuid in expected_uuids)
 
 
 @pytest.mark.parametrize("history", [None, {}])
@@ -168,18 +197,14 @@ def test__TestBank__no_history__answer__history_updates_correctly(fake_notes, hi
     test_bank = NoteBank(notes=dict_to_notes(fake_notes), history=history)
     assert len(test_bank) == len(fake_notes['notes'])
     expected_uuids = [note['note'].uuid for note in test_bank.notes.values()]
-    assert all(test_bank.history()[uuid].correct == 0 for uuid in expected_uuids)
-    assert all(test_bank.history()[uuid].incorrect == 0 for uuid in expected_uuids)
+    assert all(test_bank.history()[uuid].answers == [] for uuid in expected_uuids)
     for index in range(len(test_bank)):
         test_bank.answer(expected_uuids[index], correct=True)
-        assert test_bank.history()[expected_uuids[index]].correct == 1
-        assert test_bank.history()[expected_uuids[index]].incorrect == 0
+        assert test_bank.history()[expected_uuids[index]].answers == [True]
         test_bank.answer(expected_uuids[index], correct=False)
-        assert test_bank.history()[expected_uuids[index]].correct == 1
-        assert test_bank.history()[expected_uuids[index]].incorrect == 1
+        assert test_bank.history()[expected_uuids[index]].answers == [True, False]
         test_bank.answer(expected_uuids[index], correct=True)
-        assert test_bank.history()[expected_uuids[index]].correct == 2
-        assert test_bank.history()[expected_uuids[index]].incorrect == 1
+        assert test_bank.history()[expected_uuids[index]].answers == [True, False, True]
         assert {uuid: h.to_dict() for uuid, h in test_bank.history().items()} == test_bank.history(to_dict=True)  # noqa
 
 
@@ -193,7 +218,7 @@ def test__TestBank__draw__priority_weights(fake_notes, fake_history_equal):  # n
     """
     test_bank = NoteBank(notes=dict_to_notes(fake_notes), history=fake_history_equal)
     weights = {Priority.high: 4, Priority.medium: 2, Priority.low: 1}
-    draws = [test_bank.draw(priority_weights=weights).uuid for _ in range(10000)]
+    draws = [test_bank.draw(priority_weights=weights).uuid for _ in range(10_000)]
     counts = {uuid: draws.count(uuid) for uuid in test_bank.notes}
 
     # we can do this since all histories have the same number of correct and incorrect answers
@@ -215,7 +240,7 @@ def test__TestBank__with_history__expect_draw_counts_to_correspond_with_history(
     expected_uuids = {n.uuid for n in notes}
     assert set(fake_history.keys()) == expected_uuids
     for history in fake_history.values():
-        assert history.correct + history.incorrect == 100000
+        assert len(history.answers) == 50_000
 
     test_bank = NoteBank(notes=notes, history=fake_history)
     assert len(test_bank) == len(notes)
@@ -227,8 +252,8 @@ def test__TestBank__with_history__expect_draw_counts_to_correspond_with_history(
     # we subtract from 1 because the beta distribution is the probability of getting the answer
     # correct, but we want the probability of drawing the note
     def prob_incorrect(history: History) -> float:
-        correct = history.correct + 1
-        incorrect = history.incorrect + 1
+        correct = sum(history.answers) + 1
+        incorrect = len(history.answers) - correct + 1
         return 1 - (correct / (correct + incorrect))
 
     expected_prob_of_draw = {uuid: prob_incorrect(history) for uuid, history in fake_history.items()}  # noqa
@@ -237,7 +262,7 @@ def test__TestBank__with_history__expect_draw_counts_to_correspond_with_history(
         for uuid, prob in expected_prob_of_draw.items()
     }
     assert np.isclose(sum(expected_prob_of_draw.values()), 1, atol=0.0001)
-    draws = [test_bank.draw().uuid for _ in range(len(test_bank) * 5000)]
+    draws = [test_bank.draw().uuid for _ in range(len(test_bank) * 5_000)]
     counts = {uuid: draws.count(uuid) for uuid in expected_uuids}
     # test that the counts are roughly equal to the expected probability of draw
     # we are using large number of draws to ensure that the counts are close to the expected
