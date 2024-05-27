@@ -121,6 +121,57 @@ def test__history__success_probability_no_history__seed():  # noqa
     assert draw == history.probability_correct(seed=42)
 
 
+def test__history___handle_last_n__None_or_int():  # noqa
+    answers = [True, False, True, True]
+    assert History._handle_last_n(answers=answers, last_n=None) == (answers, None)
+    assert History._handle_last_n(answers=answers, last_n=10) == (answers, None)
+    assert History._handle_last_n(answers=answers, last_n=1) == ([True], None)
+    assert History._handle_last_n(answers=answers, last_n=2) == ([True, True], None)
+    assert History._handle_last_n(answers=answers, last_n=3) == ([False, True, True], None)
+    assert History._handle_last_n(answers=answers, last_n=4) == (answers, None)
+    assert History._handle_last_n(answers=answers, last_n=5) == (answers, None)
+
+
+def test__history___handle_last_n__weights():  # noqa
+    answers = [False, True, False, True]
+    assert History._handle_last_n(answers=answers, last_n=[1, 2, 3, 4]) == (answers, [1, 2, 3, 4])
+    assert History._handle_last_n(answers=answers, last_n=[1, 2, 3, 4, 5]) == (answers, [2, 3, 4, 5])  # noqa
+    assert History._handle_last_n(answers=answers, last_n=[1, 2, 3, 4, 5, 6]) == (answers, [3, 4, 5, 6])  # noqa
+    assert History._handle_last_n(answers=answers, last_n=[1, 2, 3]) == ([True, False, True], [1, 2, 3])  # noqa
+    assert History._handle_last_n(answers=answers, last_n=[1]) == ([True], [1])
+
+
+def test__history___calculate_correct_incorrect():  # noqa
+    answers = []
+    correct, incorrect = History._calculate_correct_incorrect(answers=answers, weights=None)
+    assert correct == 0
+    assert incorrect == 0
+
+    answers = [True]
+    correct, incorrect = History._calculate_correct_incorrect(answers=answers, weights=None)
+    assert correct == 1
+    assert incorrect == 0
+
+    answers = [False]
+    correct, incorrect = History._calculate_correct_incorrect(answers=answers, weights=None)
+    assert correct == 0
+    assert incorrect == 1
+
+    answers = [True, False, True, False, True]
+    correct, incorrect = History._calculate_correct_incorrect(answers=answers, weights=None)
+    assert correct == 3
+    assert incorrect == 2
+
+    answers = [True, False, True, False, True]
+    weights = [0, 2, 1, 1, 5]
+    total_correct = sum(a * w for a, w in zip(answers, weights, strict=True))
+    total_incorrect = sum((not a) * w for a, w in zip(answers, weights, strict=True))
+    correct, incorrect = History._calculate_correct_incorrect(answers=answers, weights=weights)
+    assert np.isclose(correct + incorrect, len(answers), atol=1e-6)
+    assert np.isclose(correct, total_correct / sum(weights) * len(answers), atol=1e-6)
+    assert np.isclose(incorrect, total_incorrect / sum(weights) * len(answers), atol=1e-6)
+
+
 def test__history__last_n__1():  # noqa
     history = History([True] * 100_000 + [False])
     # even though we have a lot of history (all correct answers), only the last 2 answer should be
@@ -343,12 +394,6 @@ def test__TestBank__draw__last_n__with_weights(fake_notes):  # noqa
     for uuid in test_bank.notes:
         expected_freq = expected_freq_lookups[uuid]
         assert np.isclose(counts[uuid] / len(draws), expected_freq, atol=0.1)
-
-
-
-
-
-
 
 
 def test__TestBank__with_history__expect_draw_counts_to_correspond_with_history(fake_notes, fake_history):  # noqa

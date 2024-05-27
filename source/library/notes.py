@@ -148,6 +148,7 @@ class DefinitionNote(Flashcard):
         """Return the term and definition together to represent the full text."""
         return f"{self._term}:\n    {self._definition}"
 
+
 class QuestionAnswerNote(Flashcard):
     """A QuestionAnswerNote is a Flashcard that has a question and an answer."""
 
@@ -284,15 +285,6 @@ class History:
         """
         self.answers = answers or []
 
-    # @property
-    # def correct(self) -> int:
-    #     """Return the number of correct answers, according to the last n answers."""
-    #     return sum(self.answers[-self.last_n:])
-
-    # @property
-    # def incorrect(self) -> int:
-    #     """Return the number of incorrect answers, according to the last n answers."""
-    #     return sum((not h) for h in self.answers[-self.last_n:])
 
     def probability_correct(
             self,
@@ -329,39 +321,85 @@ class History:
             seed:
                 The seed to use for the random number generator.
         """
-        # last_n = len(self.answers) if last_n is None else last_n
         weights = None
-        answers = self.answers
-        if last_n:
-            if isinstance(last_n, int):
-                answers = answers[-last_n:]
-            elif isinstance(last_n, list):
-                weights = last_n
-                if len(weights) < len(answers):
-                    answers = answers[-len(weights):]
-                elif len(weights) > len(answers):
-                    weights = weights[-len(answers):]
-                assert len(weights) == len(answers), "Invalid weights length"
-            else:
-                raise ValueError(f"Invalid last_n: {last_n}")
-        del last_n  # don't use last_n beyond this point
+        answers, weights = History._handle_last_n(answers=self.answers, last_n=last_n)
+        correct, incorrect = History._calculate_correct_incorrect(answers, weights)
+        rng = np.random.default_rng(seed)
+        return rng.beta(correct + 1, incorrect + 1, 1)[0]
 
-        # # Apply a weighting system that gives more weight to recent answers
+    @staticmethod
+    def _handle_last_n(
+            answers: list[bool],
+            last_n: int | list[bool] | None,
+            ) -> tuple[list[bool], list[float] | None]:
+        """Returns the answers and weights based on the last_n parameter."""
+        if not last_n:
+            return answers, None
+        weights = None
+        if isinstance(last_n, int):
+            answers = answers[-last_n:]
+        elif isinstance(last_n, list):
+            weights = last_n
+            answers, weights = History._truncate_answers_weights(answers, weights)
+        else:
+            raise ValueError(f"Invalid last_n: {last_n}")
+        return answers, weights
+
+    @staticmethod
+    def _truncate_answers_weights(
+            answers: list[bool],
+            weights: list[float],
+            ) -> tuple[list[bool], list[float]]:
+        """
+        Adjust the length of answers and weights to be equal. Truncates the longer list to the
+        length of the shorter list using the last n number of items.
+        """
+        if len(weights) < len(answers):
+            # only the last n number of answers are considered
+            answers = answers[-len(weights):]
+        elif len(weights) > len(answers):
+            # extra weights (at the beginning of the list) are ignored
+            weights = weights[-len(answers):]
+        if len(weights) != len(answers):
+            raise ValueError("Invalid weights length")
+        return answers, weights
+
+    @staticmethod
+    def _calculate_correct_incorrect(
+            answers: list[bool],
+            weights: list[float] | None,
+            ) -> tuple[float, float]:
+        """
+        Calculate the number of correct and incorrect answers based on answer history and the
+        weights, if provided.
+        """
         if weights:
-            # the weighted correct/incorrect should add up to the original number of
-            # correct/incorrect answers
-            # so if the person has answered 20 times, the sum of the weights should be 20
-            total_weights = sum(weights)
-            weights = [w / total_weights for w in weights]
-            assert np.isclose(sum(weights), 1), f"Invalid weight calculation: {weights}"
-            correct = sum(h * w for h, w in zip(answers, weights, strict=True)) * len(answers)
-            incorrect = sum((not h) * w for h, w in zip(answers, weights, strict=True)) * len(answers)  # noqa
-            assert np.isclose(correct + incorrect, len(answers)), "Invalid answer calculation"
+            if len(answers) != len(weights):
+                raise ValueError("Invalid weights length")
+            correct, incorrect = History._calculate_weighted_correct_incorrect(answers, weights)
         else:
             correct = sum(answers)
             incorrect = len(answers) - correct
-        rng = np.random.default_rng(seed)
-        return rng.beta(correct + 1, incorrect + 1, 1)[0]
+        return correct, incorrect
+
+    @staticmethod
+    def _calculate_weighted_correct_incorrect(
+            answers: list[bool],
+            weights: list[float],
+            ) -> tuple[float, float]:
+        """
+        Calculate the number of correct and incorrect answers based on the history and the weights,
+        if provided.
+        """
+        total_weights = sum(weights)
+        weights = [w / total_weights for w in weights]
+        if not np.isclose(sum(weights), 1):
+            raise ValueError(f"Invalid weight calculation: {weights}")
+        correct = sum(h * w for h, w in zip(answers, weights, strict=True)) * len(answers)
+        incorrect = sum((not h) * w for h, w in zip(answers, weights, strict=True)) * len(answers)
+        if not np.isclose(correct + incorrect, len(answers)):
+            raise ValueError("Invalid answer calculation")
+        return correct, incorrect
 
     def answer(self, correct: bool) -> None:
         """Update the history based on the correctness of the answer."""
