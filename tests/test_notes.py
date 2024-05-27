@@ -58,10 +58,12 @@ def test__dict_to_notes(fake_notes):   # noqa
         assert note.note_metadata.tags == fake_notes['note_metadata']['tags']
     assert expected_test_types == found_test_types
 
+
 def test__Note__str(fake_notes):  # noqa
     notes = dict_to_notes(fake_notes)
     for note in notes:
         assert str(note)
+
 
 def test__history__answer():  # noqa
     history = History()
