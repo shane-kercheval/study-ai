@@ -163,12 +163,6 @@ def search(notes_path: str, db_path: str, similarity_threshold: float, top_k: in
                 click.echo("--------------------------\n")
 
 
-# @cli.command()
-# @click.option('--model', '-m', help='The model to use for chatting.', default='gpt-3.5')
-# def chat():
-#     pass
-
-
 @cli.command()
 @click.option('--model_type', '-mt', help="The model service to use, e.g. 'openai', 'openai_server', 'hugging_face_endpoint'", default='openai')  # noqa
 @click.option('--model_name', '-mn', help="The model name (or endpoint) to use, e.g. 'gpt-3.5-turbo-0125' or 'http://host.docker.internal:1234/v1'", default='gpt-3.5-turbo-0125')  # noqa
