@@ -435,7 +435,8 @@ class NoteBank:
         self.notes = {}
         for note in notes:
             uuid = note.uuid
-            assert uuid not in self.notes, f"Duplicate UUID: {uuid}"
+            if uuid in self.notes:
+                raise ValueError(f"Duplicate UUID: {uuid}")
             self.notes[uuid] = {
                 'uuid': uuid,
                 'history': history[uuid] if history and uuid in history else History(),
@@ -498,7 +499,8 @@ class NoteBank:
                 for k, v in self.notes.items()
             }
         probabilities = softmax_dict(probabilities)
-        assert np.isclose(sum(probabilities.values()), 1), f"Invalid probabilities: {probabilities}"  # noqa
+        if not np.isclose(sum(probabilities.values()), 1):
+            raise ValueError(f"Invalid probabilities: {probabilities}")
         # draw a note
         rng = np.random.default_rng(seed)
         uuid = rng.choice(list(probabilities.keys()), p=list(probabilities.values()))
