@@ -354,6 +354,10 @@ class History:
         Adjust the length of answers and weights to be equal. Truncates the longer list to the
         length of the shorter list using the last n number of items.
         """
+        if not weights:
+            raise ValueError("Invalid weights")
+        if len(answers) == 0:
+            return [], []
         if len(weights) < len(answers):
             # only the last n number of answers are considered
             answers = answers[-len(weights):]

@@ -122,6 +122,10 @@ def test__history__success_probability_no_history__seed():  # noqa
 
 
 def test__history___handle_last_n__None_or_int():  # noqa
+    assert History._handle_last_n(answers=[], last_n=None) == ([], None)
+    assert History._handle_last_n(answers=[], last_n=1) == ([], None)
+    assert History._handle_last_n(answers=[], last_n=10) == ([], None)
+
     answers = [True, False, True, True]
     assert History._handle_last_n(answers=answers, last_n=None) == (answers, None)
     assert History._handle_last_n(answers=answers, last_n=10) == (answers, None)
@@ -133,6 +137,8 @@ def test__history___handle_last_n__None_or_int():  # noqa
 
 
 def test__history___handle_last_n__weights():  # noqa
+    assert History._handle_last_n(answers=[], last_n=list(range(20))) == ([], [])
+
     answers = [False, True, False, True]
     assert History._handle_last_n(answers=answers, last_n=[1, 2, 3, 4]) == (answers, [1, 2, 3, 4])
     assert History._handle_last_n(answers=answers, last_n=[1, 2, 3, 4, 5]) == (answers, [2, 3, 4, 5])  # noqa
@@ -157,10 +163,15 @@ def test__history___calculate_correct_incorrect():  # noqa
     assert correct == 0
     assert incorrect == 1
 
-    answers = [True, False, True, False, True]
-    correct, incorrect = History._calculate_correct_incorrect(answers=answers, weights=None)
-    assert correct == 3
-    assert incorrect == 2
+    answers = [True]
+    correct, incorrect = History._calculate_correct_incorrect(answers=answers, weights=[100])
+    assert correct == 1
+    assert incorrect == 0
+
+    answers = [False]
+    correct, incorrect = History._calculate_correct_incorrect(answers=answers, weights=[100])
+    assert correct == 0
+    assert incorrect == 1
 
     answers = [True, False, True, False, True]
     weights = [0, 2, 1, 1, 5]

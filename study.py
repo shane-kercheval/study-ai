@@ -71,7 +71,9 @@ def cycle(
     )
     click.echo(f"Available notes: {len(test_bank.notes)}")
     while True:
-        note = test_bank.draw()
+        # only consider the last 20 answers; give more weight (linear) to the most recent answers
+        weights = list(range(20))
+        note = test_bank.draw(last_n=weights)
         click.echo("--------------------------\n")
         click.echo(colorize_gray(f"{note.uuid}"))
         click.echo(colorize_gray(f"{note.subject_metadata.category} - {note.subject_metadata.ident} - {note.subject_metadata.abbreviation} - {note.subject_metadata.name}"))  # noqa  
