@@ -2,15 +2,13 @@
 
 from abc import ABC, abstractmethod
 from copy import deepcopy
-from functools import cache
 from textwrap import dedent
+import uuid
 from pydantic import BaseModel
 from enum import Enum
 import numpy as np
-import hashlib
 from dataclasses import dataclass
-
-from source.library.helpers import softmax_dict
+from source.library.utilities import softmax_dict
 
 
 class Priority(str, Enum):
@@ -44,28 +42,35 @@ class Note(ABC):
 
     def __init__(
             self,
+            uuid: str,
             subject_metadata: SubjectMetadata,
             note_metadata: NoteMetadata,
             priority: Priority = Priority.medium,
             ):
         """Initialize the note with metadata."""
+        assert uuid, "UUID must be provided."
+        self.uuid = uuid
         self.subject_metadata = subject_metadata
         self.note_metadata = note_metadata
         if not isinstance(priority, Priority):
             raise ValueError(f"priority must be a Priority enum: {priority}")
         self.priority = priority
 
-    @cache
-    def uuid(self) -> str:
-        """Return a unique identifier for the class (e.g. a hash of the content)."""
-        subject_meta_content = '-'.join([f"{k}={v}" for k, v in dict(self.subject_metadata).items()])  # noqa
-        note_meta_content = '-'.join([f"{k}={v}" for k, v in dict(self.note_metadata).items()])
-        text = subject_meta_content + note_meta_content + self.text()
-        return hashlib.sha256(text.encode()).hexdigest()
+    # @cache
+    # def uuid(self) -> str:
+    #     """Return a unique identifier for the class (e.g. a hash of the content)."""
+    #     subject_meta_content = '-'.join([f"{k}={v}" for k, v in dict(self.subject_metadata).items()])  # noqa
+    #     note_meta_content = '-'.join([f"{k}={v}" for k, v in dict(self.note_metadata).items()])
+    #     text = subject_meta_content + note_meta_content + self.text()
+    #     return hashlib.sha256(text.encode()).hexdigest()
 
     @abstractmethod
     def text(self) -> str:
         """Render all of the text of the note."""
+
+    @abstractmethod
+    def __str__(self) -> str:
+        """Return a string representation of the note."""
 
 
 class TextNote(Note):
@@ -73,12 +78,14 @@ class TextNote(Note):
 
     def __init__(
             self,
+            uuid: str,
             text: str,
             subject_metadata: SubjectMetadata,
             note_metadata: NoteMetadata,
             priority: Priority = Priority.medium,
             ):
         super().__init__(
+            uuid=uuid,
             subject_metadata=subject_metadata,
             note_metadata=note_metadata,
             priority=priority,
@@ -86,6 +93,10 @@ class TextNote(Note):
         self._text = dedent(text).strip()
 
     def text(self) -> str:
+        """Return the text of the note."""
+        return self._text
+
+    def __str__(self) -> str:
         """Return the text of the note."""
         return self._text
 
@@ -107,12 +118,14 @@ class DefinitionNote(Flashcard):
 
     def __init__(
             self,
+            uuid: str,
             term: str, definition: str,
             subject_metadata: SubjectMetadata,
             note_metadata: NoteMetadata,
             priority: Priority = Priority.medium,
             ):
         super().__init__(
+            uuid=uuid,
             subject_metadata=subject_metadata,
             note_metadata=note_metadata,
             priority=priority,
@@ -132,17 +145,22 @@ class DefinitionNote(Flashcard):
         """Return the term and definition together to represent the full text."""
         return self._term + " " + self._definition
 
+    def __str__(self) -> str:
+        """Return the term and definition together to represent the full text."""
+        return f"{self._term}:\n    {self._definition}"
 
 class QuestionAnswerNote(Flashcard):
     """A QuestionAnswerNote is a Flashcard that has a question and an answer."""
 
     def __init__(
             self,
+            uuid: str,
             question: str, answer: str,
             subject_metadata: SubjectMetadata, note_metadata: NoteMetadata,
             priority: Priority = Priority.medium,
             ):
         super().__init__(
+            uuid=uuid,
             subject_metadata=subject_metadata,
             note_metadata=note_metadata,
             priority=priority,
@@ -161,6 +179,19 @@ class QuestionAnswerNote(Flashcard):
     def text(self) -> str:
         """Return the question and answer together to represent the full text."""
         return self._question + " " + self._answer
+
+    def __str__(self) -> str:
+        """Return the term and definition together to represent the full text."""
+        return f"{self._question}:\n    {self._answer}"
+
+
+def add_uuids_to_dict(data: dict) -> dict:
+    """Add a UUID to each note in a dictionary."""
+    data = deepcopy(data)  # don't modify the original data
+    for note in data['notes']:
+        if 'uuid' not in note:
+            note['uuid'] = str(uuid.uuid4())
+    return data
 
 
 def dict_to_notes(data: dict) -> list[Note]:
@@ -302,7 +333,7 @@ class NoteBank:
         """
         self.notes = {}
         for note in notes:
-            uuid = note.uuid()
+            uuid = note.uuid
             assert uuid not in self.notes, f"Duplicate UUID: {uuid}"
             self.notes[uuid] = {
                 'uuid': uuid,

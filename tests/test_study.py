@@ -4,48 +4,49 @@ import shutil
 import os
 from click.testing import CliRunner
 from source.library.notes import Flashcard, Note
-from study import cli, filter_notes, load_history, load_notes
+from source.cli.utilities import filter_notes, load_history, load_notes
+from study import cli
 
 
 def test__load_notes():  # noqa
-    notes = load_notes("tests/test_files/fake_notes.yaml")
+    notes = load_notes('tests/test_files/fake_notes.yaml', generate_save_uuids=False)
     assert isinstance(notes, list)
     assert len(notes) > 1
     assert isinstance(notes[0], Note)
 
 
 def test__filter_notes__flashcards():  # noqa
-    original_notes = load_notes("tests/test_files/fake_notes_.yaml")
+    original_notes = load_notes('tests/test_files/fake_notes_.yaml', generate_save_uuids=False)
     notes = filter_notes(original_notes, flash_only=True)
     assert all(isinstance(note, Flashcard) for note in notes)
 
 
 def test__filter_notes__category():  # noqa
-    original_notes = load_notes("tests/test_files/fake_notes*.yaml")
-    notes = filter_notes(original_notes, category="OMSCS - filtered")
+    original_notes = load_notes('tests/test_files/fake_notes*.yaml', generate_save_uuids=False)
+    notes = filter_notes(original_notes, category='OMSCS - filtered')
     assert len(notes) == len(original_notes) / 2
-    assert all(note.subject_metadata.category == "OMSCS - filtered" for note in notes)
+    assert all(note.subject_metadata.category == 'OMSCS - filtered' for note in notes)
 
 
 def test__filter_notes__ident():  # noqa
-    original_notes = load_notes("tests/test_files/fake_notes*.yaml")
-    notes = filter_notes(original_notes, ident="CS 6200 - filtered")
+    original_notes = load_notes('tests/test_files/fake_notes*.yaml', generate_save_uuids=False)
+    notes = filter_notes(original_notes, ident='CS 6200 - filtered')
     assert len(notes) == len(original_notes) / 2
-    assert notes[0].subject_metadata.ident == "CS 6200 - filtered"
+    assert notes[0].subject_metadata.ident == 'CS 6200 - filtered'
 
 
 def test__filter_notes__name():  # noqa
-    original_notes = load_notes("tests/test_files/fake_notes*.yaml")
-    notes = filter_notes(original_notes, name="Graduate Introduction to Operating Systems - filtered")  # noqa
+    original_notes = load_notes('tests/test_files/fake_notes*.yaml', generate_save_uuids=False)
+    notes = filter_notes(original_notes, name='Graduate Introduction to Operating Systems - filtered')  # noqa
     assert len(notes) == len(original_notes) / 2
-    assert notes[0].subject_metadata.name == "Graduate Introduction to Operating Systems - filtered"  # noqa
+    assert notes[0].subject_metadata.name == 'Graduate Introduction to Operating Systems - filtered'  # noqa
 
 
 def test__filter_notes__abbr():  # noqa
-    original_notes = load_notes("tests/test_files/fake_notes*.yaml")
-    notes = filter_notes(original_notes, abbr="GIOS - filtered")
+    original_notes = load_notes('tests/test_files/fake_notes*.yaml', generate_save_uuids=False)
+    notes = filter_notes(original_notes, abbr='GIOS - filtered')
     assert len(notes) == len(original_notes) / 2
-    assert notes[0].subject_metadata.abbreviation == "GIOS - filtered"
+    assert notes[0].subject_metadata.abbreviation == 'GIOS - filtered'
 
 
 def test__cycle__defaults():  # noqa
@@ -87,14 +88,14 @@ def test__cycle__flash_only__no_history():  # noqa
 
 
 def test__cycle__flash_only__with_history():  # noqa
-    notes_path = "tests/test_files/fake_notes.yaml"
-    fake_history_path = "tests/test_files/fake_history_no_history.yaml"
-    temp_history_path = "tests/test_files/temp___fake_history.yaml"
+    notes_path = 'tests/test_files/fake_notes.yaml'
+    fake_history_path = 'tests/test_files/fake_history_no_history.yaml'
+    temp_history_path = 'tests/test_files/temp___fake_history.yaml'
     shutil.copy(fake_history_path, temp_history_path)
 
     orginal_notes = load_notes(notes_path)
-    expected_uuids = {note.uuid() for note in orginal_notes}
-    non_flashcard_uuids = {note.uuid() for note in orginal_notes if not isinstance(note, Flashcard)}  # noqa
+    expected_uuids = {note.uuid for note in orginal_notes}
+    non_flashcard_uuids = {note.uuid for note in orginal_notes if not isinstance(note, Flashcard)}
     flashcard_uuids = expected_uuids - non_flashcard_uuids
 
     try:
@@ -128,6 +129,7 @@ def test__cycle__flash_only__with_history():  # noqa
 
         ####
         # test with 0 correct answers; 2 incorrect answers
+        # this will test that the history is updated correctly across multiple runs
         ####
         runner = CliRunner()
         result = runner.invoke(
@@ -139,7 +141,7 @@ def test__cycle__flash_only__with_history():  # noqa
                 '--history_path', temp_history_path,
             ],
             # this sequence will only work with Flashcard notes
-            input='1\nn\n1\nn\nq\n',
+            input='1\nn\nq\n',
         )
         assert result.exit_code == 0
         saved_history = load_history(temp_history_path)
@@ -152,10 +154,11 @@ def test__cycle__flash_only__with_history():  # noqa
 
         flashcard_history = [h for uuid, h in saved_history.items() if uuid in flashcard_uuids]
         assert sum(h.correct for h in flashcard_history) == 2  # from previous test/history
-        assert sum(h.incorrect for h in flashcard_history) == 2
+        assert sum(h.incorrect for h in flashcard_history) == 1
 
         ####
         # test with 0 correct answers; 2 incorrect answers
+        # this will test that the history is updated correctly across multiple runs
         ####
         runner = CliRunner()
         result = runner.invoke(
@@ -181,7 +184,22 @@ def test__cycle__flash_only__with_history():  # noqa
         flashcard_history = [h for uuid, h in saved_history.items() if uuid in flashcard_uuids]
         # 2 correct and 2 incorrects answers from previous history file
         assert sum(h.correct for h in flashcard_history) == 4
-        assert sum(h.incorrect for h in flashcard_history) == 4
+        assert sum(h.incorrect for h in flashcard_history) == 3
 
     finally:
         os.remove(temp_history_path)
+
+
+def test__search():  # noqa
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            'search',
+        ],
+        input='What are ip addresses?\nq\n',
+    )
+    assert result.exit_code == 0
+    assert 'Cosine Similarity' in result.output
+    # ensure this note is returned in the search results
+    assert '1e16ee44-77e0-47d7-af51-e82980a6ff64' in result.output

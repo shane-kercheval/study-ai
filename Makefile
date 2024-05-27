@@ -7,8 +7,14 @@ study_docker:
 study:
 	python study.py cycle
 
+study_gios:
+	python study.py cycle --a GIOS
+
 flash:
 	python study.py cycle --flash_only
+
+search:
+	python study.py search
 
 text_to_notes:
 	python study.py text-to-notes
@@ -44,6 +50,7 @@ docker_down:
 ####
 linting:
 	ruff check source/library
+	ruff check source/cli
 	ruff check tests
 
 unittests:

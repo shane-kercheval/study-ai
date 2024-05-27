@@ -7,39 +7,49 @@ note_metadata:
   source_name: Beej's Guide to Network Programming
   source_reference: https://beej.us/guide/bgnet/pdf/bgnet_usl_c_1.pdf
   tags:
-    - systems
-    - c
-    - networking
-    - beejs
-    - chapter3
+  - systems
+  - c
+  - networking
+  - beejs
+  - chapter3
 notes:
-  - term: "IP Addresses"
-    definition: "Unique identifiers for devices connected to a network, used for routing traffic."
-    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 3
-  - term: "IPv4"
-    definition: "Internet Protocol Version 4, uses 32-bit addresses, commonly written in dot-decimal notation (e.g., 192.0.2.111)."
-    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 3.1
-  - term: "IPv6"
-    definition: "Internet Protocol Version 6, developed to address IPv4 exhaustion, uses 128-bit addresses, represented in hexadecimal and separated by colons."
-    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 3.1
-  - term: "Subnets"
-    definition: "Segments of a network, where the IP address is divided into a network portion and a host portion to improve routing and management."
-    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 3.1.1
-  - term: "Netmask"
-    definition: "A bitmask used to determine what subnet an IP address belongs to, by separating the network and host portions."
-    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 3.1.1
-  - term: "Port Numbers"
-    definition: "16-bit numbers used alongside IP addresses to identify specific services or processes on a device."
-    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 3.1.2
-  - question: "What led to the development of IPv6?"
-    answer: "The exhaustion of IPv4 addresses, as predicted by Vint Cerf, necessitated the development of IPv6 to provide a vastly larger address space."
-    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 3.1
-  - question: "How are IPv6 addresses simplified in notation?"
-    answer: "IPv6 addresses can compress zeros using double colons and omit leading zeros in each byte pair for brevity."
-    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 3.1
-  - question: "What is the purpose of subnets?"
-    answer: "Subnets help organize a network into manageable parts, allowing for efficient routing and management by separating network and host identifiers."
-    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 3.1.1
-  - question: "How do port numbers function in network communications?"
-    answer: "Port numbers identify specific applications or services on a device, allowing multiple services to operate through a single IP address."
-    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 3.1.2
+- term: "IP Addresses"
+  definition: "Unique identifiers for devices connected to a network, used for routing traffic."
+  reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 3
+  uuid: 1e16ee44-77e0-47d7-af51-e82980a6ff64
+- term: "IPv4"
+  definition: "Internet Protocol Version 4, uses 32-bit addresses, commonly written in dot-decimal notation (e.g., 192.0.2.111)."
+  reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 3.1
+  uuid: 40d2d187-4b6b-4c92-bf3a-3e48c0b04fd5
+- term: "IPv6"
+  definition: "Internet Protocol Version 6, developed to address IPv4 exhaustion, uses 128-bit addresses, represented in hexadecimal and separated by colons."
+  reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 3.1
+  uuid: ef153bdb-68d5-40ae-83ca-c34c632da7be
+- term: "Subnets"
+  definition: "Segments of a network, where the IP address is divided into a network portion and a host portion to improve routing and management."
+  reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 3.1.1
+  uuid: 90e64c40-c4a3-48b1-af5b-c7007c4af6b8
+- term: "Netmask"
+  definition: "A bitmask used to determine what subnet an IP address belongs to, by separating the network and host portions."
+  reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 3.1.1
+  uuid: 9ec28a0a-7052-4bb5-930d-92b5db6cd158
+- term: "Port Numbers"
+  definition: "16-bit numbers used alongside IP addresses to identify specific services or processes on a device."
+  reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 3.1.2
+  uuid: 57f11513-a1a6-44f6-88c5-717f16c43518
+- question: "What led to the development of IPv6?"
+  answer: "The exhaustion of IPv4 addresses, as predicted by Vint Cerf, necessitated the development of IPv6 to provide a vastly larger address space."
+  reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 3.1
+  uuid: dd4eb4b9-1f05-4ffa-a431-d8d5d359df5c
+- question: "How are IPv6 addresses simplified in notation?"
+  answer: "IPv6 addresses can compress zeros using double colons and omit leading zeros in each byte pair for brevity."
+  reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 3.1
+  uuid: 61782734-743d-44ed-951b-b0240b0dec14
+- question: "What is the purpose of subnets?"
+  answer: "Subnets help organize a network into manageable parts, allowing for efficient routing and management by separating network and host identifiers."
+  reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 3.1.1
+  uuid: 262f8b96-8883-4b96-9af9-e6aea0b9f5c9
+- question: "How do port numbers function in network communications?"
+  answer: "Port numbers identify specific applications or services on a device, allowing multiple services to operate through a single IP address."
+  reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 3.1.2
+  uuid: a7b97dd8-7ecd-4db0-b435-c6d7e2275ad1

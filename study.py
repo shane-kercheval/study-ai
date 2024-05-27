@@ -1,78 +1,17 @@
 """CLI for studying notes."""
-import glob
 import click
 import yaml
 import os
 from textwrap import dedent
 from llm_workflow.openai import OpenAIChat, OpenAIServerChat
 from llm_workflow.hugging_face import HuggingFaceEndpointChat
-from source.library.helpers import colorize_gray, colorize_markdown
-from source.library.notes import Flashcard, History, Note, NoteBank, dict_to_notes
+from source.cli.utilities import colorize_gray, colorize_green, colorize_markdown, filter_notes, load_notes
+from source.library.notes import Flashcard, History, NoteBank
 from dotenv import load_dotenv
 
+from source.library.search import VectorDatabase
+
 load_dotenv()
-
-
-def load_notes(path: str) -> list[Note]:
-    """
-    Load notes from multiple yaml files.
-
-    Args:
-        path:
-            The path to the yaml files. The expected format is the same as the glob module.
-    """
-    class_notes = []
-    # load all yaml files in data/notes via glob
-    for f in glob.glob(path):
-        with open(f) as handle:
-            data = yaml.safe_load(handle)
-        class_notes.extend(dict_to_notes(data))
-    return class_notes
-
-
-def load_history(file_path: str) -> dict:
-    """Load history from a yaml file."""
-    with open(file_path) as h:
-        history = yaml.safe_load(h)
-        return {uuid: History(**history[uuid]) for uuid in history}
-
-
-def filter_notes(
-        notes: list[Note],
-        flash_only: bool = False,
-        category: str | None = None,
-        ident: str | None = None,
-        name: str | None = None,
-        abbr: str | None = None,
-        ) -> list[Note]:
-    """
-    Filter notes based on various criteria.
-
-    Args:
-        notes:
-            The list of notes to filter.
-        flash_only:
-            If True, only return FlashCard instances.
-        category:
-            The category (in SubjectMetadata) to filter on.
-        ident:
-            The identity (in SubjectMetadata) to filter on.
-        name:
-            The name (in SubjectMetadata) to filter on.
-        abbr:
-            The abbreviation (in SubjectMetadata) to filter on.
-    """
-    if flash_only:
-        notes = [note for note in notes if isinstance(note, Flashcard)]
-    if category:
-        notes = [note for note in notes if note.subject_metadata.category == category]
-    if ident:
-        notes = [note for note in notes if note.subject_metadata.ident == ident]
-    if name:
-        notes = [note for note in notes if note.subject_metadata.name == name]
-    if abbr:
-        notes = [note for note in notes if note.subject_metadata.abbreviation == abbr]
-    return notes
 
 
 @click.group()
@@ -103,7 +42,13 @@ def cycle(
         notes_path: str,
         history_path: str,
     ) -> None:
-    """Cycle through notes from one or more YAML files."""
+    """
+    Cycle through notes/flashcards from one or more YAML files. The history of the notes will be
+    saved to a YAML file. The frequency of notes will be based on the historical accuracy of
+    correctly answers.
+
+    Press any key to reveal the answer. Press 'q' to quit.
+    """
     history = None
     if os.path.exists(history_path):
         with open(history_path) as f:
@@ -125,10 +70,13 @@ def cycle(
         history={k: History(**v) for k, v in history.items()},
     )
     click.echo(f"Available notes: {len(test_bank.notes)}")
-    click.echo("\n\n\n")
     while True:
         note = test_bank.draw()
-        if isinstance(note, Flashcard):
+        click.echo("--------------------------\n")
+        click.echo(colorize_gray(f"{note.uuid}"))
+        click.echo(colorize_gray(f"{note.subject_metadata.category} - {note.subject_metadata.ident} - {note.subject_metadata.abbreviation} - {note.subject_metadata.name}"))  # noqa  
+        click.echo(colorize_gray(f"{note.note_metadata.source_name}"))
+        if isinstance(note, Flashcard):  
             click.echo(f"\n\n{colorize_markdown(note.preview())}\n\n")
             user_response = click.prompt(
                 colorize_gray("Press any key to reveal answer (q to quit)"),
@@ -148,7 +96,7 @@ def cycle(
             )
         if user_response == 'q':
             break
-        test_bank.answer(uuid=note.uuid(), correct=user_response == 'y')
+        test_bank.answer(uuid=note.uuid, correct=user_response == 'y')
         # we need to modify/save our original history dictionary because test_bank may be a subset
         # of the original notes and we want to keep the history of all notes
         history.update(test_bank.history(to_dict=True))
@@ -187,13 +135,61 @@ def text_to_notes(model_type: str, model_name: str, temperature: float, file: st
         click.echo(f"\n\nCost: {model.cost}")
 
 
-# @cli.command()
-# @click.option('--category', '-c', help='Only display notes from a specific class category.', default=None)
-# @click.option('--ident', '-i', help='Only display notes from a specific class identity.', default=None)
-# @click.option('--name', '-n', help='Only display notes from a specific class name.', default=None)
-# @click.option('--abbr', '-a', help='Only display notes from a specific class abbreviation.', default=None)
-# def search():
-#     pass
+@cli.command()
+@click.option('--notes_path', '-p', help='The path to the notes yaml file(s).', default='data/notes/*.yaml')  # noqa
+@click.option('--db_path', '-d', help='The path to the database.', default='data/vector_database.parquet')  # noqa
+@click.option('--similarity_threshold', '-s', help='The similarity threshold for search results.', default=0.3)  # noqa
+@click.option('--top_k', '-k', help='The number of top results to return.', default=5)
+def search(notes_path: str, db_path: str, similarity_threshold: float, top_k: int) -> None:
+    """
+    Search the notes database.
+
+    Any yaml files where the notes do not have uuids will be updated with uuids and the original
+    files will be overwritten. Static uuids are used to ensure that if the notes are updated, the
+    corresponding embeddings are updated in the database.
+
+    Any notes not already in the database will be added (embeddings will be created). Any notes
+    that have been modified will have their embeddings (and corresponding text) updated. The
+    database will be saved after any changes are made.
+    """
+    click.echo("Loading notes...")
+    notes = load_notes(notes_path, generate_save_uuids=True)
+    click.echo("Loading database...")
+    db = VectorDatabase(db_path=db_path)
+    click.echo("Adding/updating notes in vector database...")
+    changes = db.add(notes=notes, save=True)
+    if changes:
+        click.echo("The following changes were made to the database:")
+        for uuid, change in changes.items():
+            click.echo(f"   `{uuid}`: {change}")
+    else:
+        # load cached model so first search is faster
+        db.model
+    while True:
+        click.echo("\n")
+        query = click.prompt("Enter a search query or 'q' to quit")
+        if query == 'q':
+            break
+        results = db.search(query=query, top_k=top_k)
+        if len(results) == 0:
+            click.echo("No results found.")
+        else:
+            results = results[results['cosine_similarity'] > similarity_threshold]
+            # get a list of matched notes in the same order as the results (based on uuid)
+            matched_uuids = set(results['uuid'].tolist())
+            matched_notes = {note.uuid: note for note in notes if note.uuid in matched_uuids}
+            # ensure same order as results
+            matched_notes = [matched_notes[uuid] for uuid in results['uuid'].tolist()]
+            click.echo("\n\n")
+            for note, cosine_simiarlity in zip(matched_notes, results['cosine_similarity']):
+                click.echo("--------------------------")
+                cosine_sim_text = colorize_green(f"Cosine Similarity: {cosine_simiarlity:.2f}")
+                uuid_text = colorize_gray(f"; uuid: {note.uuid}")
+                click.echo(f"{cosine_sim_text}{uuid_text}")
+                click.echo(colorize_gray(f"{note.subject_metadata.category} - {note.subject_metadata.ident} - {note.subject_metadata.abbreviation} - {note.subject_metadata.name}"))  # noqa  
+                click.echo(colorize_gray(f"{note.note_metadata.source_name}"))
+                click.echo(f"\n{colorize_markdown(str(note))}")
+                click.echo("--------------------------\n")
 
 
 # @cli.command()
