@@ -184,9 +184,10 @@ def search(notes_path: str, db_path: str, similarity_threshold: float, top_k: in
             for note, cosine_simiarlity in zip(matched_notes, results['cosine_similarity']):
                 click.echo("--------------------------")
                 cosine_sim_text = colorize_green(f"Cosine Similarity: {cosine_simiarlity:.2f}")
-                click.echo(f"{cosine_sim_text}; uuid: {note.uuid}")
-                click.echo(f"{note.subject_metadata.category} - {note.subject_metadata.ident} - {note.subject_metadata.abbreviation} - {note.subject_metadata.name}")  # noqa
-                click.echo(f"{note.note_metadata.source_name}")
+                uuid_text = colorize_gray(f"; uuid: {note.uuid}")
+                click.echo(f"{cosine_sim_text}{uuid_text}")
+                click.echo(colorize_gray(f"{note.subject_metadata.category} - {note.subject_metadata.ident} - {note.subject_metadata.abbreviation} - {note.subject_metadata.name}"))  # noqa  
+                click.echo(colorize_gray(f"{note.note_metadata.source_name}"))
                 click.echo(f"\n{colorize_markdown(str(note))}")
                 click.echo("--------------------------\n")
 
