@@ -449,7 +449,7 @@ def test__TestBank__with_history__expect_draw_counts_to_correspond_with_history(
 def test__TestBank__duplicates_should_raise_exception():  # noqa
     original_notes = load_notes('tests/test_files/*fake_notes.yaml', generate_save_uuids=False)
     assert len({n.uuid for n in original_notes}) < len(original_notes)
-    with pytest.raises(AssertionError):
+    with pytest.raises(ValueError):  # noqa: PT011
         NoteBank(notes=original_notes, history=None)
 
 
