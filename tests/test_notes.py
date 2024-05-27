@@ -145,22 +145,71 @@ def test__history__last_n__20():  # noqa
     assert np.mean(draws) < 0.1
 
 
-def test__history__weights():  # noqa
-    history = History([True] * 10 + [False] * 10)
-    with pytest.raises(AssertionError):
+def test__history__invalid_last_n():  # noqa
+    history = History()
+    with pytest.raises(ValueError):  # noqa: PT011
         # invalid number of weights
-        history.probability_correct(weights=[1])
+        history.probability_correct(last_n='invalid')
+
+
+def test__history__weights():  # noqa
+    """
+    Test that the weights are applied correctly when calculating the probability of getting the
+    answer correct.
+    """
+    ####
+    # test the same amount of weights as answers
+    ####
+    history = History([True]*10 + [False]*10)
     weights = list(range(len(history.answers)))
-    draws = [history.probability_correct(weights=weights) for _ in range(10_000)]
+    draws = [history.probability_correct(last_n=weights) for _ in range(10_000)]
     # The probability of correct is now much less than 0.5 since the weights give more importance
     # to the later answers which are False/incorrect
     assert np.mean(draws) < 0.3
+    original_mean = np.mean(draws)
 
     weights = list(reversed(weights))
     # The probability of correct is now much greater than 0.5 since the weights give more
     # importance to the earlier answers which are True/correct
-    draws = [history.probability_correct(weights=weights) for _ in range(10_000)]
+    draws = [history.probability_correct(last_n=weights) for _ in range(10_000)]
     assert np.mean(draws) > 0.7
+    original_mean_reversed = np.mean(draws)
+
+    ####
+    # test more weights than answers
+    ####
+    history = History([True]*10 + [False]*10)
+    weights = list(range(len(history.answers)))
+    # add more weights than answers
+    draws = [history.probability_correct(last_n=[10000, *weights]) for _ in range(10_000)]
+    # The probability of correct is now much less than 0.5 since the weights give more importance
+    # to the later answers which are False/incorrect
+    assert np.isclose(np.mean(draws), original_mean, atol=0.01)
+
+    weights = list(reversed(weights))
+    # The probability of correct is now much greater than 0.5 since the weights give more
+    # importance to the earlier answers which are True/correct
+    # add more weights than answers
+    draws = [history.probability_correct(last_n=[10000, *weights]) for _ in range(10_000)]
+    assert np.isclose(np.mean(draws), original_mean_reversed, atol=0.01)
+
+    ####
+    # test more answers than weights
+    ####
+    history = History([True]*100 + [True]*10 + [False]*10)
+    weights = list(range(20))
+    # add more weights than answers
+    draws = [history.probability_correct(last_n=weights) for _ in range(10_000)]
+    # The probability of correct is now much less than 0.5 since the weights give more importance
+    # to the later answers which are False/incorrect
+    assert np.isclose(np.mean(draws), original_mean, atol=0.01)
+
+    weights = list(reversed(weights))
+    # The probability of correct is now much greater than 0.5 since the weights give more
+    # importance to the earlier answers which are True/correct
+    # add more weights than answers
+    draws = [history.probability_correct(last_n=weights) for _ in range(10_000)]
+    assert np.isclose(np.mean(draws), original_mean_reversed, atol=0.01)
 
 
 @pytest.mark.parametrize("history", [None, {}])
@@ -229,6 +278,77 @@ def test__TestBank__draw__priority_weights(fake_notes, fake_history_equal):  # n
         # priority = test_bank.notes[uuid]['note'].priority
         expected_freq = expected_freq_lookups[uuid]
         assert np.isclose(counts[uuid] / len(draws), expected_freq, atol=0.02)
+
+
+def test__TestBank__draw__last_n__without_weights(fake_notes):  # noqa
+    """Test that the TestBank draws notes with probability corresponding to the last_n answers."""
+    notes = dict_to_notes(fake_notes)
+    history = {
+        notes[0].uuid: History([True] * 10 + [False] * 10),
+        notes[1].uuid: History([False] * 10 + [True] * 10),
+        notes[2].uuid: History([True, False] * 10),
+        notes[3].uuid: History([False, True] * 10),
+    }
+    test_bank = NoteBank(notes=notes, history=history)
+    # test last_n without weights
+    draws = [test_bank.draw(last_n=10).uuid for _ in range(10_000)]
+    counts = {uuid: draws.count(uuid) for uuid in test_bank.notes}
+    # we can do this since all histories have the same number of correct and incorrect answers
+    expected_freq_lookups = {
+        notes[0].uuid: 1.0,
+        notes[1].uuid: 0,
+        notes[2].uuid: 0.5,
+        notes[3].uuid: 0.5,
+    }
+    expected_freq_lookups = softmax_dict(expected_freq_lookups)
+    # test that the counts are roughly equal to the expected probability of draw
+    # This doesn't actually calculate the correct expected frequencies since beta distribution
+    # doesn't give an average of 0 for 10 incorrect and 0 correct (it's more like 0.1)
+    # but it's close enough for this test
+    for uuid in test_bank.notes:
+        expected_freq = expected_freq_lookups[uuid]
+        assert np.isclose(counts[uuid] / len(draws), expected_freq, atol=0.1)
+
+
+def test__TestBank__draw__last_n__with_weights(fake_notes):  # noqa
+    """
+    Test that the TestBank draws notes with probability corresponding to the last_n asnwers and the
+    weighting given to the most recent answers.
+
+    Ensure this works when last_n is not set, or set to the same length as the weights.
+    """
+    notes = dict_to_notes(fake_notes)
+    history = {
+        notes[0].uuid: History([True] * 10 + [False] * 10),
+        notes[1].uuid: History([False] * 10 + [True] * 10),
+        notes[2].uuid: History([True, False] * 20),
+        notes[3].uuid: History([False, True] * 20),
+    }
+    test_bank = NoteBank(notes=notes, history=history)
+    weights = list(range(10))
+    draws = [test_bank.draw(last_n=weights).uuid for _ in range(10_000)]
+    counts = {uuid: draws.count(uuid) for uuid in test_bank.notes}
+    # we can do this since all histories have the same number of correct and incorrect answers
+    expected_freq_lookups = {
+        notes[0].uuid: 1.0,
+        notes[1].uuid: 0,
+        notes[2].uuid: 0.5,
+        notes[3].uuid: 0.5,
+    }
+    expected_freq_lookups = softmax_dict(expected_freq_lookups)
+    # test that the counts are roughly equal to the expected probability of draw
+    # This doesn't actually calculate the correct expected frequencies since beta distribution
+    # doesn't give an average of 0 for 10 incorrect and 0 correct (it's more like 0.1)
+    # but it's close enough for this test
+    for uuid in test_bank.notes:
+        expected_freq = expected_freq_lookups[uuid]
+        assert np.isclose(counts[uuid] / len(draws), expected_freq, atol=0.1)
+
+
+
+
+
+
 
 
 def test__TestBank__with_history__expect_draw_counts_to_correspond_with_history(fake_notes, fake_history):  # noqa
