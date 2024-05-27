@@ -165,9 +165,6 @@ def search(notes_path: str, db_path: str, similarity_threshold: float, top_k: in
     else:
         # load cached model so first search is faster
         db.model
-    # query = click.prompt("Enter a search query")
-    # results = db.search(query=query)
-    # click.echo(results)
     while True:
         click.echo("\n")
         query = click.prompt("Enter a search query or 'q' to quit")
