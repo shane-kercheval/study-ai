@@ -107,37 +107,6 @@ def cycle(
 
 
 @cli.command()
-@click.option('--model_type', '-mt', help="The model service to use, e.g. 'openai', 'openai_server', 'hugging_face_endpoint'", default='openai')  # noqa
-@click.option('--model_name', '-mn', help="The model name (or endpoint) to use, e.g. 'gpt-3.5-turbo-0125' or 'http://host.docker.internal:1234/v1'", default='gpt-3.5-turbo-0125')  # noqa
-@click.option('--temperature', '-t', help='The temperature to set on the model.', default=0.1)
-@click.option('--file', '-f', help='The file to use for text-to-notes.', default=None)
-def text_to_notes(model_type: str, model_name: str, temperature: float, file: str | None) -> None:
-    """Convert text to notes using a language model."""
-    if model_type == 'openai':
-        model = OpenAIChat(model_name=model_name, temperature=temperature)
-    elif model_type == 'openai_server':
-        model = OpenAIServerChat(endpoint_url=model_name, temperature=temperature)
-    elif model_type == 'hugging_face_endpoint':
-        model = HuggingFaceEndpointChat(endpoint_url=model_name, temperature=temperature)
-    else:
-        raise NotImplementedError(f"Model type '{model_type}' not implemented.")
-
-    model.streaming_callback = lambda x: click.echo(x.response, nl=False)
-    with open("source/library/prompts/text_to_notes.txt") as f:
-        prompt_template = f.read()
-    if file:
-        with open(file) as f:
-            text = f.read()
-    else:
-        text = click.edit("<replace with text>")
-    prompt = dedent(prompt_template).strip().replace("{{text}}", text)
-    _ = model(prompt)
-    click.echo("\n\n")
-    if model.cost:
-        click.echo(f"\n\nCost: {model.cost}")
-
-
-@cli.command()
 @click.option('--notes_path', '-p', help='The path to the notes yaml file(s).', default='data/notes/*.yaml')  # noqa
 @click.option('--db_path', '-d', help='The path to the database.', default='data/vector_database.parquet')  # noqa
 @click.option('--similarity_threshold', '-s', help='The similarity threshold for search results.', default=0.3)  # noqa
@@ -200,9 +169,35 @@ def search(notes_path: str, db_path: str, similarity_threshold: float, top_k: in
 #     pass
 
 
-# @cli.command()
-# def scrape_pdf():
-#     pass
+@cli.command()
+@click.option('--model_type', '-mt', help="The model service to use, e.g. 'openai', 'openai_server', 'hugging_face_endpoint'", default='openai')  # noqa
+@click.option('--model_name', '-mn', help="The model name (or endpoint) to use, e.g. 'gpt-3.5-turbo-0125' or 'http://host.docker.internal:1234/v1'", default='gpt-3.5-turbo-0125')  # noqa
+@click.option('--temperature', '-t', help='The temperature to set on the model.', default=0.1)
+@click.option('--file', '-f', help='The file to use for text-to-notes.', default=None)
+def text_to_notes(model_type: str, model_name: str, temperature: float, file: str | None) -> None:
+    """Convert text to notes using a language model."""
+    if model_type == 'openai':
+        model = OpenAIChat(model_name=model_name, temperature=temperature)
+    elif model_type == 'openai_server':
+        model = OpenAIServerChat(endpoint_url=model_name, temperature=temperature)
+    elif model_type == 'hugging_face_endpoint':
+        model = HuggingFaceEndpointChat(endpoint_url=model_name, temperature=temperature)
+    else:
+        raise NotImplementedError(f"Model type '{model_type}' not implemented.")
+
+    model.streaming_callback = lambda x: click.echo(x.response, nl=False)
+    with open("source/library/prompts/text_to_notes.txt") as f:
+        prompt_template = f.read()
+    if file:
+        with open(file) as f:
+            text = f.read()
+    else:
+        text = click.edit("<replace with text>")
+    prompt = dedent(prompt_template).strip().replace("{{text}}", text)
+    _ = model(prompt)
+    click.echo("\n\n")
+    if model.cost:
+        click.echo(f"\n\nCost: {model.cost}")
 
 
 if __name__ == '__main__':
