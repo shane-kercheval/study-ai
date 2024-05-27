@@ -188,3 +188,18 @@ def test__cycle__flash_only__with_history():  # noqa
 
     finally:
         os.remove(temp_history_path)
+
+
+def test__search():  # noqa
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            'search',
+        ],
+        input='What are ip addresses?\nq\n',
+    )
+    assert result.exit_code == 0
+    assert 'Cosine Similarity' in result.output
+    # ensure this note is returned in the search results
+    assert '1e16ee44-77e0-47d7-af51-e82980a6ff64' in result.output
