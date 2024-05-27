@@ -6,7 +6,7 @@ from textwrap import dedent
 from llm_workflow.openai import OpenAIChat, OpenAIServerChat
 from llm_workflow.hugging_face import HuggingFaceEndpointChat
 from source.cli.utilities import colorize_gray, colorize_green, colorize_markdown, filter_notes, load_notes
-from source.library.notes import Flashcard, History, NoteBank
+from source.library.notes import Flashcard, History, NoteBank, Priority
 from dotenv import load_dotenv
 
 from source.library.search import VectorDatabase
@@ -73,7 +73,8 @@ def cycle(
     while True:
         # only consider the last 20 answers; give more weight (linear) to the most recent answers
         weights = list(range(20))
-        note = test_bank.draw(last_n=weights)
+        priority_weights = {Priority.high: 3, Priority.medium: 2, Priority.low: 1}
+        note = test_bank.draw(last_n=weights, priority_weights=priority_weights)
         click.echo("--------------------------\n")
         click.echo(colorize_gray(f"{note.uuid}"))
         click.echo(colorize_gray(f"{note.subject_metadata.category} - {note.subject_metadata.ident} - {note.subject_metadata.abbreviation} - {note.subject_metadata.name}"))  # noqa  
