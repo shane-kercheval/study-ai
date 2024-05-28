@@ -1,18 +1,20 @@
 # study-ai
 
-Using Generative AI and semantic search to aid in studying.
+Lightweight terminal interface using Generative AI and semantic search to aid in studying.
 
-## Features
+Commands in `study.py` CLI:
 
-- Lightweight terminal interface
-- Notes and flash cards:
+- `cycle`:
     - Cycle through notes or flash cards.
     - Track correct/incorrect answers.
-    - The more correct answers for a note or flash card, the less it will be shown. 
-- Search
+    - The more correct answers for a note or flash card, the less it will be shown.
+- `search`:
     - uses embeddings and vector database (i.e. numpy matrix and cosine similarity)
-- Generate notes with AI
+- `text-to-notes`:
+    - Generate notes from a text/file with AI
 - Chat with AI using notes (coming soon)
+
+See `Makefile` for examples of how to use the CLI.
 
 ## Downsides / Limitations
 
