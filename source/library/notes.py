@@ -285,7 +285,6 @@ class History:
         """
         self.answers = answers or []
 
-
     def probability_correct(
             self,
             last_n: int | list[float] | None = None,

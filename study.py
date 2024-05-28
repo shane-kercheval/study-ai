@@ -6,7 +6,7 @@ from textwrap import dedent
 from llm_workflow.openai import OpenAIChat, OpenAIServerChat
 from llm_workflow.hugging_face import HuggingFaceEndpointChat
 from source.cli.utilities import colorize_gray, colorize_green, colorize_markdown, filter_notes, load_notes
-from source.library.notes import Flashcard, History, NoteBank
+from source.library.notes import Flashcard, History, NoteBank, Priority
 from dotenv import load_dotenv
 
 from source.library.search import VectorDatabase
@@ -73,7 +73,8 @@ def cycle(
     while True:
         # only consider the last 20 answers; give more weight (linear) to the most recent answers
         weights = list(range(20))
-        note = test_bank.draw(last_n=weights)
+        priority_weights = {Priority.high: 3, Priority.medium: 2, Priority.low: 1}
+        note = test_bank.draw(last_n=weights, priority_weights=priority_weights)
         click.echo("--------------------------\n")
         click.echo(colorize_gray(f"{note.uuid}"))
         click.echo(colorize_gray(f"{note.subject_metadata.category} - {note.subject_metadata.ident} - {note.subject_metadata.abbreviation} - {note.subject_metadata.name}"))  # noqa  
@@ -104,37 +105,6 @@ def cycle(
         history.update(test_bank.history(to_dict=True))
         with open(history_path, 'w') as f:
             yaml.safe_dump(history, f)
-
-
-@cli.command()
-@click.option('--model_type', '-mt', help="The model service to use, e.g. 'openai', 'openai_server', 'hugging_face_endpoint'", default='openai')  # noqa
-@click.option('--model_name', '-mn', help="The model name (or endpoint) to use, e.g. 'gpt-3.5-turbo-0125' or 'http://host.docker.internal:1234/v1'", default='gpt-3.5-turbo-0125')  # noqa
-@click.option('--temperature', '-t', help='The temperature to set on the model.', default=0.1)
-@click.option('--file', '-f', help='The file to use for text-to-notes.', default=None)
-def text_to_notes(model_type: str, model_name: str, temperature: float, file: str | None) -> None:
-    """Convert text to notes using a language model."""
-    if model_type == 'openai':
-        model = OpenAIChat(model_name=model_name, temperature=temperature)
-    elif model_type == 'openai_server':
-        model = OpenAIServerChat(endpoint_url=model_name, temperature=temperature)
-    elif model_type == 'hugging_face_endpoint':
-        model = HuggingFaceEndpointChat(endpoint_url=model_name, temperature=temperature)
-    else:
-        raise NotImplementedError(f"Model type '{model_type}' not implemented.")
-
-    model.streaming_callback = lambda x: click.echo(x.response, nl=False)
-    with open("source/library/prompts/text_to_notes.txt") as f:
-        prompt_template = f.read()
-    if file:
-        with open(file) as f:
-            text = f.read()
-    else:
-        text = click.edit("<replace with text>")
-    prompt = dedent(prompt_template).strip().replace("{{text}}", text)
-    _ = model(prompt)
-    click.echo("\n\n")
-    if model.cost:
-        click.echo(f"\n\nCost: {model.cost}")
 
 
 @cli.command()
@@ -194,15 +164,35 @@ def search(notes_path: str, db_path: str, similarity_threshold: float, top_k: in
                 click.echo("--------------------------\n")
 
 
-# @cli.command()
-# @click.option('--model', '-m', help='The model to use for chatting.', default='gpt-3.5')
-# def chat():
-#     pass
+@cli.command()
+@click.option('--model_type', '-mt', help="The model service to use, e.g. 'openai', 'openai_server', 'hugging_face_endpoint'", default='openai')  # noqa
+@click.option('--model_name', '-mn', help="The model name (or endpoint) to use, e.g. 'gpt-3.5-turbo-0125' or 'http://host.docker.internal:1234/v1'", default='gpt-3.5-turbo-0125')  # noqa
+@click.option('--temperature', '-t', help='The temperature to set on the model.', default=0.1)
+@click.option('--file', '-f', help='The file to use for text-to-notes.', default=None)
+def text_to_notes(model_type: str, model_name: str, temperature: float, file: str | None) -> None:
+    """Convert text to notes using a language model."""
+    if model_type == 'openai':
+        model = OpenAIChat(model_name=model_name, temperature=temperature)
+    elif model_type == 'openai_server':
+        model = OpenAIServerChat(endpoint_url=model_name, temperature=temperature)
+    elif model_type == 'hugging_face_endpoint':
+        model = HuggingFaceEndpointChat(endpoint_url=model_name, temperature=temperature)
+    else:
+        raise NotImplementedError(f"Model type '{model_type}' not implemented.")
 
-
-# @cli.command()
-# def scrape_pdf():
-#     pass
+    model.streaming_callback = lambda x: click.echo(x.response, nl=False)
+    with open("source/library/prompts/text_to_notes.txt") as f:
+        prompt_template = f.read()
+    if file:
+        with open(file) as f:
+            text = f.read()
+    else:
+        text = click.edit("<replace with text>")
+    prompt = dedent(prompt_template).strip().replace("{{text}}", text)
+    _ = model(prompt)
+    click.echo("\n\n")
+    if model.cost:
+        click.echo(f"\n\nCost: {model.cost}")
 
 
 if __name__ == '__main__':
