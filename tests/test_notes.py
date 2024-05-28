@@ -91,6 +91,7 @@ def test__history__success_probability_no_history():  # noqa
     # should be a wide probability distribution for a new note with no history
     assert any(draw < 0.1 for draw in draws)
     assert any(draw > 0.9 for draw in draws)
+    # the average probability of getting the answer correct should be close to 50% without history
     assert np.isclose(np.mean(draws), 0.5, atol=0.05)
 
 
