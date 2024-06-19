@@ -5,7 +5,13 @@ import os
 from textwrap import dedent
 from llm_workflow.openai import OpenAIChat, OpenAIServerChat
 from llm_workflow.hugging_face import HuggingFaceEndpointChat
-from source.cli.utilities import colorize_gray, colorize_green, colorize_markdown, filter_notes, load_notes
+from source.cli.utilities import (
+    colorize_gray,
+    colorize_green,
+    colorize_markdown,
+    filter_notes,
+    load_notes,
+)
 from source.library.notes import Flashcard, History, NoteBank, Priority
 from dotenv import load_dotenv
 
@@ -58,7 +64,7 @@ def cycle(
 
     notes = []
     for path in notes_paths:
-        notes.extend(load_notes(path))
+        notes.extend(load_notes(path, generate_save_uuids=True))
     notes = filter_notes(
         notes=notes,
         flash_only=flash_only,
@@ -127,7 +133,6 @@ def search(notes_paths: tuple[str], db_path: str, similarity_threshold: float, t
     database will be saved after any changes are made.
     """
     click.echo("Loading notes...")
-    # notes = load_notes(notes_paths, generate_save_uuids=True)
     notes = []
     for path in notes_paths:
         notes.extend(load_notes(path, generate_save_uuids=True))

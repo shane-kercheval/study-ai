@@ -14,7 +14,9 @@ study_gios:
 search:
 	python study.py search \
 		--notes_paths "/notes/CS-6200-GIOS/notes/*.yaml" \
-		--db_path /notes/study-ai/vector_db.yaml
+		--db_path /notes/study-ai/vector_db.yaml \
+		--top_k 5
+		--similarity_threshold 0.3
 
 
 ####
@@ -24,7 +26,7 @@ study_docker:
 	# launch study.py in docker container 
 	docker exec -it study-ai-bash-1 /bin/zsh -c "python study.py cycle"
 
-study:
+study_default:
 	# start `cycle` with default settings/directory 
 	python study.py cycle
 
@@ -32,15 +34,15 @@ study_abbreviation_gios:
 	# start `cycle` filtering for only GIOS class abbreviation
 	python study.py cycle --a GIOS
 
-flash:
+study_flashcards:
 	# start `cycle` with flashcards only
 	python study.py cycle --flash_only
 
-search:
+search_default:
 	# start `search`
 	python study.py search
 
-text_to_notes:
+text_to_notes_default:
 	python study.py text-to-notes
 
 text_to_notes_local:
@@ -75,6 +77,7 @@ docker_down:
 linting:
 	ruff check source/library
 	ruff check source/cli
+	ruff check study.py
 	ruff check tests
 
 unittests:
