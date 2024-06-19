@@ -3,6 +3,7 @@
 import shutil
 import os
 from click.testing import CliRunner
+import pytest
 from source.library.notes import Flashcard, Note
 from source.cli.utilities import filter_notes, load_history, load_notes
 from study import cli
@@ -15,8 +16,23 @@ def test__load_notes():  # noqa
     assert isinstance(notes[0], Note)
 
 
+def test__load_notes__invalid_directory_file__should_raise_exception():  # noqa
+    with pytest.raises(FileNotFoundError):
+        load_notes('tests/test_files/file_does_not_exist.yaml', generate_save_uuids=False)
+
+
+def test__load_notes__directory_does_not_exist__should_raise_exception():  # noqa
+    with pytest.raises(FileNotFoundError):
+        load_notes('tests/directory_does_not_exist/*.yaml', generate_save_uuids=False)
+
+
+def test__load_notes__no_files__should_raise_exception():  # noqa
+    with pytest.raises(FileNotFoundError):
+        load_notes('tests/test_files/*.no_extensions', generate_save_uuids=False)
+
+
 def test__filter_notes__flashcards():  # noqa
-    original_notes = load_notes('tests/test_files/fake_notes_.yaml', generate_save_uuids=False)
+    original_notes = load_notes('tests/test_files/fake_notes*.yaml', generate_save_uuids=False)
     notes = filter_notes(original_notes, flash_only=True)
     assert all(isinstance(note, Flashcard) for note in notes)
 
@@ -61,11 +77,29 @@ def test__cycle__defaults():  # noqa
     assert result.exit_code == 0
 
 
+def test__cycle__multiple_notes_paths():  # noqa
+    # tests loading multiple notes paths
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            'cycle',
+            '--notes_paths', 'tests/test_files/fake_notes.yaml',
+            '--notes_paths', 'tests/test_files/fake_notes_filtering.yaml',
+        ],
+        # 'q' will work regardless of note type that is drawn
+        input='q\n',
+    )
+    assert result.exit_code == 0
+    # ensure all notes are loaded
+    assert "Available notes: 8" in result.output
+
+
 def test__cycle__defaults__no_history():  # noqa
     runner = CliRunner()
     result = runner.invoke(
         cli,
-        ['cycle', '--notes_path', 'tests/test_files/fake_notes.yaml'],
+        ['cycle', '--notes_paths', 'tests/test_files/fake_notes.yaml'],
         # 'q' will work regardless of note type that is drawn
         input='q\n',
     )
@@ -79,7 +113,7 @@ def test__cycle__flash_only__no_history():  # noqa
         [
             'cycle',
             '--flash_only',
-            '--notes_path', 'tests/test_files/fake_notes.yaml',
+            '--notes_paths', 'tests/test_files/fake_notes.yaml',
         ],
         # this sequence will only work with Flashcard notes
         input='1\nq\n',
@@ -88,12 +122,12 @@ def test__cycle__flash_only__no_history():  # noqa
 
 
 def test__cycle__flash_only__with_history():  # noqa
-    notes_path = 'tests/test_files/fake_notes.yaml'
+    notes_paths = 'tests/test_files/fake_notes.yaml'
     fake_history_path = 'tests/test_files/fake_history_no_history.yaml'
     temp_history_path = 'tests/test_files/temp___fake_history.yaml'
     shutil.copy(fake_history_path, temp_history_path)
 
-    orginal_notes = load_notes(notes_path)
+    orginal_notes = load_notes(notes_paths)
     expected_uuids = {note.uuid for note in orginal_notes}
     non_flashcard_uuids = {note.uuid for note in orginal_notes if not isinstance(note, Flashcard)}
     flashcard_uuids = expected_uuids - non_flashcard_uuids
@@ -108,7 +142,7 @@ def test__cycle__flash_only__with_history():  # noqa
             [
                 'cycle',
                 '--flash_only',
-                '--notes_path', notes_path,
+                '--notes_paths', notes_paths,
                 '--history_path', temp_history_path,
             ],
             # this sequence will only work with Flashcard notes
@@ -136,7 +170,7 @@ def test__cycle__flash_only__with_history():  # noqa
             [
                 'cycle',
                 '--flash_only',
-                '--notes_path', notes_path,
+                '--notes_paths', notes_paths,
                 '--history_path', temp_history_path,
             ],
             # this sequence will only work with Flashcard notes
@@ -164,7 +198,7 @@ def test__cycle__flash_only__with_history():  # noqa
             [
                 'cycle',
                 '--flash_only',
-                '--notes_path', notes_path,
+                '--notes_paths', notes_paths,
                 '--history_path', temp_history_path,
             ],
             # this sequence will only work with Flashcard notes
