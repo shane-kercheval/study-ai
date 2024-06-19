@@ -15,9 +15,8 @@ search:
 	python study.py search \
 		--notes_paths "/notes/CS-6200-GIOS/notes/*.yaml" \
 		--db_path /notes/study-ai/vector_db.yaml \
-		--top_k 5
+		--top_k 5 \
 		--similarity_threshold 0.3
-
 
 ####
 # CLI Examples
