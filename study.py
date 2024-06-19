@@ -31,15 +31,15 @@ def create_notes() -> None:
 @click.option('--ident', '-i', help='Only display notes from a specific class identity.', default=None)  # noqa
 @click.option('--name', '-n', help='Only display notes from a specific class name.', default=None)
 @click.option('--abbr', '-a', help='Only display notes from a specific class abbreviation.', default=None)  # noqa
-@click.option('--notes_path', '-p', help='The path to the notes yaml file(s).', default='data/notes/*.yaml')  # noqa
-@click.option('--history_path', '-h', help='The path to the history yaml file.', default='data/history.yaml')  # noqa
+@click.option('--notes_paths', '-p', multiple=True, help='The path to the notes yaml file(s).', default=['data/notes/*.yaml'])  # noqa
+@click.option('--history_path', '-h', help='The path to the history (of correct/incorrect answers) yaml file.', default='data/history.yaml')  # noqa
 def cycle(
         flash_only: bool,
         category: str,
         ident: str,
         name: str,
         abbr: str,
-        notes_path: str,
+        notes_paths: tuple[str],
         history_path: str,
     ) -> None:
     """
@@ -56,7 +56,9 @@ def cycle(
     if history is None:
         history = {}
 
-    notes = load_notes(notes_path)
+    notes = []
+    for path in notes_paths:
+        notes.extend(load_notes(path))
     notes = filter_notes(
         notes=notes,
         flash_only=flash_only,
@@ -108,11 +110,11 @@ def cycle(
 
 
 @cli.command()
-@click.option('--notes_path', '-p', help='The path to the notes yaml file(s).', default='data/notes/*.yaml')  # noqa
+@click.option('--notes_paths', '-p', multiple=True, help='The path to the notes yaml file(s).', default=['data/notes/*.yaml'])  # noqa
 @click.option('--db_path', '-d', help='The path to the database.', default='data/vector_database.parquet')  # noqa
 @click.option('--similarity_threshold', '-s', help='The similarity threshold for search results.', default=0.3)  # noqa
 @click.option('--top_k', '-k', help='The number of top results to return.', default=5)
-def search(notes_path: str, db_path: str, similarity_threshold: float, top_k: int) -> None:
+def search(notes_paths: tuple[str], db_path: str, similarity_threshold: float, top_k: int) -> None:
     """
     Search the notes database.
 
@@ -125,7 +127,10 @@ def search(notes_path: str, db_path: str, similarity_threshold: float, top_k: in
     database will be saved after any changes are made.
     """
     click.echo("Loading notes...")
-    notes = load_notes(notes_path, generate_save_uuids=True)
+    # notes = load_notes(notes_paths, generate_save_uuids=True)
+    notes = []
+    for path in notes_paths:
+        notes.extend(load_notes(path, generate_save_uuids=True))
     click.echo("Loading database...")
     db = VectorDatabase(db_path=db_path)
     click.echo("Adding/updating notes in vector database...")

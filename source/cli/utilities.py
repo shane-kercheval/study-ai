@@ -18,12 +18,16 @@ def load_notes(path: str, generate_save_uuids: bool = True) -> list[Note]:
         generate_save_uuids:
             If True, generate UUIDs for notes and save to the original yaml files.
     """
+    files = glob.glob(path)
+    if not files:
+        raise FileNotFoundError(f"No files found at {path}")
+
     class_notes = []
     ryaml = RYAML()
     ryaml.preserve_quotes = True
     ryaml.width = 100000  # don't wrap lines
     # load all yaml files in data/notes via glob
-    for f in glob.glob(path):
+    for f in files:
         with open(f) as handle:
             data = ryaml.load(handle)
         if generate_save_uuids:
