@@ -1,19 +1,43 @@
 ####
-# CLI
+# Commands that I use to start the docker container and run the study.py CLI.
+# The directories point to the notes that I have taken for the OMSCS program, which are stored in a
+# separate/private repository which is mounted to the container in the `/notes` directory.
+####
+start:
+	docker-compose run -v /Users/shanekercheval/repos/omscs:/notes bash /bin/bash
+
+study_gios:
+	python study.py cycle \
+		--notes_paths "/notes/CS-6200-GIOS/notes/*.yaml" \
+		--history_path /notes/study-ai/history.yaml
+
+search:
+	python study.py search \
+		--notes_paths "/notes/CS-6200-GIOS/notes/*.yaml" \
+		--db_path /notes/study-ai/vector_db.yaml
+
+
+####
+# CLI Examples
 ####
 study_docker:
+	# launch study.py in docker container 
 	docker exec -it study-ai-bash-1 /bin/zsh -c "python study.py cycle"
 
 study:
+	# start `cycle` with default settings/directory 
 	python study.py cycle
 
-study_gios:
+study_abbreviation_gios:
+	# start `cycle` filtering for only GIOS class abbreviation
 	python study.py cycle --a GIOS
 
 flash:
+	# start `cycle` with flashcards only
 	python study.py cycle --flash_only
 
 search:
+	# start `search`
 	python study.py search
 
 text_to_notes:
