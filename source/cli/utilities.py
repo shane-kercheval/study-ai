@@ -85,10 +85,17 @@ def filter_notes(
 
 def colorize_markdown(text: str) -> str:
     """Colorizes text (used as the output in the terminal) based on markdown syntax."""
-    # Apply red color for text surrounded by **
-    text = re.sub(r'\*\*(.*?)\*\*', r'\033[31m\1\033[0m', text)
-    # Apply blue color for text surrounded by `
-    return re.sub(r'`(.*?)`', r'\033[34m\1\033[0m', text)
+    # Check for code blocks surrounded by ```
+    if re.search(r'```.*?```', text, flags=re.DOTALL):
+        # Apply an approximate orange color and bold formatting for code blocks
+        # 38;5;208 is an ANSI escape code for a color close to orange
+        text = re.sub(r'```(.*?)```', r'\033[38;5;208;1m\1\033[0m', text, flags=re.DOTALL)
+    else:
+        # Apply red color for text surrounded by **
+        text = re.sub(r'\*\*(.*?)\*\*', r'\033[31m\1\033[0m', text)
+        # Apply blue color for text surrounded by `
+        text = re.sub(r'`(.*?)`', r'\033[34m\1\033[0m', text)
+    return text
 
 
 def colorize_gray(text: str) -> str:

@@ -14,17 +14,10 @@ study_gios:
 search:
 	python study.py search \
 		--notes_paths "/notes/CS-6200-GIOS/notes/*.yaml" \
-		--db_path /notes/study-ai/vector_db.yaml \
+		--db_path /notes/study-ai/vector_db.parquet \
 		--top_k 5 \
 		--similarity_threshold 0.3
 
-text_to_notes:
-	python study.py text-to-notes \
-		--model_type openai \
-		--model_name gpt-4o-2024-05-13 \
-		--temperature 0.1
-		# --model_name gpt-3.5-turbo-0125 \
-		# --file /notes/CS-6200-GIOS/raw_text/beej.yaml
 
 ####
 # CLI Examples
