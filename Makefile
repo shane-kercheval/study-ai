@@ -18,6 +18,14 @@ search:
 		--top_k 5 \
 		--similarity_threshold 0.3
 
+text_to_notes:
+	python study.py text-to-notes \
+		--model_type openai \
+		--model_name gpt-4o-2024-05-13 \
+		--temperature 0.1
+		# --model_name gpt-3.5-turbo-0125 \
+		# --file /notes/CS-6200-GIOS/raw_text/beej.yaml
+
 ####
 # CLI Examples
 ####
