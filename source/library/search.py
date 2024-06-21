@@ -7,6 +7,7 @@ The database can be searched using a query string, and the top k most similar ve
 returned.
 """
 import os
+import warnings
 import numpy as np
 import pandas as pd
 from sentence_transformers import SentenceTransformer
@@ -51,7 +52,16 @@ class VectorDatabase:
     def model(self) -> SentenceTransformer:
         """Get the SentenceTransformer model."""
         if self._model is None:
-            self._model = SentenceTransformer(self.model_name)
+            # getting: FutureWarning: `resume_download` is deprecated and will be removed in
+            #   version 1.0.0. Downloads always resume when possible. If you want to force a new
+            #   download, use `force_download=True`.
+            with warnings.catch_warnings():
+                warnings.filterwarnings(
+                    'ignore',
+                    category=FutureWarning,
+                    module='huggingface_hub.*',
+                )
+                self._model = SentenceTransformer(self.model_name)
         return self._model
 
     def add(self, notes: list[Note], save: bool = True) -> dict[str, str]:
