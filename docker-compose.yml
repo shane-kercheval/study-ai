@@ -4,6 +4,7 @@ services:
     working_dir: /code
     volumes:
       - .:/code
+      - /Users/shanekercheval/repos/omscs:/notes
     stdin_open: true # docker run -i
     tty: true        # docker run -t
     extra_hosts:
