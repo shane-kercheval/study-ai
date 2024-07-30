@@ -19,9 +19,18 @@ search:
 		--similarity_threshold 0.3
 
 
+text_to_notes:
+	pdftotext /notes/CS-6200-GIOS/pdfs/OSTEP-Chapter-2.pdf /notes/CS-6200-GIOS/pdfs/OSTEP-Chapter-2.txt
+	python study.py text-to-notes \
+		--file /notes/CS-6200-GIOS/pdfs/OSTEP-Chapter-2.txt
+
 ####
 # CLI Examples
 ####
+
+pdf_to_text:
+	pdftotext /notes/CS-6200-GIOS/pdfs/OSTEP-Chapter-2.pdf /notes/CS-6200-GIOS/pdfs/OSTEP-Chapter-2.txt
+
 study_docker:
 	# launch study.py in docker container 
 	docker exec -it study-ai-bash-1 /bin/zsh -c "python study.py cycle"
