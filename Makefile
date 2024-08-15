@@ -1,3 +1,7 @@
+# conda activate ./env
+environment:
+	conda env create -f environment.yml -p ./env
+
 ####
 # Commands that I use to start the docker container and run the study.py CLI.
 # The directories point to the notes that I have taken for the OMSCS program, which are stored in a
@@ -8,16 +12,15 @@ start:
 
 study_gios:
 	python study.py cycle \
-		--notes_paths "/notes/CS-6200-GIOS/notes/*.yaml" \
-		--history_path /notes/study-ai/history.yaml
+		--notes_paths "../omscs/CS-6200-GIOS/flash-cards/*.yaml" \
+		--history_path "../omscs/CS-6200-GIOS/flash-cards/study-ai/history.yaml"
 
 search:
 	python study.py search \
-		--notes_paths "/notes/CS-6200-GIOS/notes/*.yaml" \
-		--db_path /notes/study-ai/vector_db.parquet \
+		--notes_paths "../omscs/CS-6200-GIOS/flash-cards/*.yaml" \
+		--db_path "../omscs/CS-6200-GIOS/flash-cards/study-ai/vector_db.parquet" \
 		--top_k 5 \
 		--similarity_threshold 0.3
-
 
 text_to_notes:
 	pdftotext /notes/CS-6200-GIOS/pdfs/OSTEP-Chapter-2.pdf /notes/CS-6200-GIOS/pdfs/OSTEP-Chapter-2.txt
@@ -27,7 +30,6 @@ text_to_notes:
 ####
 # CLI Examples
 ####
-
 pdf_to_text:
 	pdftotext /notes/CS-6200-GIOS/pdfs/OSTEP-Chapter-2.pdf /notes/CS-6200-GIOS/pdfs/OSTEP-Chapter-2.txt
 

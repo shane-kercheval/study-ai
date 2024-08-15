@@ -1,0 +1,21 @@
+name: study-ai
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.12
+  - pip
+  - pandas
+  - pyarrow
+  - pydantic
+  - pytest
+  - PyYAML
+  - ruamel.yaml
+  - ruff
+  - pip:
+      - click
+      - coverage
+      - helpsk
+      - llm-workflow
+      - python-dotenv
+      - sentence-transformers
