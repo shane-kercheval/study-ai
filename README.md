@@ -32,6 +32,13 @@ See `Makefile` for examples of how to use the CLI.
 - When I run the CLI for studying, I use the command `make start`. This starts the container in the terminal, and also attaches the directory that contains all of my notes (i.e. allows the container to see the folder outside of the container), which points to a private github repo in the specified directory.
 - See `Makefile` for examples of how to run the various CLI commands.
 
+## `pdftotext`
+
+To use `pdftotext` command, install following
+
+- Linux: `sudo apt-get install poppler-utils`
+- Mac: `brew install poppler`
+
 # Contributing
 
 - This project is optimized for my study preferences. It's not intended to be generalized to meet the needs of a larger audience. As such, documentation is a little light.
