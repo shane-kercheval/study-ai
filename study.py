@@ -176,7 +176,7 @@ def search(notes_paths: tuple[str], db_path: str, similarity_threshold: float, t
 
 @cli.command()
 @click.option('--model_type', '-mt', help="The model service to use, e.g. 'openai', 'openai_server', 'hugging_face_endpoint'", default='openai')  # noqa
-@click.option('--model_name', '-mn', help="The model name (or endpoint) to use, e.g. 'gpt-3.5-turbo-0125' or 'http://host.docker.internal:1234/v1'", default='gpt-3.5-turbo-0125')  # noqa
+@click.option('--model_name', '-mn', help="The model name (or endpoint) to use, e.g. 'gpt-4o-mini' or 'http://host.docker.internal:1234/v1'", default='gpt-4o-mini')  # noqa
 @click.option('--temperature', '-t', help='The temperature to set on the model.', default=0.1)
 @click.option('--file', '-f', help='The file to use for text-to-notes.', default=None)
 def text_to_notes(model_type: str, model_name: str, temperature: float, file: str | None) -> None:

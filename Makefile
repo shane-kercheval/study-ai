@@ -65,11 +65,10 @@ text_to_notes_local:
 text_to_notes_file:
 	# using lmstudio to set up local server
 	python study.py text-to-notes \
-		--model_name gpt-4-turbo-2024-04-09 \
+		--model_name gpt-4o-mini \
 		--file /code/temp.txt
 		# --model_type openai_server \
 		# --model_name http://host.docker.internal:1234/v1 \
-
 ####
 # DOCKER
 ####
