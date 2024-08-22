@@ -4,7 +4,6 @@ import yaml
 import os
 from textwrap import dedent
 from llm_workflow.openai import OpenAIChat, OpenAIServerChat
-from llm_workflow.hugging_face import HuggingFaceEndpointChat
 from source.cli.utilities import (
     colorize_gray,
     colorize_green,
@@ -175,23 +174,33 @@ def search(notes_paths: tuple[str], db_path: str, similarity_threshold: float, t
 
 
 @cli.command()
-@click.option('--model_type', '-mt', help="The model service to use, e.g. 'openai', 'openai_server', 'hugging_face_endpoint'", default='openai')  # noqa
+@click.option('--model_type', '-mt', help="The model service to use, e.g. 'openai' or 'openai_server'", default='openai')  # noqa
 @click.option('--model_name', '-mn', help="The model name (or endpoint) to use, e.g. 'gpt-4o-mini' or 'http://host.docker.internal:1234/v1'", default='gpt-4o-mini')  # noqa
 @click.option('--temperature', '-t', help='The temperature to set on the model.', default=0.1)
 @click.option('--file', '-f', help='The file to use for text-to-notes.', default=None)
-def text_to_notes(model_type: str, model_name: str, temperature: float, file: str | None) -> None:
+@click.option('--notes_input', '-f', help='Input is notes (as opposed to e.g. text from pdf).', is_flag=True, default=False)  # noqa
+def text_to_notes(
+        model_type: str,
+        model_name: str,
+        temperature: float,
+        file: str | None,
+        notes_input: bool) -> None:
     """Convert text to notes using a language model."""
     if model_type == 'openai':
         model = OpenAIChat(model_name=model_name, temperature=temperature)
     elif model_type == 'openai_server':
         model = OpenAIServerChat(endpoint_url=model_name, temperature=temperature)
-    elif model_type == 'hugging_face_endpoint':
-        model = HuggingFaceEndpointChat(endpoint_url=model_name, temperature=temperature)
     else:
         raise NotImplementedError(f"Model type '{model_type}' not implemented.")
 
     model.streaming_callback = lambda x: click.echo(x.response, nl=False)
-    with open("source/library/prompts/text_to_notes.txt") as f:
+    if notes_input:
+        path = "source/library/prompts/notes_to_notes.txt"
+        print("Using notes_to_notes.txt prompt")
+    else:
+        path = "source/library/prompts/text_to_notes.txt"
+        print("Using text_to_notes.txt prompt")
+    with open(path) as f:
         prompt_template = f.read()
     if file:
         with open(file) as f:
@@ -203,6 +212,45 @@ def text_to_notes(model_type: str, model_name: str, temperature: float, file: st
     click.echo("\n\n")
     if model.cost:
         click.echo(f"\n\nCost: {model.cost}")
+
+
+@cli.command()
+@click.option('--model_type', '-mt', help="The model service to use, e.g. 'openai' or 'openai_server'", default='openai')  # noqa
+@click.option('--model_name', '-mn', help="The model name (or endpoint) to use, e.g. 'gpt-4o-mini' or 'http://host.docker.internal:1234/v1'", default='gpt-4o-mini')  # noqa
+@click.option('--temperature', '-t', help='The temperature to set on the model.', default=0.1)
+@click.option('--file', '-f', help='The file to use for text-to-notes.', default=None)
+def quiz(
+        model_type: str,
+        model_name: str,
+        temperature: float,
+        file: str | None) -> None:
+    """Convert text to notes using a language model."""
+    if model_type == 'openai':
+        model = OpenAIChat(model_name=model_name, temperature=temperature)
+    elif model_type == 'openai_server':
+        model = OpenAIServerChat(endpoint_url=model_name, temperature=temperature)
+    else:
+        raise NotImplementedError(f"Model type '{model_type}' not implemented.")
+
+    model.streaming_callback = lambda x: click.echo(x.response, nl=False)
+    path = "source/library/prompts/quiz.txt"
+    with open(path) as f:
+        prompt_template = f.read()
+    with open(file) as f:
+        notes = f.read()
+    prompt = dedent(prompt_template).strip().replace("{{notes}}", notes)
+    click.echo("\n------\n")
+    _ = model(prompt)
+    click.echo("\n")
+    while True:
+        user_response = click.prompt(
+            colorize_gray("Answer: "),
+            type=str,
+        )
+        click.echo("\n")
+        _ = model(user_response)
+        if model.cost:
+            click.echo(f"\n\nCost: {model.cost}")
 
 
 if __name__ == '__main__':

@@ -27,6 +27,17 @@ text_to_notes:
 	python study.py text-to-notes \
 		--file /notes/CS-6200-GIOS/pdfs/OSTEP-Chapter-2.txt
 
+note_to_notes:
+	python study.py text-to-notes \
+	    --notes_input \
+		--file ../obsidian_omscs/CS6200-GIOS/Module\ Notes/P1L2\ -\ Introduction\ to\ Operating\ Systems.md
+
+quiz:
+	python study.py quiz \
+	    --temperature 1 \
+		--file ../obsidian_omscs/CS6200-GIOS/Module\ Notes/P1L2\ -\ Introduction\ to\ Operating\ Systems.md
+
+
 ####
 # CLI Examples
 ####

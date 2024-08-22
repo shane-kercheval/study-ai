@@ -1,0 +1,70 @@
+Create structured notes from the notes provided. The structured notes will be used as flash cards to study for an exam.
+                
+Here are the instructions, it is critical they are followed:
+    - The notes must be returned in valid yaml format.
+    - The notes must contain ALL important information and details from the notes.
+    - There are several types of notes (and corresponding yaml formats):
+        - a note which contains `term` and `definition` properities
+        - a note which contains `question` and `answer` properties
+    - If a reference is provided by the user, include that as an additional attribute in the yaml.
+    - Use markdown formatting to format terms, important concepts, etc. accordingly.
+    - Please explain things that weren't clearly explained in the text or provide definitions of terms that may not be recognized by most of the audience.
+    - The response should contain only yaml, no other text or explanations.
+
+Here is an example of the format of the structured notes to generate:
+
+```
+notes:
+  - term: What is a `socket`?
+    definition: A **way to speak to other programs** using standard Unix **file descriptors**.
+    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 2
+  - term: What is a `file descriptor`?
+    definition: |
+      An **integer** associated with an **open file**.
+    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 2
+  - question: What are file descriptors used for and what types of things can be file descriptors?
+    answer: |
+      When Unix programs do any sort of **I/O**, they do it by reading or writing to a **file descriptor**. That file can be a **network connection**, a **FIFO**, a **pipe**, a **terminal**, a real on-the-disk **file**, or just about anything else. Everything in Unix is a file.
+    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 2
+  - question: What are the two types of sockets?
+    answer: |
+      One is `Stream` Sockets; the other is `Datagram` Sockets, which may hereafter be referred to as `SOCK_STREAM` and `SOCK_DGRAM`, respectively.
+      
+      **Datagram** sockets are sometimes called **connectionless sockets**. (Though they can be `connect()`’d if you really want.)
+    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 2.1
+  - term: What are `stream` sockets?
+    definition: |
+      Stream sockets are **reliable** **two-way** **connected communication streams**. If you output two items into the socket in the order “1, 2”, they will arrive in the order “1, 2” at the opposite end. They will also be **error-free**.
+    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 2.1
+  - question: What are `stream` sockets used for?
+    answer: |
+      Stream sockets are used for applications that require the **reliable**, **sequenced**, and **error-free** transmission of data. These are crucial characteristics for various network applications such as **Telnet** (allows users to log into remote applications; largly replaced by SSH), **SSH** (Secure Shell), and **web browsers** using **HTTP** (Hypertext Transfer Protocol). These applications depend on stream sockets to ensure that data, such as typed characters or web page requests, is transmitted in the exact order it was sent and without errors. This is achieved using the `Transmission Control Protocol` (`TCP`), which is a key part of the TCP/IP suite responsible for managing data integrity and providing a reliable communication channel over the network.
+    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 2.1
+  - term: What are `datagram` sockets?
+    definition: |
+      Datagram sockets are an implementation of socket communication that use IP for routing, but they use the `User Datagram Protocol` (`UDP`) instead of TCP (Transmission Control Protocol).
+      
+      **If you send a datagram, it may (or may not) arrive. Each packet may arrive out of order. If it arrives, the data within the packet will be error-free.**
+      
+      Unlike TCP, **UDP** is a **connectionless** protocol that does not establish a persistent connection between endpoints before data is sent. Datagram sockets **do not require a connection** to be established before data is sent. This means that **each packet (or datagram) is sent independently** and may follow different paths to reach its destination. Each datagram **carries its own address information**, allowing it to be routed independently across the network.
+    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 2.1
+  - question: What are `datagram` sockets used for?
+    answer: |
+      UDP and datagram sockets are **preferred in scenarios where the overhead of establishing a connection would impede performance**. They are commonly used in applications like **streaming media** (audio and video), **online multiplayer games**, **voice over IP** (VoIP), and other **real-time** services. The protocol is also useful in environments where a lightweight or quick communication method is needed, even at the cost of potential packet loss.
+    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 2.1
+  - question: What is the benefit of UDP vs TCP?
+    answer: |
+      UDP is **faster** and has **lower overhead** than TCP because it **lacks the error-checking and sequencing functionalities that ensure packets are delivered in order and without errors**.
+    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 2.1
+  - question: How do applications that use UDP, like **TFTP**, ensure data isn't lost?
+    answer: |
+      While UDP itself does not provide mechanisms for handling lost packets or ensuring order and reliability, higher-level protocols or application-layer implementations can add these features. For example, TFTP (Trivial File Transfer Protocol) uses UDP but adds a simple control mechanism whereby the receiver must send an acknowledgment (ACK) for each received packet. If the sender does not receive an ACK within a certain time frame, it will retransmit the packet. This ensures reliability in the delivery of files, even over a connectionless and potentially unreliable network layer.
+    reference: https://beej.us/guide/bgnet/html/#what-is-a-socket; chapter 2.1
+```
+
+Here is the text to generate notes from:
+
+
+```
+{{text}}
+```
