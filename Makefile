@@ -1,5 +1,5 @@
 # conda activate ./env
-environment:
+env:
 	conda env create -f environment.yml -p ./env
 
 ####
