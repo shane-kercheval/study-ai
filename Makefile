@@ -30,12 +30,12 @@ text_to_notes:
 note_to_notes:
 	python study.py text-to-notes \
 	    --notes_input \
-		--file ../obsidian_omscs/CS6200-GIOS/Module\ Notes/P1L2\ -\ Introduction\ to\ Operating\ Systems.md
+		--file ../obsidian_omscs/CS6200-GIOS/Module\ Notes/P1L2\ -\ 1\ -\ Intro\ to\ OS.md
 
 quiz:
 	python study.py quiz \
 	    --temperature 1 \
-		--file ../obsidian_omscs/CS6200-GIOS/Module\ Notes/P1L2\ -\ Introduction\ to\ Operating\ Systems.md
+		--file ../obsidian_omscs/CS6200-GIOS/Module\ Notes/P1L2\ -\ 1\ -\ Intro\ to\ OS.md
 
 quiz_local:
 	python study.py quiz \
@@ -43,7 +43,7 @@ quiz_local:
 		--model_name http://localhost:1234/v1 \
 		--stream \
 	    --temperature 1 \
-		--file ../obsidian_omscs/CS6200-GIOS/Module\ Notes/P1L2\ -\ Introduction\ to\ Operating\ Systems.md
+		--file ../obsidian_omscs/CS6200-GIOS/Module\ Notes/P1L2\ -\ 1\ -\ Intro\ to\ OS.md
 
 ####
 # CLI Examples

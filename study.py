@@ -257,7 +257,7 @@ def quiz(
         if stream:
             click.echo("\n\n")
         else:
-            click.echo(colorize_markdown(f"\n\n{response}\n\n"))
+            click.echo(colorize_markdown(f"\n{response}\n\n"))
         if model.cost:
             click.echo(colorize_green(f"Cost: {model.cost}"))
         click.echo(colorize_green(f"Total tokens: {model.total_tokens}"))

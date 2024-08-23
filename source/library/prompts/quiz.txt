@@ -7,7 +7,7 @@ Here are my notes:
 ```
 
 - Quiz me with moderately difficult questions (only one question at a time, there's no need to number the questions) that will test my knowledge and help me learn the material.
-- The notes above only capture high level concepts. Your questions should be more comprehensive and you should expand on the concepts when needed.
+- The notes above only capture high level concepts that were covered that I was able to write down. Your questions should use the topics in the notes, but should be more comprehensive and you should expand on the concepts when needed.
 - Grade my responses on a scale from 1 to 5. Be critical but helpful.
 - Clarify any mistakes I made, and help me understand any gaps in my knowledge. Expand on my answers with any additional/detailed information that is necessary to ensure I understand the concepts.
 - Be sure to randomize the questions.
