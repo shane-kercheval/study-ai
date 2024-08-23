@@ -7,6 +7,7 @@ from llm_workflow.openai import OpenAIChat, OpenAIServerChat
 from source.cli.utilities import (
     colorize_gray,
     colorize_green,
+    colorize_red,
     colorize_markdown,
     filter_notes,
     load_notes,
@@ -216,23 +217,26 @@ def text_to_notes(
 
 @cli.command()
 @click.option('--model_type', '-mt', help="The model service to use, e.g. 'openai' or 'openai_server'", default='openai')  # noqa
-@click.option('--model_name', '-mn', help="The model name (or endpoint) to use, e.g. 'gpt-4o-mini' or 'http://host.docker.internal:1234/v1'", default='gpt-4o-mini')  # noqa
+@click.option('--model_name', '-mn', help="The model name (or endpoint) to use, e.g. 'gpt-4o-mini', 'http://localhost:1234/v1', or 'http://host.docker.internal:1234/v1'", default='gpt-4o-mini')  # noqa
 @click.option('--temperature', '-t', help='The temperature to set on the model.', default=0.1)
 @click.option('--file', '-f', help='The file to use for text-to-notes.', default=None)
+@click.option('--stream', '-s', help='Stream response.', is_flag=True, default=False)
 def quiz(
         model_type: str,
         model_name: str,
         temperature: float,
-        file: str | None) -> None:
+        file: str | None,
+        stream: bool) -> None:
     """Convert text to notes using a language model."""
     if model_type == 'openai':
         model = OpenAIChat(model_name=model_name, temperature=temperature)
     elif model_type == 'openai_server':
         model = OpenAIServerChat(endpoint_url=model_name, temperature=temperature)
+        model.model_name = None
     else:
         raise NotImplementedError(f"Model type '{model_type}' not implemented.")
-
-    model.streaming_callback = lambda x: click.echo(x.response, nl=False)
+    if stream:
+        model.streaming_callback = lambda x: click.echo(x.response, nl=False)
     path = "source/library/prompts/quiz.txt"
     with open(path) as f:
         prompt_template = f.read()
@@ -240,17 +244,25 @@ def quiz(
         notes = f.read()
     prompt = dedent(prompt_template).strip().replace("{{notes}}", notes)
     click.echo("\n------\n")
-    _ = model(prompt)
-    click.echo("\n")
+    response = model(prompt)
+    if not stream:
+        click.echo(colorize_markdown(f"{response}"))
     while True:
         user_response = click.prompt(
-            colorize_gray("Answer: "),
+            colorize_red("\n\nAnswer: "),
             type=str,
         )
         click.echo("\n")
-        _ = model(user_response)
+        response = model(user_response)
+        if stream:
+            click.echo("\n\n")
+        else:
+            click.echo(colorize_markdown(f"\n\n{response}\n\n"))
         if model.cost:
-            click.echo(f"\n\nCost: {model.cost}")
+            click.echo(colorize_green(f"Cost: {model.cost}"))
+        click.echo(colorize_green(f"Total tokens: {model.total_tokens}"))
+        click.echo(colorize_green(f"Input tokens: {model.input_tokens}"))
+        click.echo(colorize_green(f"Response tokens: {model.response_tokens}"))
 
 
 if __name__ == '__main__':

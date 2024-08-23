@@ -37,6 +37,14 @@ quiz:
 	    --temperature 1 \
 		--file ../obsidian_omscs/CS6200-GIOS/Module\ Notes/P1L2\ -\ Introduction\ to\ Operating\ Systems.md
 
+quiz_local:
+	python study.py quiz \
+		--model_type openai_server \
+		--model_name http://localhost:1234/v1 \
+		--stream \
+	    --temperature 1 \
+		--file ../obsidian_omscs/CS6200-GIOS/Module\ Notes/P1L2\ -\ Introduction\ to\ Operating\ Systems.md
+
 
 ####
 # CLI Examples

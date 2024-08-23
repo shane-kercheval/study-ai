@@ -108,3 +108,9 @@ def colorize_green(text: str) -> str:
     """Colorizes text (used as the output in the terminal) to green."""
     # Apply green color to all text
     return f'\033[32m{text}\033[0m'
+
+
+def colorize_red(text: str) -> str:
+    """Colorizes text (used as the output in the terminal) to red."""
+    # Apply red color to all text
+    return f'\033[31m{text}\033[0m'
