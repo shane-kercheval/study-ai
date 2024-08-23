@@ -1,4 +1,4 @@
-Create structured notes from the notes provided. The structured notes will be used as flash cards to study for an exam.
+Create structured notes (in the format shown below) from the notes provided. The structured notes will be used as flash cards to study for an exam.
                 
 Here are the instructions, it is critical they are followed:
     - The notes must be returned in valid yaml format.
@@ -63,7 +63,6 @@ notes:
 ```
 
 Here is the text to generate notes from:
-
 
 ```
 {{text}}

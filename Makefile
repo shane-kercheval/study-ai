@@ -45,7 +45,6 @@ quiz_local:
 	    --temperature 1 \
 		--file ../obsidian_omscs/CS6200-GIOS/Module\ Notes/P1L2\ -\ Introduction\ to\ Operating\ Systems.md
 
-
 ####
 # CLI Examples
 ####
@@ -89,16 +88,16 @@ text_to_notes_file:
 		# --model_type openai_server \
 		# --model_name http://host.docker.internal:1234/v1 \
 ####
-# DOCKER
+# DOCKER (NOTE i moved from using docker to using conda)
 ####
-docker_build:
-	docker compose -f docker-compose.yml build
+# docker_build:
+# 	docker compose -f docker-compose.yml build
 
-docker_run: docker_build
-	docker compose -f docker-compose.yml up
+# docker_run: docker_build
+# 	docker compose -f docker-compose.yml up
 
-docker_down:
-	docker compose down --remove-orphans
+# docker_down:
+# 	docker compose down --remove-orphans
 
 ####
 # Project
