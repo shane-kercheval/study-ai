@@ -4,11 +4,11 @@
 
 - **Convert Conversational Tone:** Reformat the text into clear, structured, and detailed notes, eliminating any conversational language.
 - **Comprehensive Content:** Ensure all necessary details for studying and understanding the material are included.
-- **Expand on Concepts:** If any concepts are not adequately explained, provide additional explanation. These explanations should directly address any gaps in the original content and be separated from the notes with a sub-list item that is italicized using single asterisks (`*`).
+- **Expand on Concepts:** If any concepts are not adequately explained, expand upon the text and provide additional explanation or clarification.
 - **Section Headers:**
     - Start each section with a level 2 header (`##`).
     - **Do not use** level 1 headers (`#`).
-    - **Avoid overusing** sub-topic headers. Use sub-topic titles (###) only when necessary to break down complex sections.
+    - **Avoid overusing** sub-topic headers. Use sub-topic titles (###) only when necessary to break down complex sections. Prefer using nested lists as a way to organize notes over headers.
 - **Formatting of Terms:**
     - Terms that need to be learned should be formatted with backticks, like this: `` `term` ``.
     - When defining a term, place the definition at the beginning of the sentence: `` `term`: definition ``.
