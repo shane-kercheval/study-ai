@@ -49,14 +49,14 @@ format_to_markdown:
 	python study.py format-notes \
 		--model_type openai \
 		--model_name gpt-4o-mini \
-	    --temperature 0.8 \
+	    --temperature 0.5 \
 		--stream
 
 format_to_markdown_local:
 	python study.py format-notes \
 		--model_type openai_server \
 		--model_name http://localhost:1234/v1 \
-	    --temperature 0.8 \
+	    --temperature 0.5 \
 		--stream
 
 ####

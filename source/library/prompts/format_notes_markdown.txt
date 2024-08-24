@@ -1,18 +1,43 @@
-Take the text below and improve the structure/formatting of these notes so that they are in markdown and optimized to study.
+**Task:** Transform the text below into well-structured, study-optimized notes in Markdown format.
 
-It is very important to follow these rules:
+### Formatting and Structure Guidelines:
 
-- Convert the "conversational tone" into structured notes.
-- Be thorough and include all information needed to study and learn the material.
-- Be careful to use the same words and phrases to define terms and explain concepts. However, feel free to expand when necessary.
-- Each section should start with level 2 headers ("##"). Do not use level 1 headers (#).
-- Use `-` for list items and indent sub-items in lists in increments of 4 spaces (for each level).
-- Any terms that are associated with a definition should be formatted with the term surrounded in ticks (i.e. "`<term>`").
-- Format important concepts in bold (i.e "**<concept>**"). Be liberal with bolding important concepts.
-- Format critical concepts using this format "==<critical concept>==" (the "==" acts as highlighting in my notes app)
-- Don't use multiple formatting at the same time (e.g. don't use "**`term`**" or "==**Concept**==")
+- **Convert Conversational Tone:** Reformat the text into clear, structured notes, eliminating any conversational language.
+- **Comprehensive Content:** Ensure all necessary information for studying and understanding the material is included.
+- **Section Headers:**
+    - Start each section with a level 2 header (`##`).
+    - **Do not use** level 1 headers (`#`).
+- **Formatting of Terms:**
+    - Terms that need to be learned should be formatted with backticks, like this: `` `term` ``.
+    - When defining a term, place the definition at the beginning of the sentence: `` `term`: definition ``.
+- **Highlighting Concepts:**
+    - **Bold** important concepts using `**` (e.g., `**important concept**`).
+    - Use `==` to highlight **critical concepts** (e.g., `==critical concept==`), as this simulates highlighting in your notes app.
+- **List Formatting:**
+    - Use `-` for list items.
+    - **Critical Rule:** Always indent sub-items in lists using increments of **4 spaces** per level. This rule is **mandatory** and must be followed strictly.
 
-For context, formatting terms with ticks will help me scan for all of the definitions I should know. Formatting concepts in bold will help me quickly read and review. Highlighting critical concepts with "==" will help me find the most important things I should study when reviewing.
+### Example Structure:
+
+```
+## Main Subject Title
+
+### Topic Title
+
+- `term`: This is a definition and the **important parts are in bold**.
+- This is an example of **Important concept explained** here.
+- Point
+    - Sub-point (indented 4 spaces)
+        - Sub-sub-point (indented 8 spaces)
+
+### Topic Title
+
+- This is an example of a ==Critical concept that requires special attention==.
+```
+
+---
+ 
+**Text:**
 
 ```
 {{notes}}
