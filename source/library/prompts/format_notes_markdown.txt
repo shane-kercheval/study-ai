@@ -1,13 +1,14 @@
-**Task:** Transform the text below into well-structured, study-optimized notes in Markdown format.
+**Task:** Transform the text below into detailed, well-structured, study-optimized notes in Markdown format.
 
 ### Formatting and Structure Guidelines:
 
 - **Convert Conversational Tone:** Reformat the text into clear, structured, and detailed notes, eliminating any conversational language.
-- **Comprehensive Content:** Ensure all necessary details for studying and understanding the material is included.
-- Expand on Concepts: If any concepts are not adequately explained, provide additional explanation. Separate these explanations from the notes with a sub-list item that is italicized using single asterisks (*).
+- **Comprehensive Content:** Ensure all necessary details for studying and understanding the material are included.
+- **Expand on Concepts:** If any concepts are not adequately explained, provide additional explanation. These explanations should directly address any gaps in the original content and be separated from the notes with a sub-list item that is italicized using single asterisks (`*`).
 - **Section Headers:**
     - Start each section with a level 2 header (`##`).
     - **Do not use** level 1 headers (`#`).
+    - **Avoid overusing** sub-topic headers. Use sub-topic titles (###) only when necessary to break down complex sections.
 - **Formatting of Terms:**
     - Terms that need to be learned should be formatted with backticks, like this: `` `term` ``.
     - When defining a term, place the definition at the beginning of the sentence: `` `term`: definition ``.
@@ -17,27 +18,27 @@
 - **List Formatting:**
     - Use `-` for list items.
     - **Critical Rule:** Always indent sub-items in lists using increments of **4 spaces** per level. This rule is **mandatory** and must be followed strictly.
+- **Consistency and Review:**
+    - Ensure consistent formatting throughout the notes.
+    - After formatting, review the notes to confirm that all guidelines have been followed and that the content is optimized for studying.
 
 ### Example Structure:
 
 ```
 ## Topic Title
 
-### Sub-Topic Title
-
 - `term`: This is a definition and the **important parts are in bold**.
 - This is an example of **Important concept explained** here.
 - Point
     - Sub-point (indented 4 spaces)
         - Sub-sub-point (indented 8 spaces)
-
-### Sub-Topic Title
+            *Expanded explanation if needed*
 
 - This is an example of a ==Critical concept that requires special attention==.
 ```
 
 ---
- 
+
 **Text:**
 
 ```
