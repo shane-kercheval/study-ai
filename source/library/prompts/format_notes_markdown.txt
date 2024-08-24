@@ -2,8 +2,9 @@
 
 ### Formatting and Structure Guidelines:
 
-- **Convert Conversational Tone:** Reformat the text into clear, structured notes, eliminating any conversational language.
-- **Comprehensive Content:** Ensure all necessary information for studying and understanding the material is included.
+- **Convert Conversational Tone:** Reformat the text into clear, structured, and detailed notes, eliminating any conversational language.
+- **Comprehensive Content:** Ensure all necessary details for studying and understanding the material is included.
+- Expand on Concepts: If any concepts are not adequately explained, provide additional explanation. Separate these explanations from the notes with a sub-list item that is italicized using single asterisks (*).
 - **Section Headers:**
     - Start each section with a level 2 header (`##`).
     - **Do not use** level 1 headers (`#`).
@@ -20,13 +21,18 @@
 ### Example Structure:
 
 ```
-## Subject Title
+## Topic Title
+
+### Sub-Topic Title
 
 - `term`: This is a definition and the **important parts are in bold**.
 - This is an example of **Important concept explained** here.
 - Point
     - Sub-point (indented 4 spaces)
         - Sub-sub-point (indented 8 spaces)
+
+### Sub-Topic Title
+
 - This is an example of a ==Critical concept that requires special attention==.
 ```
 
