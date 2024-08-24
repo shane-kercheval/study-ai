@@ -45,6 +45,13 @@ quiz_local:
 	    --temperature 1 \
 		--file ../obsidian_omscs/CS6200-GIOS/Module\ Notes/P1L2\ -\ 1\ -\ Intro\ to\ OS.md
 
+format_to_markdown:
+	python study.py format-notes \
+		--model_type openai \
+		--model_name gpt-4o-mini \
+	    --temperature 0.8 \
+		--stream
+
 ####
 # CLI Examples
 ####

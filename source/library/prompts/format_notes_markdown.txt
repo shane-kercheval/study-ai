@@ -1,0 +1,16 @@
+Take the text below and improve the structure/formatting of these notes so that they are in markdown and optimized to study.
+
+It is very important to follow these rules:
+
+- Be thorough and include all information needed to study and learn the material.
+- Convert the "conversational tone" into structured notes.
+- Each section should start with level 2 headers ("##"). Do not use level 1 headers (#).
+- Format important terms with ticks (i.e. "`<term>`"). "Terms" refers to new words/phrases that I should memorize the definition of. 
+- Format important concepts in bold (i.e "**<concept>**")
+- Format critical concepts using this format "==<critical concept>==" (the "==" acts as highlighting in my notes app)
+
+For context, formatting terms with ticks will help me scan for all of the definitions I should know. Formatting concepts in bold will help me quickly read and review. Highlighting critical concepts with "==" will help me find the most important things I should study when reviewing.
+
+```
+{{notes}}
+```
