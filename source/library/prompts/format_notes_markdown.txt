@@ -20,18 +20,13 @@
 ### Example Structure:
 
 ```
-## Main Subject Title
-
-### Topic Title
+## Subject Title
 
 - `term`: This is a definition and the **important parts are in bold**.
 - This is an example of **Important concept explained** here.
 - Point
     - Sub-point (indented 4 spaces)
         - Sub-sub-point (indented 8 spaces)
-
-### Topic Title
-
 - This is an example of a ==Critical concept that requires special attention==.
 ```
 
