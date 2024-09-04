@@ -4,36 +4,29 @@
 
 - **Convert Conversational Tone:** Reformat the text into clear, structured, and detailed notes, eliminating any conversational language.
 - **Comprehensive Content:** Ensure all necessary details for studying and understanding the material are included.
-- **Expand on Concepts:** If any concepts are not adequately explained, expand upon the text and provide additional explanation or clarification.
+- **Be concise:** Although it is critical to be comprehensive, also be concise, and summarize points in ways that eliminate superfluous text. However, don't just mention what was discussed, explain the concepts.
 - **Section Headers:**
-    - Start each section with a level 2 header (`##`).
-    - **Do not use** level 1 headers (`#`).
-    - **Avoid overusing** sub-topic headers. Use sub-topic titles (###) only when necessary to break down complex sections. Prefer using nested lists as a way to organize notes over headers.
-- **Formatting of Terms:**
-    - Terms that need to be learned should be formatted with backticks, like this: `` `term` ``.
-    - When defining a term, place the definition at the beginning of the sentence: `` `term`: definition ``.
+    - **Avoid overusing** sub-topic headers. 
+    - when a header is used, used level- 2 header (`##`). **Do not use** level 1 headers (`#`).
+    = Use sub-topic titles only when necessary to break down complex sections. Prefer using nested lists as a way to organize notes over headers.
 - **Highlighting Concepts:**
     - **Bold** important concepts using `**` (e.g., `**important concept**`).
     - Use `==` to highlight **critical concepts** (e.g., `==critical concept==`), as this simulates highlighting in your notes app.
 - **List Formatting:**
     - Use `-` for list items.
     - **Critical Rule:** Always indent sub-items in lists using increments of **4 spaces** per level. This rule is **mandatory** and must be followed strictly.
-- **Consistency and Review:**
-    - Ensure consistent formatting throughout the notes.
-    - After formatting, review the notes to confirm that all guidelines have been followed and that the content is optimized for studying.
+    - DO NOT add multiple newlines between list items. Each list item should directly follow the previous without additional newlines.
 
 ### Example Structure:
 
 ```
 ## Topic Title
 
-- `term`: This is a definition and the **important parts are in bold**.
 - This is an example of **Important concept explained** here.
+- `term`: This is a definition and the **important parts are in bold**.
 - Point
     - Sub-point (indented 4 spaces)
         - Sub-sub-point (indented 8 spaces)
-            *Expanded explanation if needed*
-
 - This is an example of a ==Critical concept that requires special attention==.
 ```
 
