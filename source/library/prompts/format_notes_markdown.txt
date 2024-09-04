@@ -4,7 +4,7 @@
 
 - **Convert Conversational Tone:** Reformat the text into clear, structured, and detailed notes, eliminating any conversational language.
 - **Comprehensive Content:** Ensure all necessary details for studying and understanding the material are included.
-- **Be concise:** Although it is critical to be comprehensive, also be concise, and summarize points in ways that eliminate superfluous text. However, don't just mention what was discussed, explain the concepts.
+- **Be concise:** Although it is critical to be comprehensive, also be concise and summarize points in ways that eliminate superfluous text. However, don't just mention what was discussed, explain the concepts.
 - **Section Headers:**
     - **Avoid overusing** sub-topic headers. 
     - when a header is used, used level- 2 header (`##`). **Do not use** level 1 headers (`#`).
