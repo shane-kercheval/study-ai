@@ -179,13 +179,11 @@ def search(notes_paths: tuple[str], db_path: str, similarity_threshold: float, t
 @click.option('--model_name', '-mn', help="The model name (or endpoint) to use, e.g. 'gpt-4o-mini' or 'http://host.docker.internal:1234/v1'", default='gpt-4o-mini')  # noqa
 @click.option('--temperature', '-t', help='The temperature to set on the model.', default=0.1)
 @click.option('--file', '-f', help='The file to use for text-to-notes.', default=None)
-@click.option('--notes_input', '-f', help='Input is notes (as opposed to e.g. text from pdf).', is_flag=True, default=False)  # noqa
-def text_to_notes(
+def text_to_flashcards(
         model_type: str,
         model_name: str,
         temperature: float,
-        file: str | None,
-        notes_input: bool) -> None:
+        file: str | None) -> None:
     """Convert text to notes using a language model."""
     if model_type == 'openai':
         model = OpenAIChat(model_name=model_name, temperature=temperature)
@@ -195,12 +193,7 @@ def text_to_notes(
         raise NotImplementedError(f"Model type '{model_type}' not implemented.")
 
     model.streaming_callback = lambda x: click.echo(x.response, nl=False)
-    if notes_input:
-        path = "source/library/prompts/notes_to_notes.txt"
-        print("Using notes_to_notes.txt prompt")
-    else:
-        path = "source/library/prompts/text_to_notes.txt"
-        print("Using text_to_notes.txt prompt")
+    path = "source/library/prompts/text_to_flashcards.txt"
     with open(path) as f:
         prompt_template = f.read()
     if file:
@@ -275,8 +268,13 @@ def format_notes(
         model_name: str,
         temperature: float,
         stream: bool) -> None:
-    """Convert text to notes in markdown format using a language model."""
+    """
+    Convert text to notes in markdown format using a language model.
+
+    For example, this is used to convert lector trancripts into notes.
+    """
     if model_type == 'openai':
+
         model = OpenAIChat(model_name=model_name, temperature=temperature)
     elif model_type == 'openai_server':
         model = OpenAIServerChat(endpoint_url=model_name, temperature=temperature)

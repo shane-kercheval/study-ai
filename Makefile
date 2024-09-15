@@ -22,15 +22,14 @@ search:
 		--top_k 5 \
 		--similarity_threshold 0.3
 
-text_to_notes:
-	pdftotext /notes/CS-6200-GIOS/pdfs/OSTEP-Chapter-2.pdf /notes/CS-6200-GIOS/pdfs/OSTEP-Chapter-2.txt
-	python study.py text-to-notes \
-		--file /notes/CS-6200-GIOS/pdfs/OSTEP-Chapter-2.txt
+# text_to_flashcards:
+# 	pdftotext /notes/CS-6200-GIOS/pdfs/OSTEP-Chapter-2.pdf /notes/CS-6200-GIOS/pdfs/OSTEP-Chapter-2.txt
+# 	python study.py text-to-flashcards \
+# 		--file /notes/CS-6200-GIOS/pdfs/OSTEP-Chapter-2.txt
 
-note_to_notes:
-	python study.py text-to-notes \
-	    --notes_input \
-		--file ../obsidian_omscs/CS6200-GIOS/Module\ Notes/P1L2\ -\ 1\ -\ Intro\ to\ OS.md
+text_to_flashcards:
+	python study.py text-to-flashcards \
+		--file ../obsidian_omscs/CS6200-GIOS/Module\ Notes/P1L2\ -\ 2\ -\ Intro\ to\ OS.md
 
 quiz:
 	python study.py quiz \
@@ -85,18 +84,18 @@ search_default:
 	# start `search`
 	python study.py search
 
-text_to_notes_default:
-	python study.py text-to-notes
+text_to_flashcards_default:
+	python study.py text-to-flashcards
 
-text_to_notes_local:
+text_to_flashcards_local:
 	# using lmstudio to set up local server
-	python study.py text-to-notes \
+	python study.py text-to-flashcards \
 		--model_type openai_server \
 		--model_name http://host.docker.internal:1234/v1
 
-text_to_notes_file:
+text_to_flashcards_file:
 	# using lmstudio to set up local server
-	python study.py text-to-notes \
+	python study.py text-to-flashcards \
 		--model_name gpt-4o-mini \
 		--file /code/temp.txt
 		# --model_type openai_server \
