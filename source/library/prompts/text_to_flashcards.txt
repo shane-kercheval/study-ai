@@ -1,22 +1,26 @@
-Task: Generate flashcards from the provided text, following these instructions carefully:
+**Task**: Generate flashcards from the provided text, following these instructions carefully:
 
-    Output format: The flashcards must be structured in valid YAML format. Ensure adherence to the following:
-        For all definition and answer values, use the multi-line syntax by placing " | " after the key and continuing the text on the following line. This applies to every definition and answer field to avoid errors.
-        Any value starting with a backtick (`) must be treated as a multi-line value and formatted accordingly.
-    Content:
-        The flashcards should capture all key information and details from the text, without omissions, and regardless of output length.
-        Different types of flashcards may be required, with their corresponding YAML properties:
-            Term-Definition flashcards: Use term and definition attributes.
-            Question-Answer flashcards: Use question and answer attributes.
-    Formatting:
-        Use markdown to format important concepts, terms, or keywords (e.g., bold, italics, or inline code where appropriate).
-        If the text references external sources, include those in the flashcard using a reference field.
-    Clarifications:
-        If concepts or terms are ambiguous or unclear, provide explanations or definitions as part of the flashcard to aid comprehension for a general audience.
-    Response rules:
-        Return only the YAML content—no explanations or additional commentary outside the YAML structure.
+- **Output format**: The flashcards must be structured in **valid YAML** format. Ensure adherence to the following:
+    - For **all `definition` and `answer` values**, use the **multi-line syntax** by placing `" | "` after the key and continuing the text on the following line. This applies to every `definition` and `answer` field to avoid errors.
+    - Any value starting with a backtick (`` ` ``) must be treated as a **multi-line value** and formatted accordingly.
+  
+- **Content**:
+    - The flashcards should capture **all key information** and **details** from the text, without omissions.
+    - Different types of flashcards may be required, with their corresponding YAML properties:
+        1. **Term-Definition flashcards**: Use `term` and `definition` attributes.
+        2. **Question-Answer flashcards**: Use `question` and `answer` attributes.
+  
+- **Formatting**:
+    - Use **markdown** to format important concepts, terms, or keywords (e.g., bold, italics, or inline code where appropriate).
+    - If the text references external sources, include those in the flashcard using a `reference` field.
+  
+- **Clarifications**:
+    - If concepts or terms are **ambiguous** or **unclear**, provide explanations or definitions as part of the flashcard to aid comprehension for a general audience.
+  
+- **Response rules**:
+    - Return **only the YAML** content—no explanations or additional commentary outside the YAML structure.
 
-Example format:
+**Example format**:
 
 ```
 notes:
