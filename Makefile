@@ -22,11 +22,6 @@ search:
 		--top_k 5 \
 		--similarity_threshold 0.3
 
-# text_to_flashcards:
-# 	pdftotext /notes/CS-6200-GIOS/pdfs/OSTEP-Chapter-2.pdf /notes/CS-6200-GIOS/pdfs/OSTEP-Chapter-2.txt
-# 	python study.py text-to-flashcards \
-# 		--file /notes/CS-6200-GIOS/pdfs/OSTEP-Chapter-2.txt
-
 text_to_flashcards:
 	python study.py text-to-flashcards \
 		--file ../obsidian_omscs/CS6200-GIOS/Module\ Notes/P1L2\ -\ 2\ -\ Intro\ to\ OS.md
