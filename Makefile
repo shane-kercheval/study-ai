@@ -11,7 +11,13 @@ start:
 	docker-compose run -v /Users/shanekercheval/repos/omscs:/notes bash /bin/bash
 
 study_gios:
-	python study.py cycle \
+	python study.py study \
+		--notes_paths "../omscs/CS-6200-GIOS/flash-cards/*.yaml" \
+		--history_path "../omscs/CS-6200-GIOS/flash-cards/study-ai/history.yaml"
+
+smart_study_gios:
+	python study.py study \
+		--smart_cycle \
 		--notes_paths "../omscs/CS-6200-GIOS/flash-cards/*.yaml" \
 		--history_path "../omscs/CS-6200-GIOS/flash-cards/study-ai/history.yaml"
 
@@ -61,19 +67,19 @@ pdf_to_text:
 
 study_docker:
 	# launch study.py in docker container 
-	docker exec -it study-ai-bash-1 /bin/zsh -c "python study.py cycle"
+	docker exec -it study-ai-bash-1 /bin/zsh -c "python study.py study"
 
 study_default:
-	# start `cycle` with default settings/directory 
-	python study.py cycle
+	# start `study` with default settings/directory 
+	python study.py study
 
 study_abbreviation_gios:
-	# start `cycle` filtering for only GIOS class abbreviation
-	python study.py cycle --a GIOS
+	# start `study` filtering for only GIOS class abbreviation
+	python study.py study --a GIOS
 
 study_flashcards:
-	# start `cycle` with flashcards only
-	python study.py cycle --flash_only
+	# start `study` with flashcards only
+	python study.py study --flash_only
 
 search_default:
 	# start `search`

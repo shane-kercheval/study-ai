@@ -65,25 +65,25 @@ def test__filter_notes__abbr():  # noqa
     assert notes[0].subject_metadata.abbreviation == 'GIOS - filtered'
 
 
-def test__cycle__defaults():  # noqa
+def test__study__defaults():  # noqa
     # tests loading in all notes saved in the default notes path
     runner = CliRunner()
     result = runner.invoke(
         cli,
-        ['cycle'],
+        ['study'],
         # 'q' will work regardless of note type that is drawn
         input='q\n',
     )
     assert result.exit_code == 0
 
 
-def test__cycle__multiple_notes_paths():  # noqa
+def test__study__multiple_notes_paths():  # noqa
     # tests loading multiple notes paths
     runner = CliRunner()
     result = runner.invoke(
         cli,
         [
-            'cycle',
+            'study',
             '--notes_paths', 'tests/test_files/fake_notes.yaml',
             '--notes_paths', 'tests/test_files/fake_notes_filtering.yaml',
         ],
@@ -95,23 +95,23 @@ def test__cycle__multiple_notes_paths():  # noqa
     assert "Available notes: 8" in result.output
 
 
-def test__cycle__defaults__no_history():  # noqa
+def test__study__defaults__no_history():  # noqa
     runner = CliRunner()
     result = runner.invoke(
         cli,
-        ['cycle', '--notes_paths', 'tests/test_files/fake_notes.yaml'],
+        ['study', '--notes_paths', 'tests/test_files/fake_notes.yaml'],
         # 'q' will work regardless of note type that is drawn
         input='q\n',
     )
     assert result.exit_code == 0
 
 
-def test__cycle__flash_only__no_history():  # noqa
+def test__study__flash_only__no_history():  # noqa
     runner = CliRunner()
     result = runner.invoke(
         cli,
         [
-            'cycle',
+            'study',
             '--flash_only',
             '--notes_paths', 'tests/test_files/fake_notes.yaml',
         ],
@@ -121,7 +121,7 @@ def test__cycle__flash_only__no_history():  # noqa
     assert result.exit_code == 0
 
 
-def test__cycle__flash_only__with_history():  # noqa
+def test__study__flash_only__with_history():  # noqa
     notes_paths = 'tests/test_files/fake_notes.yaml'
     fake_history_path = 'tests/test_files/fake_history_no_history.yaml'
     temp_history_path = 'tests/test_files/temp___fake_history.yaml'
@@ -140,7 +140,7 @@ def test__cycle__flash_only__with_history():  # noqa
         result = runner.invoke(
             cli,
             [
-                'cycle',
+                'study',
                 '--flash_only',
                 '--notes_paths', notes_paths,
                 '--history_path', temp_history_path,
@@ -168,7 +168,7 @@ def test__cycle__flash_only__with_history():  # noqa
         result = runner.invoke(
             cli,
             [
-                'cycle',
+                'study',
                 '--flash_only',
                 '--notes_paths', notes_paths,
                 '--history_path', temp_history_path,
@@ -196,7 +196,7 @@ def test__cycle__flash_only__with_history():  # noqa
         result = runner.invoke(
             cli,
             [
-                'cycle',
+                'study',
                 '--flash_only',
                 '--notes_paths', notes_paths,
                 '--history_path', temp_history_path,

@@ -431,12 +431,14 @@ class NoteBank:
                 A dictionary of History objects for each note. The key is the UUID of the note
                 and the value is the History object.
         """
-        self.notes = {}
+        self.notes_list = notes
+        self.notes_dict = {}
+        self.next_note_index = 0
         for note in notes:
             uuid = note.uuid
-            if uuid in self.notes:
+            if uuid in self.notes_dict:
                 raise ValueError(f"Duplicate UUID: {uuid}")
-            self.notes[uuid] = {
+            self.notes_dict[uuid] = {
                 'uuid': uuid,
                 'history': history[uuid] if history and uuid in history else History(),
                 'note': note,
@@ -444,7 +446,13 @@ class NoteBank:
 
     def __len__(self) -> int:
         """Return the number of notes in the test bank."""
-        return len(self.notes)
+        return len(self.notes_dict)
+
+    def next(self) -> Note:
+        """Return the next note in the test bank."""
+        note = self.notes_list[self.next_note_index]
+        self.next_note_index = (self.next_note_index + 1) % len(self.notes_list)
+        return note
 
     def draw(
             self,
@@ -489,13 +497,13 @@ class NoteBank:
         # likely we need to study this note.
         if priority_weights:
             priority_weights = softmax_dict(priority_weights)
-            for k, v in self.notes.items():
+            for k, v in self.notes_dict.items():
                 probability_incorrect = 1 - v['history'].probability_correct(last_n=last_n, seed=seed)  # noqa
                 probabilities[k] = probability_incorrect * priority_weights[ v['note'].priority]
         else:
             probabilities = {
                 k: 1 - v['history'].probability_correct(last_n=last_n, seed=seed)
-                for k, v in self.notes.items()
+                for k, v in self.notes_dict.items()
             }
         probabilities = softmax_dict(probabilities)
         if not np.isclose(sum(probabilities.values()), 1):
@@ -503,11 +511,11 @@ class NoteBank:
         # draw a note
         rng = np.random.default_rng(seed)
         uuid = rng.choice(list(probabilities.keys()), p=list(probabilities.values()))
-        return self.notes[uuid]['note']
+        return self.notes_dict[uuid]['note']
 
     def answer(self, uuid: str, correct: bool) -> None:
         """Update the history of the note based on the correctness of the answer."""
-        self.notes[uuid]['history'].answer(correct)
+        self.notes_dict[uuid]['history'].answer(correct)
 
     def history(self, to_dict: bool = False) -> dict[str, History] | dict[str, dict[str, int]]:
         """
@@ -519,5 +527,5 @@ class NoteBank:
                 history as a dictionary of History objects.
         """
         if to_dict:
-            return {uuid: v['history'].to_dict() for uuid, v in self.notes.items()}
-        return {uuid: v['history'] for uuid, v in self.notes.items()}
+            return {uuid: v['history'].to_dict() for uuid, v in self.notes_dict.items()}
+        return {uuid: v['history'] for uuid, v in self.notes_dict.items()}

@@ -32,6 +32,7 @@ def create_notes() -> None:
 
 
 @cli.command()
+@click.option('--smart_cycle', '-f', help='Cycle through notes based on historical accuracy.', is_flag=True, default=False)  # noqa
 @click.option('--flash_only', '-f', help='Only display flashcards.', is_flag=True, default=False)
 @click.option('--category', '-c', help='Only display notes from a specific class category.', default=None)  # noqa
 @click.option('--ident', '-i', help='Only display notes from a specific class identity.', default=None)  # noqa
@@ -39,7 +40,8 @@ def create_notes() -> None:
 @click.option('--abbr', '-a', help='Only display notes from a specific class abbreviation.', default=None)  # noqa
 @click.option('--notes_paths', '-p', multiple=True, help='The path to the notes yaml file(s).', default=['data/notes/*.yaml'])  # noqa
 @click.option('--history_path', '-h', help='The path to the history (of correct/incorrect answers) yaml file.', default='data/history.yaml')  # noqa
-def cycle(
+def study(
+        smart_cycle: bool,
         flash_only: bool,
         category: str,
         ident: str,
@@ -77,12 +79,15 @@ def cycle(
         notes=notes,
         history={k: History(**v) for k, v in history.items()},
     )
-    click.echo(f"Available notes: {len(test_bank.notes)}")
+    click.echo(f"Available notes: {len(test_bank.notes_dict)}")
     while True:
         # only consider the last 20 answers; give more weight (linear) to the most recent answers
         weights = list(range(20))
         priority_weights = {Priority.high: 3, Priority.medium: 2, Priority.low: 1}
-        note = test_bank.draw(last_n=weights, priority_weights=priority_weights)
+        if smart_cycle:
+            note = test_bank.draw(last_n=weights, priority_weights=priority_weights)
+        else:
+            note = test_bank.next()
         click.echo("--------------------------\n")
         click.echo(colorize_gray(f"{note.uuid}"))
         click.echo(colorize_gray(f"{note.subject_metadata.category} - {note.subject_metadata.ident} - {note.subject_metadata.abbreviation} - {note.subject_metadata.name}"))  # noqa  
@@ -102,7 +107,7 @@ def cycle(
         user_response = ''
         while user_response not in ['y', 'n', 'q']:
             user_response = click.prompt(
-                colorize_gray("Invalid input. Correct? (y/n) or q to quit"),
+                colorize_gray("Correct? (y/n) or q to quit"),
                 type=str,
             )
         if user_response == 'q':

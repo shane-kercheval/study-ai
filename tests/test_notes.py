@@ -282,10 +282,10 @@ def test__TestBank__no_history__expect_equal_draws(fake_notes, history):  # noqa
     present.
     """
     test_bank = NoteBank(notes=dict_to_notes(fake_notes), history=history)
-    {uuid: n['note'].text() for uuid, n in test_bank.notes.items()}
+    {uuid: n['note'].text() for uuid, n in test_bank.notes_dict.items()}
     assert len(test_bank) == len(fake_notes['notes'])
     draws = [test_bank.draw().uuid for _ in range(len(test_bank) * 1000)]
-    expected_uuids = {note['note'].uuid for note in test_bank.notes.values()}
+    expected_uuids = {note['note'].uuid for note in test_bank.notes_dict.values()}
     assert set(draws) == expected_uuids
     # Each note should be drawn roughly the same number of times
     # get counts of each uuid
@@ -308,7 +308,7 @@ def test__TestBank__no_history__answer__history_updates_correctly(fake_notes, hi
     """Test that the history is updated correctly when answering questions."""
     test_bank = NoteBank(notes=dict_to_notes(fake_notes), history=history)
     assert len(test_bank) == len(fake_notes['notes'])
-    expected_uuids = [note['note'].uuid for note in test_bank.notes.values()]
+    expected_uuids = [note['note'].uuid for note in test_bank.notes_dict.values()]
     assert all(test_bank.history()[uuid].answers == [] for uuid in expected_uuids)
     for index in range(len(test_bank)):
         test_bank.answer(expected_uuids[index], correct=True)
@@ -318,6 +318,18 @@ def test__TestBank__no_history__answer__history_updates_correctly(fake_notes, hi
         test_bank.answer(expected_uuids[index], correct=True)
         assert test_bank.history()[expected_uuids[index]].answers == [True, False, True]
         assert {uuid: h.to_dict() for uuid, h in test_bank.history().items()} == test_bank.history(to_dict=True)  # noqa
+
+
+def test__TestBank__next(fake_notes, fake_history_equal):  # noqa
+    test_bank = NoteBank(notes=dict_to_notes(fake_notes), history=fake_history_equal)
+    assert len(test_bank) == len(fake_notes['notes'])
+    next_note = test_bank.next()
+    assert next_note.uuid == test_bank.notes_list[0].uuid
+    next_note = test_bank.next()
+    assert next_note.uuid == test_bank.notes_list[1].uuid
+    for _ in range(len(test_bank)):
+        next_note = test_bank.next()
+        assert next_note.uuid in test_bank.notes_dict
 
 
 def test__TestBank__draw__priority_weights(fake_notes, fake_history_equal):  # noqa
@@ -331,14 +343,14 @@ def test__TestBank__draw__priority_weights(fake_notes, fake_history_equal):  # n
     test_bank = NoteBank(notes=dict_to_notes(fake_notes), history=fake_history_equal)
     weights = {Priority.high: 4, Priority.medium: 2, Priority.low: 1}
     draws = [test_bank.draw(priority_weights=weights).uuid for _ in range(10_000)]
-    counts = {uuid: draws.count(uuid) for uuid in test_bank.notes}
+    counts = {uuid: draws.count(uuid) for uuid in test_bank.notes_dict}
 
     # we can do this since all histories have the same number of correct and incorrect answers
-    uuid_weights = {uuid: weights[test_bank.notes[uuid]['note'].priority] for uuid in test_bank.notes}  # noqa
+    uuid_weights = {uuid: weights[test_bank.notes_dict[uuid]['note'].priority] for uuid in test_bank.notes_dict}  # noqa
     expected_freq_lookups = softmax_dict(uuid_weights)
     # test that the counts are roughly equal to the expected probability of draw
-    for uuid in test_bank.notes:
-        # priority = test_bank.notes[uuid]['note'].priority
+    for uuid in test_bank.notes_dict:
+        # priority = test_bank.notes_dict[uuid]['note'].priority
         expected_freq = expected_freq_lookups[uuid]
         assert np.isclose(counts[uuid] / len(draws), expected_freq, atol=0.02)
 
@@ -355,7 +367,7 @@ def test__TestBank__draw__last_n__without_weights(fake_notes):  # noqa
     test_bank = NoteBank(notes=notes, history=history)
     # test last_n without weights
     draws = [test_bank.draw(last_n=10).uuid for _ in range(10_000)]
-    counts = {uuid: draws.count(uuid) for uuid in test_bank.notes}
+    counts = {uuid: draws.count(uuid) for uuid in test_bank.notes_dict}
     # we can do this since all histories have the same number of correct and incorrect answers
     expected_freq_lookups = {
         notes[0].uuid: 1.0,
@@ -368,7 +380,7 @@ def test__TestBank__draw__last_n__without_weights(fake_notes):  # noqa
     # This doesn't actually calculate the correct expected frequencies since beta distribution
     # doesn't give an average of 0 for 10 incorrect and 0 correct (it's more like 0.1)
     # but it's close enough for this test
-    for uuid in test_bank.notes:
+    for uuid in test_bank.notes_dict:
         expected_freq = expected_freq_lookups[uuid]
         assert np.isclose(counts[uuid] / len(draws), expected_freq, atol=0.1)
 
@@ -390,7 +402,7 @@ def test__TestBank__draw__last_n__with_weights(fake_notes):  # noqa
     test_bank = NoteBank(notes=notes, history=history)
     weights = list(range(10))
     draws = [test_bank.draw(last_n=weights).uuid for _ in range(10_000)]
-    counts = {uuid: draws.count(uuid) for uuid in test_bank.notes}
+    counts = {uuid: draws.count(uuid) for uuid in test_bank.notes_dict}
     # we can do this since all histories have the same number of correct and incorrect answers
     expected_freq_lookups = {
         notes[0].uuid: 1.0,
@@ -403,7 +415,7 @@ def test__TestBank__draw__last_n__with_weights(fake_notes):  # noqa
     # This doesn't actually calculate the correct expected frequencies since beta distribution
     # doesn't give an average of 0 for 10 incorrect and 0 correct (it's more like 0.1)
     # but it's close enough for this test
-    for uuid in test_bank.notes:
+    for uuid in test_bank.notes_dict:
         expected_freq = expected_freq_lookups[uuid]
         assert np.isclose(counts[uuid] / len(draws), expected_freq, atol=0.1)
 
@@ -421,7 +433,7 @@ def test__TestBank__with_history__expect_draw_counts_to_correspond_with_history(
 
     test_bank = NoteBank(notes=notes, history=fake_history)
     assert len(test_bank) == len(notes)
-    assert set(test_bank.notes.keys()) == expected_uuids
+    assert set(test_bank.notes_dict.keys()) == expected_uuids
 
     # each note is associated with a beta distribution that has been updated 100,000 times
     # so the probability from success_probability should be very close to the actual probability of
