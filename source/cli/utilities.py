@@ -90,12 +90,14 @@ def colorize_markdown(text: str) -> str:
         # Apply an approximate orange color and bold formatting for code blocks
         # 38;5;208 is an ANSI escape code for a color close to orange
         text = re.sub(r'```(.*?)```', r'\033[38;5;208;1m\1\033[0m', text, flags=re.DOTALL)
-    else:
-        # Apply red color for text surrounded by **
-        text = re.sub(r'\*\*(.*?)\*\*', r'\033[31m\1\033[0m', text)
-        # Apply blue color for text surrounded by `
-        text = re.sub(r'`(.*?)`', r'\033[34m\1\033[0m', text)
-    return text
+    # Apply blue color and bold for text surrounded by **
+    text = re.sub(r'\*\*(.*?)\*\*', r'\033[34;1m\1\033[0m', text)
+    # Apply red color and bold for text surrounded by ==
+    text = re.sub(r'==(.*?)==', r'\033[31;1m\1\033[0m', text)
+    # Apply orange color and bold for text surrounded by `
+    text = re.sub(r'`(.*?)`', r'\033[38;5;208;1m\1\033[0m', text)
+    # text = re.sub(r'`(.*?)`', r'\033[38;5;208m\1\033[0m', text)
+    return text  # noqa: RET504
 
 
 def colorize_gray(text: str) -> str:
