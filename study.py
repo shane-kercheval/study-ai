@@ -266,13 +266,17 @@ def quiz(
 @cli.command()
 @click.option('--model_type', '-mt', help="The model service to use, e.g. 'openai' or 'openai_server'", default='openai')  # noqa
 @click.option('--model_name', '-mn', help="The model name (or endpoint) to use, e.g. 'gpt-4o-mini', 'http://localhost:1234/v1', or 'http://host.docker.internal:1234/v1'", default='gpt-4o-mini')  # noqa
+@click.option('--file', '-f', help='The file to use for text-to-notes.', default=None)
 @click.option('--temperature', '-t', help='The temperature to set on the model.', default=0.1)
 @click.option('--stream', '-s', help='Stream response.', is_flag=True, default=False)
+@click.option('--clean_markdown', '-cm', help='Clean markdown.', is_flag=True, default=False)
 def format_notes(
         model_type: str,
         model_name: str,
+        file: str | None,
         temperature: float,
-        stream: bool) -> None:
+        stream: bool,
+        clean_markdown: bool) -> None:
     """
     Convert text to notes in markdown format using a language model.
 
@@ -288,10 +292,17 @@ def format_notes(
         raise NotImplementedError(f"Model type '{model_type}' not implemented.")
     if stream:
         model.streaming_callback = lambda x: click.echo(x.response, nl=False)
-    path = "source/library/prompts/format_notes_markdown.txt"
+    if clean_markdown:
+        path = "source/library/prompts/clean_notes_markdown.txt"
+    else:
+        path = "source/library/prompts/format_notes_markdown.txt"
     with open(path) as f:
         prompt_template = f.read()
-    notes = click.edit("")
+    if file:
+        with open(file) as f:
+            notes = f.read()
+    else:
+        notes = click.edit("")
     click.echo("\n------\n")
     prompt = dedent(prompt_template).strip().replace("{{notes}}", notes)
     response = model(prompt)

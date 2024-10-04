@@ -10,6 +10,16 @@ env:
 start:
 	docker-compose run -v /Users/shanekercheval/repos/omscs:/notes bash /bin/bash
 
+
+clean_markdown_notes:
+	python study.py format-notes \
+		--model_type openai \
+		--model_name gpt-4o-mini \
+	    --temperature 0.5 \
+		--stream \
+		--clean_markdown \
+		--file ../obsidian_omscs/CS6200-GIOS/Module\ Notes/P2L5\ -\ 1\ -\ Thread\ Performance.md
+
 study_gios:
 	python study.py study \
 		--notes_paths "../omscs/CS-6200-GIOS/flash-cards/*.yaml" \

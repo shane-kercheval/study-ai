@@ -1,0 +1,27 @@
+**Task:** Clean the markdown text below into detailed, well-structured, study-optimized notes in Markdown format.
+
+### Formatting and Structure Guidelines:
+
+- **Comprehensive Content:** Ensure all necessary details for studying and understanding the material are included.
+- **Be concise:** Although it is critical to be comprehensive, also be concise and summarize points in ways that eliminate superfluous text. However, don't just mention what was discussed, explain the concepts in detail.
+- **Section Headers:**
+    - **Avoid overusing** sub-topic headers. 
+    - when a header is used, used level- 2 header (`##`). **Do not use** level 1 headers (`#`).
+    = Use sub-topic titles only when necessary to break down complex sections. Prefer using nested lists as a way to organize notes over headers.
+- **Highlighting Concepts:**
+    - Use "`" for `keywords` and `terms`
+    - **Bold** important concepts using `**` (e.g., `**important concept**`).
+    - Use `==` to highlight **critical concepts** (e.g., `==critical concept==`), as this simulates highlighting in your notes app.
+    - It is critical to include **all** references to images which have this format "![[<image-name>.png]]"
+- **List Formatting:**
+    - Use `-` for list items.
+    - **Critical Rule:** Always indent sub-items in lists using increments of **4 spaces** per level. This rule is **mandatory** and must be followed strictly.
+    - DO NOT add multiple newlines between list items. Each list item should directly follow the previous without additional newlines.
+
+---
+
+**Text:**
+
+```
+{{notes}}
+```
