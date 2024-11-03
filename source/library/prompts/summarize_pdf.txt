@@ -30,9 +30,115 @@ Create a comprehensive, detailed study guide based on the provided research pape
 
 The final guide should mirror the structure of the paper exactly, serving as a clear, standalone resource for understanding the research in detail.
 
-The following is an example of a SINGLE SECTION in a PDF. 
+The following is an example of a paper to summarize. 
 
 ```
+Virtual Machine
+
+Monitors: CurrentTechnology and Future Trends
+
+A t the end of the 1960s, the virtual machine monitor (VMM) came into being as a soft- ware-abstraction layer that partitions a hardware platform into one or more virtual machines.1 Each of these virtual machines was sufﬁciently similar to the underlying physical machine to run existing software unmodiﬁed.
+
+At the time, general-purpose computing was the domain of large, expensive mainframe hardware, and users found that VMMs provided a compelling way to multiplex such a scarce resource among mul- tiple applications. Thus, for a brief period, this tech- nology ﬂourished both in industry and in academic research.
+
+The 1980s and 1990s, however, brought modern multitasking operating systems and a simultaneous drop in hardware cost, which eroded the value of
+
+VMMs. As mainframes gave way to minicomput- ers and then PCs, VMMs disappeared to the extent that computer architectures no longer provided the necessary hardware to implement them efﬁciently.
+
+By the late 1980s, neither academics nor industry practitioners viewed VMMs as much more than a historical curiosity.
+
+Fast forwarding to 2005, VMMs are again a hot topic in academia and industry: Venture capital
+
+ﬁrms are competing to fund startup companies tout- ing their virtual-machine-based technologies. Intel,
+
+AMD, Sun Microsystems, and IBM are developing virtualization strategies that target markets with revenues in the billions and growing. In research labs and universities, researchers are developing approaches based on virtual machines to solve mobility, security, and manageability problems.
+
+What happened between the VMM’s essential retirement and its current resurgence?
+
+In the 1990s, Stanford University researchers began to look at the potential of virtual machines to overcome difﬁculties that hardware and operat- ing system limitations imposed: This time the prob- lems stemmed from massively parallel processing (MPP) machines that were difﬁcult to program and could not run existing operating systems. With vir- tual machines, researchers found they could make these unwieldy architectures look sufﬁciently sim- ilar to existing platforms to leverage the current operating systems. From this project came the peo- ple and ideas that underpinned VMware Inc. (www.vmware.com), the original supplier of
+
+VMMs for commodity computing hardware. The implications of having a VMM for commodity plat- forms intrigued both researchers and entrepreneurs.
+
+WHY THE REVIVAL?
+
+Ironically, the capabilities of modern operating systems and the drop in hardware cost—the very
+
+Developed more than 30 years ago to address mainframe computing problems, virtual machine monitors have resurfaced on commodity platforms, offering novel solutions to challenges in security, reliability,  and administration.
+
+Mendel
+
+Rosenblum
+
+VMware Inc.
+
+Tal Garﬁnkel
+
+Stanford University
+
+combination that had obviated the use of VMMs during the 1980s—began to cause problems that researchers thought VMMs might solve. Less expensive hardware had led to a proliferation of machines, but these machines were often under- used and incurred signiﬁcant space and manage- ment overhead. And the increased functionality that had made operating systems more capable had also made them fragile and vulnerable.
+
+To reduce the effects of system crashes and break- ins, system administrators again resorted to a com- puting model with one application running per machine. This in turn increased hardware require- ments, imposing signiﬁcant cost and management overhead. Moving applications that once ran on many physical machines into virtual machines and consolidating those virtual machines onto just a few physical platforms increased use efﬁciency and reduced space and management costs. Thus, the
+
+VMM’s ability to serve as a means of multiplexing hardware—this time in the name of server consol- idation and utility computing—again led it to prominence.
+
+Moving forward, a VMM will be less a vehicle for multitasking, as it was originally, and more a solution for security and reliability. In many ways
+
+VMMs give operating systems developers another opportunity to develop functionality no longer practical in today’s complex and ossiﬁed operating systems, where innovation moves at a geologic pace. Functions like migration and security that have proved difﬁcult to achieve in modern operat- ing systems seem much better suited to implemen- tation at the VMM layer. In this context, VMMs provide a backward-capability path for deploying innovative operating system solutions, while pro- viding the ability to safely pull along the existing software base.
+
+DECOUPLING HARDWARE AND SOFTWARE
+
+As Figure 1 shows, the VMM decouples the soft- ware from the hardware by forming a level of indi- rection between the software running in the virtual machine (layer above the VMM) and the hardware.
+
+This level of indirection lets the VMM exert tremendous control over how guest operating sys- tems (GuestOSs)—operating systems running inside a virtual machine—use hardware resources.
+
+A VMM provides a uniform view of underlying hardware, making machines from different vendors with different I/O subsystems look the same, which means that virtual machines can run on any avail- able computer. Thus, instead of worrying about individual machines with tightly coupled hardware and software dependencies, administrators can view hardware simply as a pool of resources that can run arbitrary services on demand.
+
+Because the VMM also offers complete encapsu- lation of a virtual machine’s software state, the
+
+VMM layer can map and remap virtual machines to available hardware resources at will and even migrate virtual machines across machines. Load bal- ancing among a collection of machines thus becomes trivial, and there is a robust model for deal- ing with hardware failures or for scaling systems.
+
+When a computer fails and must go ofﬂine or when a new machine comes online, the VMM layer can simply remap virtual machines accordingly. Virtual machines are also easy to replicate, which lets administrators bring new services online as needed.
+
+Encapsulation also means that administrators can suspend virtual machines and resume them at arbitrary times or checkpoint them and roll them back to a previous execution state. With this gen- eral-purpose undo capability, systems can easily recover from crashes or configuration errors.
+
+Encapsulation also supports a very general mobil- ity model, since users can copy a suspended virtual machine over a network or store and transport it on removable media.
+
+The VMM can also provide total mediationof all interactions between the virtual machine and under- lying hardware, thus allowing strong isolation between virtual machines and supporting the mul- tiplexing of many virtual machines on a single hard- ware platform. The VMM can then consolidate a collection of virtual machines with low resources onto a single computer, thereby lowering hardware costs and space requirements.
+
+Strong isolation is also valuable for reliability and security. Applications that previously ran together on one machine can now separate into different vir- tual machines. If one application crashes the oper- ating system because of a bug, the other applications are isolated from this fault and can continue running undisturbed. Further, if attackers
+
+May 2005 35
+
+Hardware
+
+Operating system
+
+App App
+
+Virtual machine monitor
+
+App App App
+
+Operating system
+
+Operating system
+
+Figure 1. Classic
+
+VMM. The VMM is a thin software layer that exports a virtual machine abstraction. The abstraction looks enough like the hardware that any software written for that hardware will run in the virtual machine.
+
+36 Computer compromise a single application, the attack is contained to just the compromised virtual machine.
+
+Thus, VMMs are a tool for restructuring systems to enhance robustness and security— without imposing the space or management overhead that would be required if applica- tions executed on separate physical machines.
+
+VMM IMPLEMENTATION ISSUES
+
+The VMM must be able to export a hardware interface to the software in a virtual machine that is roughly equivalent to raw hardware and simul- taneously maintain control of the machine and retain the ability to interpose on hardware access.
+
+Various techniques can help achieve this, each offer- ing different design tradeoffs.
+
+When evaluating these tradeoffs, the central design goals for VMMs are compatibility, perfor- mance, and simplicity. Compatibility is clearly important, since the VMM’s chief beneﬁt is its abil- ity to run legacy software. The goal of performance, a measure of virtualization overhead, is to run the virtual machine at the same speed as the software would run on the real machine. Simplicity is par- ticularly important because a VMM failure is likely to cause all the virtual machines running on the computer to fail. In particular, providing secure iso- lation requires that the VMM be free of bugs that attackers could use to subvert the system.
+
 CPU virtualization
 
 A CPU architecture is virtualizable if it supports the basic VMM technique of direct execution— executing the virtual machine on the real machine, while letting the VMM retain ultimate control of the CPU.
@@ -105,12 +211,404 @@ IBM mainframe virtualization support of the early days, it should be possible to
 
 Lessons from the past indicate that adequate hardware support can decrease overhead, even without paravirtualization, to the point that the value of having a fully compatible virtual machine abstraction overrides any performance benefits from breaking compatibility.
 
+Memory virtualization
+
+The traditional implementation technique for vir- tualizing memory is to have the VMM maintain a shadow of the virtual machine’s memory-manage- ment data structure. This data structure, the shadow page table, lets the VMM precisely control which pages of the machine’s memory are available to a vir- tual machine.
+
+When the operating system running in a virtual machine establishes a mapping in its page table, the
+
+May 2005 37
+
+Building a VMM  that offers full  compatibility and high performance  is a signiﬁcant  engineering challenge.
+
+38 Computer
+
+VMM detects the changes and establishes a mapping in the corresponding shadow page table entry that points to the actual page loca- tion in the hardware memory. When the vir- tual machine is executing, the hardware uses the shadow page table for memory transla- tion so that the VMM can always control what memory each virtual machine is using.
+
+Like a traditional operating system’s virtual memory subsystems, the VMM can page the virtual machine to a disk so that the memory allocated to virtual machines can exceed the hard- ware’s physical memory size. Because this effectively lets the VMM overcommit the machine memory, the virtual machine workload requires less hardware.
+
+The VMM can dynamically control how much memory each virtual machine gets according to what it needs.
+
+Challenges. The VMM’s virtual memory subsys- tem constantly controls how much memory goes to a virtual machine, and it must periodically reclaim some of that memory by paging a portion of the virtual machine out to disk. The operating system running in the virtual machine (the
+
+GuestOS), however, is likely to have much better information than a VMM’s virtual memory system about which pages are good candidates for paging out. For example, a GuestOS might note that the process that created a page has exited, which means nothing will access the page again. The VMM oper- ating at the hardware level does not see this and might wastefully page out that page.
+
+To address this problem, VMware’s ESX Server5 adopted a paravirtualization-like approach, in which a balloon process running inside the
+
+GuestOS can communicate with the VMM. When the VMM wants to take memory away from a vir- tual machine, it asks the balloon process to allo- cate more memory, essentially “inflating” the process. The GuestOS then uses its superior knowl- edge about page replacement to select the pages to give to the balloon process, which the process then passes to the VMM for reallocation. The increased memory pressure caused by inﬂating the balloon process causes the GuestOS to intelligently page memory to the virtual disk.
+
+A second challenge for memory virtualization is the size of modern operating systems and applica- tions. Running multiple virtual machines can waste considerable memory by storing redundant copies of code and data that are identical across virtual machines.
+
+To address this challenge, VMware designers developed content-based page sharing for their server products. In this scheme, the VMM tracks the contents of physical pages, noting if they are identi- cal. If so, the VMM modiﬁes the virtual machine’s shadow page tables to point to only a single copy.
+
+The VMM can then deallocate the redundant copy, thereby freeing the memory for other uses.
+
+As with a normal copy-on-write page-sharing scheme, the VMM gives each virtual machine its own copy of the page if the contents later diverge.
+
+To give an idea of potential savings, an x86 com- puter might have 30 virtual machines running
+
+Microsoft Windows 2000 but only one copy of the
+
+Windows kernel in the computer’s memory—a sig- niﬁcant reduction in physical memory use.
+
+Future support. Operating systems make frequent changes to their page tables, so keeping shadow copies up to date in software can incur undesirable overhead. Hardware-managed shadow page tables have long been present in mainframe virtualization architectures and would prove a fruitful direction for accelerating x86 CPU virtualization.
+
+Resource management holds great promise as an area for future research. Much work remains in investigating ways for VMMs and guest operating systems to make cooperative resource management decisions. In addition, research must look at resource management at the entire data center level, and we expect signiﬁcant strides will be made in this area in the coming decade.
+
+I/O virtualization
+
+Thirty years ago, the I/O subsystems of IBM mainframes used a channel-based architecture, in which access to the I/O devices was through com- munication with a separate channel processor. By using a channel processor, the VMM could safely export I/O device access directly to the virtual machine. The result was a very low virtualization overhead for I/O. Rather than communicating with the device using traps into the VMM, the software in the virtual machine could directly read and write the device. This approach worked well for the I/O devices of that time, such as text terminals, disks, card readers, and card punches.
+
+Challenges. Current computing environments, with their richer and more diverse collection of I/O devices, make virtualizing I/O much more difﬁcult.
+
+The x86-based computing environments support a huge collection of I/O devices from different ven- dors with different programming interfaces. Con- sequently, the job of writing a VMM layer that talks to these various devices becomes a huge effort. In addition, some devices such as a modern PC’s graphics subsystem or a modern server’s network
+
+Resource management  holds great  promise as an  area for future research.
+
+interface have extremely high performance require- ments. This makes low-overhead virtualization an even more critical prerequisite for widespread acceptance.
+
+Exporting a standard device interface means that the virtualization layer must be able to communi- cate with the computer’s I/O devices. To provide this capability, VMware Workstation, a product targeting desktop computers, developed the hosted architecture6 shown in Figure 2. In this architec- ture, the virtualization layer uses the device drivers of a host operating system (HostOS) such as Win- dows or Linux to access devices. Because most I/O devices have drivers for these operating systems, the virtualization layer can support any I/O device.
+
+When the GuestOS gives the command to read or write blocks from the virtual disk, the virtual layer translates the command into a system call that reads or writes a ﬁle in the HostOS’s ﬁle system. Similarly, the I/O VMM renders the virtual machine’s virtual display card in a window on the HostOS, which lets the HostOS control, drive, and manage the virtual machine’s I/O display devices regardless of what devices the GuestOS thinks are present.
+
+The hosted architecture has three important advantages. First, the VMM is simple to install because users can install it like an application on the
+
+HostOS rather than on the raw hardware, as with traditional VMMs. Second, the hosted architecture fully accommodates the rich diversity of I/O devices in the x86 PC marketplace. Third, the VMM can use the scheduling, resource management, and other services the HostOS environment offers.
+
+The disadvantages of the hosted architecture became material when VMware started to develop products for the x86 server marketplace. The hosted architecture greatly increases the perfor- mance overhead for I/O device virtualization. Each
+
+I/O request must transfer control to the HostOS environment and then transition through the
+
+HostOS’s software layers to talk to the I/O devices.
+
+For server environments with high-performance network and disk subsystems, the resulting over- head was unacceptably high.
+
+Another problem is that modern operating sys- tems such as Windows and Linux do not have the resource-management support to provide perfor- mance isolation and service guarantees to the  virtual machines—a feature that many server envi- ronments require.
+
+ESX Server 5 adopts a more traditional VMM approach, running directly on the hardware with- out a host operating system. In addition to sophis- ticated scheduling and resource management, ESX
+
+Server has a highly optimized I/O subsystem for network and storage devices.
+
+The ESX Server kernel can use device drivers from the Linux kernel to talk directly to the device, resulting in signiﬁcantly lower virtualization over- head for I/O devices. VMware could use this approach because relatively few network and stor- age I/O devices have passed certiﬁcation to run in major x86 vendor server machines. Limiting sup- port to these I/O devices makes directly managing the I/O devices feasible for servers.
+
+Yet another performance optimization in
+
+VMware’s products is the ability to export special highly optimized virtual I/O devices that don’t cor- respond to any existing I/O devices. Like the par- avirtualization approach for CPUs, this use of paravirtualization requires that GuestOS environ- ments use a special device driver to access the I/O devices. The result is a more virtualization-friendly
+
+I/O device interface with lower overhead for com- municating the I/O commands from the GuestOS and thus higher performance.
+
+Future support. Like CPU trends, industry trends in I/O subsystems point toward hardware support for high-performance I/O device virtualization.
+
+Discrete I/O devices, such as the standard x86 PC keyboard controller and IDE disk controllers that date back to the original IBM PC, are giving way to channel-like I/O devices, such as USB and SCSI.
+
+Like the IBM mainframe I/O channels, these I/O interfaces greatly ease implementation complex- ity and reduce virtualization overhead.
+
+With adequate hardware support, safely passing these channel I/O devices directly to the software in the virtual machine should be possible, effectively eliminating all I/O virtualization overhead. For this to work, I/O devices will need to know about vir- tual machines and be able to support multiple vir- tual interfaces so that the VMM can safely map the interface into the virtual machine. In this way, the virtual machine’s device drivers will be able to com-
+
+May 2005 39
+
+Standard x86 PC hardware
+
+HostOS  VMM
+
+GuestOS
+
+App
+
+App App I/O
+
+VMM
+
+Figure 2. VMware’s hosted architecture.
+
+Rather than running as a layer below all other software, the hosted architecture shares the hardware with an existing operating system (HostOS).
+
+40 Computer municate directly with the I/O device with- out the overhead of trapping into the VMM.
+
+I/O devices that perform direct memory access will require address remapping. The remapping ensures that the memory addresses that the device driver running in the virtual machine speciﬁes will get mapped to the locations in the computer’s memory that the shadow page tables specify. For the iso- lation property to hold, the device should be able to access only memory belonging to the virtual machine regardless of how the driver in the virtual machine programs the device.
+
+In a system with multiple virtual machines using the same I/O device, the VMM will need an efﬁ- cient mechanism for routing device completion interrupts to the correct virtual machine. Finally, virtualizable I/O devices will need to interface to the VMM to maintain isolation between hardware and software and ensure that the VMM can con- tinue to migrate and take a checkpoint of the vir- tual machines. I/O devices that provide this kind of support could minimize virtualization overhead, allowing the use of virtual machines for even the most I/O-intensive workloads. Besides perfor- mance, a signiﬁcant beneﬁt is the improved secu- rity and reliability gained from removing complex device driver code from the VMM.
+
+WHAT’S AHEAD?
+
+An examination of current products and recent research provides some interesting insights into the future of VMMs and the demands they will place on virtualization technology.
+
+Server side
+
+In the data center, administrators will be able to quickly provision, monitor, and manage thousands of virtual machines running on hundreds of phys- ical boxes—all from a single console. Rather than conﬁguring individual computers, system admin- istrators will create new servers by instantiating a new virtual machine from an existing template and mapping these virtual machines onto physical resources according to speciﬁc administration poli- cies. Rather than thinking of any computer as pro- viding a particular ﬁxed service, administrators will view computers simply as part of a pool of generic hardware resources. An example of this technol- ogy is VMware’s Virtual Center.
+
+This mapping of a virtual machine to hardware resources will be highly dynamic. Hot migration capabilities, such as those in VMware’s VMotion technology, will let virtual machines move rapidly between physical machines according to the data cen- ter’s needs. The VMM can handle traditional hard- ware-management problems, such as hardware failure, simply by placing the virtual machines run- ning on the failed computer onto other correctly func- tioning hardware. The ability to move running virtual machines also eases some hardware challenges, such as scheduling preventive maintenance, dealing with equipment lease ends, and deploying hardware upgrades. Administrators can use hot migration to perform these tasks without service interruptions.
+
+Today, manual migration is the norm, but the future should see a virtual machine infrastructure that automatically performs load balancing, detects impending hardware failures and migrates virtual machines accordingly, and creates and destroys vir- tual machines according to demand for particular services.
+
+Beyond the machine room
+
+As the pervasive use of virtual machines moves from the server room to the desktop, their effects on computing will become even more profound.
+
+Virtual machines provide a powerful unifying par- adigm for restructuring desktop management.7 The provisioning benefits that VMMs bring to the machine room apply equally to the desktop and help solve the management challenges that large collections of desktop and laptop machines impose.
+
+Solving problems in the VMM layer beneﬁts all software running in the virtual machine, regardless of the software’s age (legacy or latest release) or its vendor. This operating system independence also reduces the need to buy and maintain redundant infrastructure. Instead of n versions of help desk or backup software, for example, only one version— the one that operates at the VMM level—would require support.
+
+Virtual machines could also signiﬁcantly change how users think about computers. If ordinary users can easily create, copy, and share virtual machines, the use models could be vastly different from those in computing environments with hardware avail- ability constraints. Software developers, for exam- ple, can use products like VMware Workstation to easily set up a network of machines for testing, or they can keep their own set of test machines for every target platform.
+
+The increased mobility of virtual machines will also signiﬁcantly change machine use. Projects such as The Collective7 and Internet Suspend/Resume8 demonstrate the feasibility of migrating a user’s entire computing environment over the local and wide area. The availability of large-capacity, inex-
+
+Virtual machines provide a powerful unifying paradigm for restructuring desktop management.
+
+pensive removable media in the form of USB hard drives might mean that users can bring their com- puting environments with them wherever they go.
+
+The increasingly dynamic character of virtual machine-based environments will also require more dynamic network topologies. Virtual switches,  virtual ﬁrewalls, and overlay networks will be an integral part of a future in which the logical com- puting environment is decoupled from the physical location.
+
+Security improvements
+
+VMMs offer the potential to restructure existing software systems to provide greater security, while also facilitating new approaches to building secure systems. Current operating systems provide poor isolation, leaving host-based security mechanisms subject to attack. Moving these capabilities outside a virtual machine—so that they run alongside an operating system but are isolated from it—offers the same functionality but with much stronger resis- tance to attack. Two research examples of such sys- tems are Livewire,9 a system that uses a VMM for advanced intrusion detection on the software in the virtual machines, and ReVirt,10 which uses the
+
+VMM layer to analyze the damage hackers might have caused during the break-in. These systems not only gain greater attack resistance from operating outside the virtual machine, but also beneﬁt from the ability to interpose and monitor the system inside the virtual machine at a hardware level.
+
+Placing security outside a virtual machine pro- vides an attractive way to quarantine the net- work—limiting a virtual machine’s access to a network to ensure that it is neither malicious nor vulnerable to attack. By controlling network access at the virtual machine layer and inspecting virtual machines before permitting (or limiting) access, vir- tual machines become a powerful tool for limiting the spread of malicious code in networks.
+
+Virtual machines are also particularly well suited as a building block for constructing high-assurance systems. The US National Security Administration’s
+
+NetTop architecture, for example, uses VMware’s
+
+VMM to isolate multiple environments, each of which has access to separate networks with varying security classiﬁcations. Applications like this illus- trate the need to continue researching and develop- ing support for building ever smaller VMMs with increasingly higher assurance.
+
+VMMs are particularly interesting in that they support the ability to run multiple software stacks with different security levels. Because they can spec- ify the software stack from the hardware up, vir- tual machines provide maximum ﬂexibility in trading off performance, backward com- patibility, and assurance. Further, specifying an application’s complete software stack sim- plifies reasoning about its security. In con- trast, it is almost impossible to reason about the security of a single application in today’s operating systems because processes are poorly isolated from one another. Thus, an application’s security depends on the security of every other application on the machine.
+
+These capabilities make VMMs particularly well suited for building trusted computing, as the Terra system11 demonstrates. In Terra, the VMM can authenticate software running inside a virtual machine to remote parties, in a process called attes- tation.
+
+Suppose, for example, that a user’s desktop machine is running multiple virtual machines simul- taneously. The user might have a relatively low-secu- rity Windows virtual machine for Web browsing, a higher-security virtual machine with a hardened
+
+Linux virtual machine for day-to-day work, and a still higher-security virtual machine comprising a special-purpose high-security operating system and a dedicated mail client for sensitive internal mail.
+
+A remote server could require attestation from each virtual machine to conﬁrm its contents; for example, the company ﬁle server might allow only the hardened Linux virtual machine to interact with it, while the secure-mail virtual machine might be able to connect only to a dedicated mail server. In both scenarios the servers are also likely to be run- ning in virtual machines, permitting mutual authen- tication to take place.
+
+Finally, the ﬂexible resource management that
+
+VMMs provide can make systems more resistant to attack. The ability to rapidly replicate virtual machines and dynamically adapt to large work- loads can provide a powerful tool for dealing with the scaling demands that ﬂash crowds and distrib- uted denial-of-service attacks can impose.
+
+Software distribution
+
+For the software industry, the ubiquitous deploy- ment of VMMs has signiﬁcant implications. The
+
+VMM layer provides exciting possibilities for soft- ware companies to distribute entire virtual machines containing complex software environments. Oracle, for example, has distributed more than 10,000 fully functional copies of its latest database environment in virtual machines. Rather than having to install the entire complex environment to test the software, users simply boot the virtual machine.
+
+May 2005 41
+
+VMMs offer the potential to  restructure existing software systems  to provide  greater security.
+
+42 Computer
+
+Although the use of virtual machines as a distri- bution mechanism is widespread for software demonstration, the model could also work well for production environments, creating a fundamentally different way of distributing software. Admini- strators using VMware’s ACE product can publish virtual machines and control how these virtual machines can be used. The Collective project explored in depth the idea of bundling applications into virtual appliances. The idea is to provide ﬁle servers, desktop applications, and so on in a form that lets users treat the virtual machines as a stand- alone application. An appliance maintainer han- dles issues like patch management, thus relieving normal users of the maintenance burden.
+
+The virtual machine-based distribution model will require software vendors to update their license agreements. Software that is licensed to run on a particular CPU or physical machine will not trans- late as well into this new environment, relative to licenses based on use or to sitewide licenses. Users and system administrators will tend to favor oper- ating system environments that they can easily and inexpensively distribute in virtual machines, rather than more restrictive and expensive options.
+
+T he VMM resurgence seems to be fundamen- tally altering the way software and hardware designers view, manage, and structure complex software environments. VMMs also provide a back- ward-capability path for deploying innovative oper- ating system solutions that both meet current needs and safely pull along the existing software base. This capability will be key to meeting future computing challenges.
+
+Companies are increasingly abandoning the strategy of procuring individual machines and tightly bundling complex software environments.
+
+VMMs are giving these fragile, difﬁcult-to-manage systems new freedom. In coming years, virtual machines will move beyond their simple provi- sioning capabilities and beyond the machine room to provide a fundamental building block for mobility, security, and usability on the desktop.
+
+Indeed, VMM capabilities should continue to be an important part of the shift in the computing landscape. ■
+
 ```
 
 This is an example of the summary you should provide.
 
 ```
+# Virtual Machine Monitors: Current Technology and Future Trends
 
+## Introduction
+
+A ==virtual machine monitor (VMM)== came into being in the 1960's as **software-abstraction layer** that **partitions a hardware platform into one or more virtual machines** (VMs).
+
+- Each VM operates independently and closely resembles the underlying physical machine, allowing it to run software without modification.
+
+This technology first emerged in the late 1960s, designed to enable a single physical machine to run multiple applications concurrently, which was especially valuable on expensive **mainframe computers**, the predominant computing systems of the time.
+
+In the 1980s and 90s, the emergence of multitasking operating systems and declining hardware costs reduced the demand for VMMs, which were seen as outdated by the late 1980s.
+
+By 2005, VMMs gained renewed interest from venture capitalists, tech companies (Intel, AMD, IBM, Sun Microsystems), and researchers, aiming to use VMMs for scalable solutions in mobility, security, and manageability.
+
+Stanford University researchers in the 1990s explored VMMs to address limitations in massively parallel processing (MPP) machines, which were complex and incompatible with existing OSs. This research led to the foundation of VMware Inc., demonstrating the feasibility of VMMs on commodity hardware, sparking broad interest in virtual-machine-based solutions across academia and industry.
+## Why the revival?
+
+The same factors that reduced the need for VMMs in the 1980s—lower hardware costs and more capable operating systems—eventually led to new problems, including **underutilized hardware and increased OS fragility**.
+
+As hardware costs dropped, the proliferation of machines resulted in **management complexity and overhead**, with many systems **underused**.
+
+VMMs became valuable again by enabling **server consolidation**: combining multiple applications on fewer physical machines to improve resource efficiency and reduce costs.
+
+Modern VMMs focus on **security and reliability** rather than multitasking, addressing OS limitations for tasks like **migration** and **security**.
+
+VMMs now provide a platform for innovation, allowing developers to implement complex functionality outside the constraints of traditional, slowly evolving operating systems.
+## Decoupling Hardware and Software
+
+**Hardware-Software Decoupling**: ==VMMs decouple the software from the hardware by creating a **separation layer** between the software running in the virtual machine (layer above the VMM) and the hardware==.
+
+- This **separation lets the VMM exert tremendous control over how guest operating systems use hardware resources**.
+	**GuestOS**: operating systems running inside a virtual machine.   
+
+**Uniform Hardware View**: The ==VMM standardizes the view of underlying hardware==, making different machines *appear* identical to the GuestOS.
+
+- This allows GuestOSs running in virtual machines to **run seamlessly on any available system**.
+- This allows administrators to **treat hardware as a flexible resource pool** rather than managing individual machine dependencies.
+
+**Encapsulation and Flexibility**: VMMs **encapsulate each virtual machine’s software state**, which means that the VMM layer can map and remap virtual machines to available hardware resources at will.
+
+- This enables the migration of VMs across physical machines.
+- This supports load balancing, simplifies handling hardware failures, and scales systems effectively.
+
+**Replication and Mobility**: Encapsulation allows for the suspension, resumption, and rollback of virtual machines, aiding in crash recovery and configuration correction. It also supports VM mobility, letting users copy and transport VMs over networks or on portable media.
+
+**Resource Multiplexing and Isolation**: ==VMMs mediate all interactions with hardware, enabling strong isolation of virtual machines==. Multiple VMs can be consolidated onto one machine, reducing hardware costs and physical space needs.
+
+**Reliability and Security**: VMMs improve **system reliability and security** by **isolating** applications within separate virtual machines. If one application crashes or is compromised, the impact is contained, preventing disruption or breaches from affecting other applications.
+## VMM Implementation Issues
+
+==The VMM must offer a hardware interface to virtual machines that closely mimics actual hardware while retaining control over the machine’s resources==. This balance between accessibility and control involves design trade-offs, with three primary goals:
+
+- ==Compatibility==: Ensures that legacy software can run unmodified.
+- ==Performance==: Aims to minimize virtualization overhead, enabling VMs to **perform as they would on actual hardware**.
+- ==Simplicity==: Critical for **secure isolation** and **stability**, as VMM failures affect all VMs on the host.
+### CPU Virtualization
+
+**CPU Virtualization** is a method that allows the **virtual machine monitor (VMM)** to control the CPU while running a virtual machine on real hardware. For a CPU architecture to be deemed **virtualizable**, it must support **direct execution** of VM instructions with the ==VMM maintaining control over privileged CPU operations==.
+
+- This enables the virtual machine to run as though it is operating on physical hardware, without directly interfering with or controlling privileged CPU functions.
+- **Direct Execution**: This is the primary method used by VMMs to run virtual machines as if they were on actual hardware. To accomplish this, the virtual machine’s **privileged code** (kernel-level code) and **unprivileged code** (user-level code) are run in the **CPU’s unprivileged mode**, while the ==VMM itself operates in the privileged mode==. This setup ensures that the VMM maintains full control over the CPU.
+
+The ==CPU traps any privileged operations attempted by the VM/GuestOS, which the VMM then handles==.
+
+- For example, if a GuestOS disables interrupts, the VMM traps and records this, maintaining control over the CPU and ensuring safe handling of interrupts.
+	- Allow a guest operating system to disable interrupts would not be safe since the VMM would not be able to regain control of the CPU.
+	- Instead the VMM would trap the operation, record it, and then create the illusion of the outcome that a normal physical machine would have had.
+
+The key to providing virtualizable architecture is to provide trap semantics that let a VMM safely, transparently, and directly use the CPU to execute the VM, which allows the ==VMM to use direct execution to create the illusion of a normal physical machine for the software running inside the virtual machine==.
+#### Challenges
+
+Many modern CPU architectures, notably **x86 architecture**, were not originally designed with virtualization in mind, leading to multiple challenges:
+
+1. **Lack of Trapping for Some Privileged Instructions**: The **POPF instruction** (used to pop CPU flags from the stack) does not trigger a trap when run in unprivileged mode on x86 CPUs. This means that if the virtual machine attempts to modify the interrupt-disable flag using POPF, the CPU ignores these changes rather than trapping the instruction. Consequently, **direct execution** techniques cannot safely virtualize privileged mode code using this instruction.
+2. **Access to Privileged State in Unprivileged Mode**: x86 architecture allows certain unprivileged instructions to read privileged state. For example, software in a virtual machine can check the CPU’s **privilege level** by reading the **code segment register**. Ideally, a virtualizable CPU would trap such access, allowing the VMM to adjust the data returned to reflect the virtual machine’s privilege level. However, x86 does not trap this instruction, potentially exposing the virtual machine to incorrect privilege level readings.
+#### Techniques
+
+To manage **non-virtualizable CPUs** like x86, VMM developers use the following techniques:
+
+1. ==Paravirtualization==: In paravirtualization, the VMM builder defines the VM interface by ==replacing **non-virtualizable portions** of the original instruction set with easily **virtualized** and **more efficient** equivalents==.
+	- The "original instruction set" refers to the **instruction set of the GuestOS** or, more specifically, the hardware instructions that the GuestOS would normally execute if it were running directly on physical hardware.
+	- The **updated instruction set** can, for example, **eliminate virtualization overhead such as traps** on privileged instructions, which can result in **increased performance**.  
+	- The paravirtualization method **requires any GuestOS to be ported** to the new virtual machine architecture, making it ==incompatible with unmodified legacy systems==.
+	- **Example**: **Disco**, a VMM for the MIPS architecture, used paravirtualization to handle virtualization challenges. In Disco, the MIPS interrupt flag was redefined as a specific memory location rather than a processor register, eliminating the need for traps on privileged instructions. Although this increased efficiency, it also required a modified OS version compatible with this setup.
+
+2. **Binary Translation**: VMware developed **binary translation** as a solution to maintain compatibility and performance on x86 systems. ==Binary translation operates by running virtual machines in **direct execution mode where possible** but intercepts and **translates privileged instructions on-the-fly for those that aren’t virtualizable**==. The translated **instruction is cached**, improving performance on subsequent executions.
+	- **Unlike paravirtualization**, ==binary translation does not alter the original OS or application code==. Instead, it translates problematic instructions when they are first encountered, applying changes only as the code executes. This approach allows **full software compatibility** with **high performance**, since most instructions remain in their original form and the cache optimizes repeated executions.
+	- **Reduced Overhead**: While binary translation does incur some overhead, it is negligible on most workloads. Additionally, ==binary translation is also a way to optimize direct execution==. For example, the optimizations can reduce the frequency of traps by translating privileged code that would normally trigger frequent traps. By decreasing these transitions, binary translation achieves lower virtualization overhead, especially on modern CPUs with deep instruction pipelines, like x86.
+#### Future Support
+
+To overcome these existing limitations, both **Intel** (with **Vanderpool** technology) and **AMD** (with **Pacifica** technology) have announced CPU designs incorporating specific virtualization support. These innovations include:
+
+- **New Execution Modes**: Instead of adjusting existing modes, these technologies introduce new modes tailored to support safe and efficient direct execution for virtual machines. This allows VMMs to use direct execution fully while reducing traps needed for managing virtual machines and shortening trap processing times.
+- **Potential Impact**: If successful, these hardware innovations would decrease the overhead associated with virtualization significantly, removing the need for techniques like paravirtualization or binary translation on x86 processors. This would simplify the implementation of VMMs while retaining compatibility with legacy systems.
+### Memory Virtualization
+
+The **traditional** implementation technique for virtualizing memory is to have the VMM maintain a shadow of the VM's (GuestOS's) memory-management data structure, (called a **shadow page table**) which lets the **VMM precisely control which pages of the machine's memory are available to a VM**.
+
+- **Shadow Page Table**: The VMM uses a **shadow page table** to track memory allocations for each VM. When a GuestOS modifies its page table, the **VMM updates the shadow page table to point to the actual physical memory locations**. This lets the VMM control which memory pages are available to each VM and manage memory access effectively.
+- **Paging**: Similar to an operating system's memory paging, the VMM can offload VM memory to disk if needed, allowing the VMM to **overcommit memory** beyond the physical hardware capacity.
+#### Challenges
+
+**Optimal Paging Decisions**: The ==GuestOS often has better knowledge of which memory pages can be offloaded==, while the VMM may lack visibility into which pages are less critical.
+
+- **Ballooning Technique**: VMware's ESX Server addresses this by using a **balloon process** within the GuestOS, which reallocates memory based on the GuestOS’s knowledge of page usage. The balloon process allocates memory within the GuestOS, forcing it to release pages that can then be managed by the VMM.
+
+**OS Size and Memory Redundancy**: The size of modern operating systems and applications has increased, and multiple VMs ==running similar applications often contain identical memory pages==, leading to inefficient memory use.
+
+- **Content-Based Page Sharing**: To address this challenge, VMware designers developed **content-based page sharing** for their server products. The **VMM tracks and detects identical memory pages across VMs**. ==If the VMM detects identical pages, the VMM modifies the **VM's shadow page tables** to point to only a **single copy**==. If any **VM modifies a shared page, a copy is created specifically for that VM**.
+
+#### Future Support
+
+**Hardware-Assisted Shadow Paging**: Mainframes use hardware to manage shadow pages, and introducing similar support for x86 architectures could greatly reduce software overhead and accelerate memory management.
+
+**Data Center-Level Resource Management**: Future advancements could enable more collaborative memory management across VMMs and GuestOSs at a broader data center level.
+### I/O Virtualization
+
+The **goal of I/O virtualization** is to allow the VMM to manage access to input/output (I/O) devices—such as network interfaces, storage, and graphics cards—so multiple virtual machines (VMs) can share these physical resources efficiently. 
+
+Traditional I/O virtualization in mainframe systems, such as IBM’s, used **channel-based architectures**, where a dedicated channel processor enabled **direct I/O access** with **minimal VMM intervention** and overhead. The GuestOS in each VM interacted directly with the I/O device **without trapping through the VMM**, which kept virtualization overhead low and performance high.
+#### Challenges
+
+**Diverse I/O Device Support**: The x86 platform supports a **wide variety of I/O devices**, each with **different programming interfaces**, making it complex for the VMM to standardize and manage I/O virtualization effectively. As modern computing environments have expanded to include **high-performance I/O devices like GPUs and high-speed network interfaces**, managing virtualization for these devices has become increasingly challenging. 
+
+**High-Performance Demands**: Certain I/O devices, particularly network and graphics subsystems, require low-latency and high-bandwidth access to function efficiently. Achieving this in a virtualized environment, where VMs share hardware, is difficult without incurring significant overhead. 
+
+#### Techniques
+
+1. **==Hosted== Architecture**: In VMware Workstation, the VMM operates in a **hosted architecture**, relying on the **HostOS’s device drivers** to manage I/O access.  
+	- Hosted Architecture **Advantages**:
+		1. The ==VMM is simple to install because users can install it like an application on the HostOS== rather than on the raw hardware, as with traditional VMMs.
+		2. The hosted architecture fully and already accommodates a wide variety of I/O devices.
+		3. The VMM can use the scheduling, resource management, and other services the HostOS environment offers.
+	- Hosted Architecture **Disadvantages**:
+		1. Hosted architecture **greatly increases the performance overhead for I/O device virtualization**. **Each I/O request (from all VMs running on the host)** must transfer control to the HostOS environment and then transition through the HostOS's software layers to talk to the I/O devices. For high-performance servers, the overhead was unacceptably high.
+		2. Modern operating systems such as Windows and Linux **do not** have the resource-management support to provide **performance isolation and service guarantees** to the virtual machines. 
+
+2. **Direct Hardware Access (==Bare-Metal Virtualization==)**: VMware’s **ESX Server** operates **directly on hardware without relying on a HostOS**, providing **more efficient I/O management by directly interacting** with certified network and storage devices.
+	   - **Optimized I/O Subsystem**: The ESX Server kernel can **use Linux-based drivers to communicate directly with devices**, reducing virtualization overhead and improving I/O performance. This approach is feasible because relatively few network and storage I/O devices have passed certification to run in major x86 vendor server machines. Limiting support to only the I/O devices that have passed certification means there is a much smaller subset of devices to support. 
+	   - **Specialized Virtual Devices (Paravirtualization)**: ESX Server also introduces ==optimized **virtual** devices that don’t correspond to physical devices==, reducing the communication overhead with the GuestOS and increasing performance for high-demand I/O tasks. Similar to CPU **paravirtualization**, ==specialized drivers within the GuestOS interface directly with the VMM’s optimized virtual devices rather than standard hardware==. This setup reduces the need for the VMM to trap I/O instructions, significantly improving efficiency.
+#### Future Support
+
+**Hardware-Assisted I/O Virtualization**: Industry trends are moving towards hardware-supported I/O virtualization, where new device interfaces—such as USB and SCSI—resemble **channel-based architectures**. These designs simplify I/O virtualization by reducing VMM intervention, supporting efficient device sharing across VMs.
+
+- **Direct Device Access**: Future I/O devices could potentially support direct interaction with VMs by recognizing virtual machine contexts, minimizing the need for VMM mediation and virtually eliminating I/O virtualization overhead.
+  
+**Direct Memory Access (DMA) Remapping**: As DMA-capable devices directly access memory, they will need **address remapping capabilities** to ensure that memory addresses map to the correct VM’s memory space. This remapping would enable isolation, allowing each VM’s device driver to communicate securely and directly with the I/O device.
+
+**Efficient Interrupt Handling**: In multi-VM systems where multiple VMs share the same I/O device, the VMM will need mechanisms to route device completion interrupts efficiently to the appropriate VM. This capability will be essential for supporting high-performance I/O in virtualized environments.
+
+With hardware support, the industry aims to eliminate virtualization overhead, making VMs feasible for even the most I/O-intensive workloads. This progress will not only enhance performance but also improve security and reliability by reducing the complexity and risk associated with I/O device drivers in the VMM.
+
+## What’s Ahead?
+
+An analysis of current products and research provides insights into the future of virtual machine monitors (VMMs) and the advancements they may drive in virtualization technology.
+### Server Side
+
+In data centers, VMMs will allow administrators to **provision**, **monitor**, and **manage** thousands of virtual machines (VMs) across hundreds of physical machines from a single console. This will reduce the need for configuring individual servers:
+
+- **Dynamic Resource Allocation**: Administrators will instantiate VMs from templates and dynamically map them to hardware based on policies, viewing physical machines as a **resource pool** rather than fixed assets for specific services. Examples include products like **VMware’s Virtual Center**.
+- **Hot Migration**: Technologies like **VMotion** enable live migration of VMs between physical hosts. VMMs can automatically respond to hardware issues by relocating VMs to functioning hardware, simplifying tasks like preventive maintenance, equipment upgrades, and failure recovery without service disruptions.
+  
+In the future, VMMs may automatically:
+   - **Balance Loads**: Distribute VMs based on real-time hardware performance needs.
+   - **Detect Failures**: Predict and respond to potential hardware issues by relocating VMs.
+   - **Scale Resources Dynamically**: Adjust the number of VMs based on service demands.
+### Beyond the Machine Room
+
+As VMMs move to desktop environments, they will have a transformative effect on **personal and corporate** computing by simplifying desktop management and reducing hardware dependencies.
+
+- **Unified Desktop Management**: VMMs on desktops provide OS independence, letting IT departments manage large collections of desktops and laptops with less redundant infrastructure. By solving issues at the VMM layer, solutions become **vendor-independent** and work across various OS versions, reducing support needs.
+- **User Flexibility**: Users will be able to easily **create, copy, and share VMs**, redefining computer use. For example, developers could create **isolated test environments**, while general users could transport their entire computing setup on removable media (e.g., USB drives) or networks.
+  
+**Enhanced Mobility**: Projects like **The Collective** and **Internet Suspend/Resume** showcase how VMMs could support portable environments that users can carry across locations or networks. Future virtualized environments will require **dynamic network topologies**, incorporating features like **virtual switches**, **firewalls**, and **overlay networks** to support the decoupling of logical environments from physical locations.
+### Security Improvements
+
+VMMs can fundamentally improve security by moving **security mechanisms** out of the VM/GuestOS and into the **VMM (Virtual Machine Monitor) layer**, and offering new ways to design secure systems.
+
+- **Out-of-VM Security Functions**: By moving security mechanisms outside the VM (in the VMM layer), VMMs offer greater resistance to attacks. Examples include:
+	- **Livewire**: Uses the VMM layer for advanced intrusion detection.
+	- **ReVirt**: Analyzes security incidents at the VMM level, allowing forensic examination of attack impacts.
+- **Network Quarantine**: VMMs can restrict a VM’s network access until it is verified as secure, effectively quarantining potentially compromised VMs to prevent the spread of malicious code.
+- **Trusted Environments**: Applications like the **US NSA’s NetTop** architecture use VMMs to isolate environments with varying security classifications on the same hardware. This allows secure multi-environment setups, with each environment restricted to its designated security level.
+- **Attestation**: VMMs, like the **Terra system**, support attestation, enabling the VMM to authenticate the software running in a VM to remote parties. This lets remote servers verify the security level of VMs before allowing access, useful in multi-level security setups.
+	- **Attestation** is a security process used to **verify and prove the integrity** and **authenticity** of the software running on a system, often within a **virtual machine (VM)** or trusted computing environment. Attestation allows a system to confirm that it is in a known, trusted state and that no unauthorized modifications have been made to its software or hardware.
+### Software Distribution
+
+The adoption of VMMs creates new software distribution models where complex environments are bundled and delivered as VMs:
+
+- **Self-Contained Virtual Appliances**: VMMs allow vendors to distribute complete software environments as VMs, eliminating complex installation processes. For instance, **Oracle** has distributed virtual appliances containing entire database setups, allowing users to boot a fully-configured VM rather than install software.
+- **Centralized Management**: Products like **VMware’s ACE** enable administrators to control and distribute VMs while managing their use and access.
+  
+**Evolving Licensing Models**: This shift requires software vendors to update licensing terms to accommodate VMs. Traditional CPU- or machine-based licenses may need replacement by more flexible, use-based models that better fit the portable, easily distributable nature of VMs.
 ```
 
-You should provide this level of detail for EVERY SECTION. Follow the rules closely from above.
+Create a similar, extremely comprehensive, summary similar to the example above, for the paper below.
