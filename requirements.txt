@@ -5,6 +5,7 @@ llm-workflow
 pandas
 pyarrow
 pydantic
+pypdf
 pytest
 python-dotenv
 PyYAML

@@ -1,0 +1,32 @@
+Create a comprehensive, detailed study guide based on the provided research paper, strictly following the structure of the paper. **Ensure a 1:1 correspondence** between each section and subsection in the paper and the headers in the study guide. This guide should be clear and accessible to newcomers while maintaining the depth needed for thorough understanding.
+
+### Content Requirements:
+
+1. **Structured Alignment with the Paper**  
+    - Each section and subsection in the paper must have an exact corresponding header in the guide.
+    - Use `##` headers for each main section and `###` for each subsection, precisely mirroring the paper’s organization. Only use `###` if the paper has subsections.
+2. **Definitions of Technical Terms**  
+    - Define technical terms as they first appear in each section or subsection, using beginner-friendly language.
+    - Each definition should be 2–3 sentences or longer for complex terms, fully capturing all essential details.
+    - **Do not overly simplify**—provide a detailed definition first, then simplify if needed for clarity.
+3. **Key Concepts and Processes**  
+    - Provide clear explanations of each key concept, focusing on breaking down complex ideas for a newcomer’s perspective.
+    - **Do not overly simplify**—cover all essential details first. Then, for more complex ideas, simplify further with analogies or comparisons to make the material relatable.
+4. **Connections Between Concepts**  
+    - Highlight connections between ideas within each section and across sections, showing how concepts build on or support each other.
+    - Emphasize interrelationships and logical flow to aid comprehension of the paper’s broader narrative.
+
+### Formatting Instructions:
+
+- **Highlight Key Concepts**: Use `==` around complete concepts or key phrases for emphasis, not just individual terms.  
+    - Example: “The critical takeaway here is ==this concept, which illustrates x==.”
+- **Headers and Structure**:  
+    - Use `##` headers for each main section and `###` headers for each subsection, aligning exactly with the paper.
+    - Use bulleted lists to break down details within sections, reserving `###` headers only for additional subsections directly matching the paper.
+- **Bullets and Indentation**:  
+    - It is critical to use 4 spaces for tabbed and indented sub-bullets.
+    - Aim for at least **4–10 bullets per section** to ensure each section is thoroughly covered without excessive detail.
+    - At the very least, you should have one sentence point per paragraph, but ideally more when needed.
+    - Aim for approximately 750-1000 words.
+
+The final guide should mirror the structure of the paper exactly, serving as a clear, standalone resource for understanding the research in detail.
