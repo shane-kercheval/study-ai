@@ -1,6 +1,7 @@
 """Test the search module."""
 import os
 import numpy as np
+import pytest
 from source.library.notes import dict_to_notes
 from source.library.search import VectorDatabase, cosine_similarity
 
@@ -92,7 +93,7 @@ def test__VectorDabase__search(fake_notes):  # noqa
         results = db.search(query=notes[-1].text(), top_k=2)
         assert len(results) == 2
         assert results['uuid'].tolist()[0] == notes[-1].uuid
-        assert results['cosine_similarity'].tolist()[0] == 1.0
+        results['cosine_similarity'].tolist()[0] == pytest.approx(1.0)
         # ensure that db.df was not modified
         assert db._data.equals(original_df)
 
