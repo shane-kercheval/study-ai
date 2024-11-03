@@ -25,8 +25,92 @@ Create a comprehensive, detailed study guide based on the provided research pape
     - Use bulleted lists to break down details within sections, reserving `###` headers only for additional subsections directly matching the paper.
 - **Bullets and Indentation**:  
     - It is critical to use 4 spaces for tabbed and indented sub-bullets.
-    - Aim for at least **4–10 bullets per section** to ensure each section is thoroughly covered without excessive detail.
+    - Cover each section comprehensively.
     - At the very least, you should have one sentence point per paragraph, but ideally more when needed.
-    - Aim for approximately 750-1000 words.
 
 The final guide should mirror the structure of the paper exactly, serving as a clear, standalone resource for understanding the research in detail.
+
+The following is an example of a SINGLE SECTION in a PDF. 
+
+```
+CPU virtualization
+
+A CPU architecture is virtualizable if it supports the basic VMM technique of direct execution— executing the virtual machine on the real machine, while letting the VMM retain ultimate control of the CPU.
+
+Implementing basic direct execution requires running the virtual machine’s privileged (operat- ing-system kernel) and unprivileged code in the
+
+CPU’s unprivileged mode, while the VMM runs in privileged mode. Thus, when the virtual machine attempts to perform a privileged operation, the
+
+CPU traps into the VMM, which emulates the priv- ileged operation on the virtual machine state that the VMM manages.
+
+The VMM handling of an instruction that dis- ables interrupts provides a good example. Letting a guest operating system disable interrupts would not be safe since the VMM could not regain con- trol of the CPU. Instead, the VMM would trap the operation to disable interrupts and then record that interrupts were disabled for that virtual machine.
+
+The VMM would then postpone delivering subse- quent interrupts to the virtual machine until it reen- ables interrupts.
+
+Consequently, the key to providing virtualizable architecture is to provide trap semantics that let a
+
+VMM safely, transparently, and directly use the
+
+CPU to execute the virtual machine. With these semantics, the VMM can use direct execution to create the illusion of a normal physical machine for the software running inside the virtual machine.
+
+Challenges. Unfortunately, most modern CPU architectures were not designed to be virtualizable, including the popular x86 architecture. For exam- ple, x86 operating systems use the x86POPF instruction (pop CPU ﬂags from stack) to set and clear the interrupt-disable flag. When it runs in unprivileged mode, POPF does not trap. Instead, it simply ignores the changes to the interrupt ﬂag, so direct execution techniques will not work for privileged-mode code that uses this instruction.
+
+Another challenge of the x86 architecture is that unprivileged instructions let the CPU access privi- leged state. Software running in the virtual machine can read the code segment register to determine the processor’s current privilege level. A virtualizable processor would trap this instruction, and the
+
+VMM could then patch what the software running in the virtual machine sees to reflect the virtual machine’s privilege level. The x86, however, doesn’t trap the instruction, so with direct execution, the software would see the wrong privilege level in the code segment register.
+
+Techniques. Several techniques address how to implement VMMs on CPUs that can’t be virtual- ized, the most prevalent being paravirtualization2 and direct execution combined with fast binary translation. With paravirtualization, the VMM builder defines the virtual machine interface by replacing nonvirtualizable portions of the original instruction set with easily virtualized and more efﬁ- cient equivalents. Although operating systems must be ported to run in a virtual machine, most normal applications run unmodiﬁed.
+
+Disco,3 a VMM for the nonvirtualizable MIPS architecture, used paravirtualization. Disco design- ers changed the MIPS interrupt ﬂag to be simply a special memory location in the virtual machine rather than a privileged register in the processor.
+
+They replaced the MIPS equivalent of the x86 POPF instruction and the read access to the code segment register with accesses to this special memory loca- tion. This replacement also eliminated virtualiza- tion overhead such as traps on privileged in- structions, which resulted in increased performance.
+
+The designers then modiﬁed a version of the Irix
+
+The central design goals for VMMs are compatibility, performance, and simplicity.
+
+operating system to take advantage of this paravir- tualized version of the MIPS architecture.
+
+The biggest drawback to paravirtualization is incompatibility. Any operating system run in a par- avirtualized VMM must be ported to that archi- tecture. Operating system vendors must cooperate, legacy operating systems cannot run, and existing machines cannot easily migrate into virtual machines. With years of excellent backward-com- patible x86 hardware, huge amounts of legacy soft- ware are still in use, which means that giving up backward compatibility is not trivial.
+
+In spite of these drawbacks, academic research projects have favored paravirtualization because building a VMM that offers full compatibility and high performance is a signiﬁcant engineering chal- lenge.
+
+To provide fast, compatible virtualization of the x86 architecture, VMware developed a new virtu- alization technique that combines traditional direct execution with fast, on-the-ﬂy binary translation.
+
+In most modern operating systems, the processor modes that run normal application programs are virtualizable and hence can run using direct execu- tion. A binary translator can run privileged modes that are nonvirtualizable, patching the nonvirtual- izable x86 instructions. The result is a high-perfor- mance virtual machine that matches the hardware and thus maintains total software compatibility.
+
+Others have developed binary translators4 that translate code between CPUs with different instruc- tion sets. VMware’s binary translation is much sim- pler because the source and target instruction sets are nearly identical. The VMM’s basic technique is to run privileged mode code (kernel code) under control of the binary translator. The translator translates the privileged code into a similar block, replacing the problematic instructions, which lets the translated block run directly on the CPU. The binary translation system caches the translated block in a trace cache so that translation does not occur on subsequent executions.
+
+The translated code looks much like the results from the paravirtualized approach: Normal instruc- tions execute unchanged, while the translator replaces instructions that need special treatment, like
+
+POPFand reads from the code segment registers with an instruction sequence similar to what a paravirtu- alized virtual machine would need to run. There is one important difference, however: Rather than applying the changes to the source code of the oper- ating system or applications, the binary translator applies the changes when the code ﬁrst executes.
+
+While binary translation does incur some over- head, it is negligible on most workloads. The translator runs only a fraction of the code, and execution speeds are nearly indistin- guishable from direct execution once the trace cache has warmed up.
+
+Binary translation is also a way to optimize direct execution. For example, privileged code that frequently traps can incur signiﬁcant addi- tional overhead when using direct execution since each trap transfers control from the vir- tual machine to the monitor and back. Binary translation can eliminate many of these traps, which results in a lower overall virtualization overhead. This is particularly true on CPUs with deep instruction pipelines, such as the modern x86
+
+CPUs, where traps incur high overhead.
+
+Future support. In the near term, both Intel with its Vanderpool technology and AMD with its
+
+Paciﬁca technology have announced hardware sup- port for x86 CPU VMMs. Rather than making existing execution modes virtualizable, both the
+
+Intel and AMD technologies add a new execution mode to the processor that lets a VMM safely and transparently use direct execution for running vir- tual machines. To improve performance, the mode attempts to reduce both the traps needed to imple- ment virtual machines and the time it takes to per- form the traps.
+
+When these technologies become available, direct- execution-only VMMs could be possible on x86 processors, at least for operating system environ- ments that do not use these new execution modes.
+
+If this hardware support works as well as the
+
+IBM mainframe virtualization support of the early days, it should be possible to decrease performance overhead even more, as well as simplifying the implementation of virtualization techniques.
+
+Lessons from the past indicate that adequate hardware support can decrease overhead, even without paravirtualization, to the point that the value of having a fully compatible virtual machine abstraction overrides any performance benefits from breaking compatibility.
+
+```
+
+This is an example of the summary you should provide.
+
+```
+
+```
+
+You should provide this level of detail for EVERY SECTION. Follow the rules closely from above.
