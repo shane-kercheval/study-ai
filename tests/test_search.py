@@ -85,7 +85,7 @@ def test__VectorDabase__search(fake_notes):  # noqa
         results = db.search(query=notes[0].text(), top_k=1)
         assert len(results) == 1
         assert results.loc[0, 'uuid'] == notes[0].uuid
-        assert results.loc[0, 'cosine_similarity'] == 1.0
+        assert results.loc[0, 'cosine_similarity'] == pytest.approx(1.0)
         # ensure that db.df was not modified
         assert db._data.equals(original_df)
 
