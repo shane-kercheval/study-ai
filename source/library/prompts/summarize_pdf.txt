@@ -21,7 +21,7 @@ Create a comprehensive, detailed study guide based on the provided research pape
 - **Highlight Key Concepts**: Use `==` around complete concepts or key phrases for emphasis, not just individual terms.  
     - Example: “The critical takeaway here is ==this concept, which illustrates x==.”
 - **Headers and Structure**:  
-    - Use `##` headers for each main section and `###` headers for each subsection, aligning exactly with the paper.
+    - Use `#` headers for each main section and `##` headers for each subsection, and so on, aligning exactly with the paper.
     - Use bulleted lists to break down details within sections, reserving `###` headers only for additional subsections directly matching the paper.
 - **Bullets and Indentation**:  
     - It is critical to use 4 spaces for tabbed and indented sub-bullets.
