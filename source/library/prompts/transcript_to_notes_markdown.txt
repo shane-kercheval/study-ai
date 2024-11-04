@@ -44,7 +44,7 @@ In this example, a client uploads images to a server and requests processing tas
 
 **The steps that are required from the developer of this particular application are very similar (some of them are identical to the steps that are required in the previous example).** There are also some additional functionality (e.g. some additional processing that needs to be performed for every image). One **difference** is that the protocol related information that would have to be included in the buffers would have to specify things like the algorithm that the client is requesting from the server to be performed, along with any parameters that are relevant for the algorithm. **But a lot of the overall steps end up being identical in both cases, even though different data is sent.** 
 
-# Emergence of RPC
+## Emergence of RPC
 
 In the 1980s, as networks became faster and distributed applications increased, it became clear that the steps from the examples above were quite common for these types of applications. 
 
