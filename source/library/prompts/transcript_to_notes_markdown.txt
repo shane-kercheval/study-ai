@@ -1,0 +1,58 @@
+**Task:** Transform the text below into detailed, well-structured, study-optimized notes in Markdown format.
+
+### Formatting and Structure Guidelines:
+
+- **Convert Conversational Tone:** Reformat the text into clear, structured, and detailed notes, eliminating any conversational language.
+- **Comprehensive Content:** Ensure all necessary details for studying and understanding the material are included.
+- **Highlighting Concepts:**
+    - **Bold** important concepts using `**` (e.g., `**important concept**`).
+    - Use `==` to highlight **critical concepts** (e.g., `==critical concept==`), as this simulates highlighting in your notes app.
+- **List Formatting:**
+    - Use `-` for list items.
+    - **Critical Rule:** Always indent sub-items in lists using increments of **4 spaces** per level. This rule is **mandatory** and must be followed strictly.
+    - DO NOT add multiple newlines between list items. Each list item should directly follow the previous without additional newlines.
+
+### Example
+
+Here is an example of a transcript from a lecture as well as the summary/notes that should be generated.
+
+Transcript:
+
+```
+To understand why we need RPC, let's look at two example applications. The first one is an application, where a client requests a file from a server. And uses a simple get file protocol that's like HTTP request, but less complex. In this application the client and the server interact using a socket based API. And as a developer you would have to explicitly create and initialize the sockets, then allocate any buffers that are going to be sent via those sockets, and populate them with anything that includes protocol related information. Like for instance, this protocol will have something like, get file directives. And you have to specify the size of the buffer. And also you'll have to explicitly copy the data in and out of these buffers. So copy the file name, string or the actual file in and out of these buffers. Now imagine another application that's also a client server application in which the client interacts with a server to upload some images and that it requests then from the server for these images to be modified. To create a gray scale version of an image, to create a low resolution version of an image, to apply some phase detection algorithm. So it's in some sense similar to get file, but there are some additional functionalities, some additional processing that needs to be performed for every image. The steps that are required from the developer of this particular application are very similar, in fact some of them are identical to the steps that are required in the get file application. One difference is that the protocol related information that would have to be included in the buffers would have to specify things like the algorithm that the client is requesting from the server to be performed. Like whether it's grace key link or whether its some face detection algorithm along with any parameters are relevant for that algorithm. And also the data that is being sent between the client and the server, we said in this case the client uploads an image to the server and then the server returns that image back to the client after this particular function has been performed. That's different than the file name, the string that's being sent from the client to the server, and the actual file that's returned in response. But a lot of the steps end up being identical in both cases. In the 80s, as networks are becoming faster, and more and more of distributed applications were being developed. It became obvious that these kinds of steps are really very common in a related interprocess communications, and need to be repeatedly reimplemented for a majority of these kinds of applications. It was obvious that we need some system solution that will simplify this process that will capture all the common steps that are related to remote interprocess communications. And this key do Remote Procedure Calls or RPC.
+```
+
+Generated Notes:
+
+```
+## Example Applications **Without** RPC
+
+### Example 1 - Client/Server File Retrieval
+
+In this example, a client requests a file from a server using a custom protocol, similar to HTTP but simpler. The client and the server interact using a socket based API.
+
+A developer would need to explicitly do the following:
+
+- **Create and initialize the sockets**.
+- **Allocate any buffers** that are going to be used to send data via sockets, and deal with things like specifying the size of the buffer.
+- **Populate the buffers** with protocol related information (e.g. file size).
+- **Copying the data in and out of these buffers** (file name, file contents).
+
+### Example 2 - Client/Server Image Processing
+
+In this example, a client uploads images to a server and requests processing tasks (e.g., grayscale conversion, resolution reduction, face detection).
+
+**The steps that are required from the developer of this particular application are very similar (some of them are identical to the steps that are required in the previous example).** There are also some additional functionality (e.g. some additional processing that needs to be performed for every image). One **difference** is that the protocol related information that would have to be included in the buffers would have to specify things like the algorithm that the client is requesting from the server to be performed, along with any parameters that are relevant for the algorithm. **But a lot of the overall steps end up being identical in both cases, even though different data is sent.** 
+
+# Emergence of RPC
+
+In the 1980s, as networks became faster and distributed applications increased, it became clear that the steps from the examples above were quite common for these types of applications. 
+
+**RPC** was developed to **simplify** and **standardize** **remote** interprocess communication across **distributed applications**. ==RPC abstracts common steps, allowing developers to focus on application functionality without handling low-level communication tasks==.
+```
+
+Here is the transcript to summarize.
+
+```
+{{notes}}
+```
