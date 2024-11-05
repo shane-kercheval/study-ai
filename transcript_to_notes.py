@@ -16,7 +16,7 @@ def generate_response(notes: str, model_name: str) -> str:
     global total_cost
     # Load the prompt template
     model = OpenAIChat(model_name=model_name, temperature=0.5)
-    path = "source/library/prompts/format_notes_markdown.txt"
+    path = "source/library/prompts/transcript_to_notes_markdown.txt"
     with open(path) as f:
         prompt_template = f.read()
     prompt = dedent(prompt_template).strip().replace("{{notes}}", notes)
@@ -44,6 +44,7 @@ def extract_number(filename: str) -> int:
     match = re.match(r"(\d+)", filename)
     assert match
     return int(match.group(0))
+
 
 def extract_lecture_title(filename: str) -> str:
     """Extracts the lecture title from a filename."""
@@ -76,13 +77,13 @@ if __name__ == "__main__":
 
     # Print sorted file paths
     for file_path, lecture_number, lesson_name, lecture_title in files_with_numbers:
-        if lecture_number >= 434:
+        if lecture_number >= 440:
             print(f"{lecture_number} - {lesson_name} - {lecture_title}")
-
             with open(file_path) as f:
                 notes = f.read()
-
-            print(clean_notes(notes))
+            notes = clean_notes(notes)
+            print(f"Notes: {notes}")
+            print("--------------------")
+            response = generate_response(notes, model_name)
+            print(f"Response:\n\n{response}")
             break
-
-    # process_file(input_file_path, output_file_path, model_name)

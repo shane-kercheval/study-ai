@@ -1,22 +1,20 @@
 **Task:** Transform the text below into detailed, well-structured, study-optimized notes in Markdown format.
 
-### Formatting and Structure Guidelines:
+## Formatting and Structure Guidelines:
 
-- **Convert Conversational Tone:** Reformat the text into clear, structured, and detailed notes, eliminating any conversational language.
+- **Convert Conversational Tone:** Reformat the text into clear, structured, and detailed notes, eliminating the conversational language.
 - **Comprehensive Content:** Ensure all necessary details for studying and understanding the material are included.
 - **Highlighting Concepts:**
-    - **Bold** important concepts using `**` (e.g., `**important concept**`).
-    - Use `==` to highlight **critical concepts** (e.g., `==critical concept==`), as this simulates highlighting in your notes app.
-- **List Formatting:**
-    - Use `-` for list items.
-    - **Critical Rule:** Always indent sub-items in lists using increments of **4 spaces** per level. This rule is **mandatory** and must be followed strictly.
-    - DO NOT add multiple newlines between list items. Each list item should directly follow the previous without additional newlines.
+    - Use `**` for important concepts (e.g., `**important concept**`).
+    - Use `==` to highlight critical concepts (e.g., `==critical concept==`).
 
-### Example
+## Examples
 
-Here is an example of a transcript from a lecture as well as the summary/notes that should be generated.
+Here are an example of a transcript from a lecture as well as the summary/notes that should be generated.
 
-Transcript:
+### Example 1
+
+Transcript
 
 ```
 To understand why we need RPC, let's look at two example applications. The first one is an application, where a client requests a file from a server. And uses a simple get file protocol that's like HTTP request, but less complex. In this application the client and the server interact using a socket based API. And as a developer you would have to explicitly create and initialize the sockets, then allocate any buffers that are going to be sent via those sockets, and populate them with anything that includes protocol related information. Like for instance, this protocol will have something like, get file directives. And you have to specify the size of the buffer. And also you'll have to explicitly copy the data in and out of these buffers. So copy the file name, string or the actual file in and out of these buffers. Now imagine another application that's also a client server application in which the client interacts with a server to upload some images and that it requests then from the server for these images to be modified. To create a gray scale version of an image, to create a low resolution version of an image, to apply some phase detection algorithm. So it's in some sense similar to get file, but there are some additional functionalities, some additional processing that needs to be performed for every image. The steps that are required from the developer of this particular application are very similar, in fact some of them are identical to the steps that are required in the get file application. One difference is that the protocol related information that would have to be included in the buffers would have to specify things like the algorithm that the client is requesting from the server to be performed. Like whether it's grace key link or whether its some face detection algorithm along with any parameters are relevant for that algorithm. And also the data that is being sent between the client and the server, we said in this case the client uploads an image to the server and then the server returns that image back to the client after this particular function has been performed. That's different than the file name, the string that's being sent from the client to the server, and the actual file that's returned in response. But a lot of the steps end up being identical in both cases. In the 80s, as networks are becoming faster, and more and more of distributed applications were being developed. It became obvious that these kinds of steps are really very common in a related interprocess communications, and need to be repeatedly reimplemented for a majority of these kinds of applications. It was obvious that we need some system solution that will simplify this process that will capture all the common steps that are related to remote interprocess communications. And this key do Remote Procedure Calls or RPC.
@@ -25,6 +23,8 @@ To understand why we need RPC, let's look at two example applications. The first
 Generated Notes:
 
 ```
+We can use two examples to show why we need RPC.
+
 ## Example Applications **Without** RPC
 
 ### Example 1 - Client/Server File Retrieval
@@ -51,7 +51,220 @@ In the 1980s, as networks became faster and distributed applications increased, 
 **RPC** was developed to **simplify** and **standardize** **remote** interprocess communication across **distributed applications**. ==RPC abstracts common steps, allowing developers to focus on application functionality without handling low-level communication tasks==.
 ```
 
-Here is the transcript to summarize.
+### Example 2
+
+Transcript
+
+```
+RPC is intended to simplify the development of cross-address space and/or cross-machine interactions. So what are the benefits? RPC offers a higher-level interface that captures all aspects of data movement and communications, including communication establishment, requests, responses, acknowledgements, et cetera. What this also allows it permits for RPC's to capture a lot of the error handling and automated, and the programmer doesn't really have to worry about that. Or at least the programmer doesn't have to explicitly reimplement the handling of all types of errors. And finally, another benefit from RPC is that it hides the complexities of cross-machines interactions, so the fact that machines may be of different types, that the network between them may fail, that the machines themselves may fail. That will be hidden from the developer. So as a programmer, when using RPC, we don't have to worry about those differences. 
+```
+
+Generated Notes:
+
+```
+**RPC** is intended to ==simplify the development== of **cross-address space** (e.g. separate processes on the same machine) and/or **cross-machine interactions**.
+
+**The benefits of RPC include:**
+
+- RPCs offers a ==higher-level interface== that **captures all aspects of data movement and communications**, including:
+	- **Communication establishment**: Sets up connections between client and server.
+	- **Requests and responses**: Manages sending requests and receiving responses efficiently.
+	- **Acknowledgements**: Handles communication confirmation without manual coding.
+	- etc.
+
+- RPCs ==capture and automate much of the error handling==, so developers **do not need to explicitly implement error handling or management** that commonly occur in distributed systems.
+
+- RPCs ==hides the complexities of cross-machine interactions==.
+	- **Abstracts away** the **differences across machines** of different types and architectures.
+	- Abstracts away network reliability and machine failure issues, maintaining continuity in functionality.
+```
+
+### Example 3
+
+Transcript
+
+```
+Let's see what's required from the system software that provides support for RPCs. First, the model of inter-process interactions that the RPC model is intended for needs to manage client/server interactions. A server supports some potentially complex service. Maybe it's running a complex computation but really fast, or maybe it's a file service that services a remote file content. The clients do not need to have the same capabilities or they don't have to be able to perform accesses to the same data. They just need to be able to issue requests to the server for whatever they need. The second requirement has to do with the fact that when RPC was first developed, the state-of-the-art programming languages for procedural languages including Basic and Pascal, and Fortran and C. So this is what programmers were familiar with. One goal of the RPC systems was to simplify the development of distributed applications underneath a procedure called interface. This is why the term remote procedure calls came to be. As a result, RPCs are intended to have similar synchronous semantics. Just like regular procedure calls. What that means is that when a process makes our remote procedure calls, the calling process or at least the calling thread, will block, and wait until the procedure completes, and then returns the result. This is the exact same thing that happens when we call a procedure in a single address base. The execution of the thread will reach the point when the procedure call is made. At that point, we jump somewhere in the address base where the procedure is implemented. The actual original thread of execution will not advance beyond that procedure called point until we get the results from the procedure. And then when we move on to the next step, we act, actually already have the results. So this is what we mean by the synchronous call semantics. And this is what we require from the RPC systems as well. RPCs have other useful features that are similar to regular procedure calls, and one is type checking. If you pass to a procedure an argument of the wrong type, you'll receive some kind of error. This is one useful reason why RPC systems would incorporate type checking mechanisms. In addition, type checking mechanisms are useful because they allow us, in certain ways, to optimize the implementation of the RPC run-time. When packets are being sent among two machines, it's just a bunch of bytes that reach from one endpoint to another. And some notion about the types of the data that's packaged into those bytes can be useful when the RPC run-time is trying to interpret what do these bytes mean. Are they integers or they're file. Do I need to put them together so as to create some kind of image or some kind of array. This is what the type information can be used for. Since the client and the server may run on different machines, there may be differences in how they represent certain data types. For instance, machines may differ in the way they use big endian or little endian format to represent integers. This determines whether the most significant byte of that integer is in the first or the last position in the sequence of bytes that corresponds to the integers. Or machines may differ in their representation of floating point numbers, may use different representations for negative numbers. The RPC system should hide all of these differences from the programmer, and should make sure that data is correctly transported, and it must perform any of the necessary conversions, any of the necessary translations among the two machines. One way to deal with this conversion is for the RPC run-time in both endpoints to agree upon a single data representation for the data types. For instance, it can agree of that everything will be represented in the network format. Then there is no need for the two endpoints to negotiate exactly how data should be encoded, exactly how data should be represented. Finally, RPCs intended to be more than just a transport-level protocol like TCP and UDP that worries about sending packets from one endpoint to another in an ordered reliable way. RPC should support underneath different kinds of protocols, so we should be able to carry out the same types of client-server interactions, regardless of whether the two machines use UDP or TCP, or some other protocol to communicate. But RPC should also incorporate some higher level mechanisms like access control, or authentication, or fault tolerance. For instance, if a server is not responding, a client can retry and reissue their same request to either the same server or it can make an attempt to contact the replica of that original server that it was trying to contact.
+```
+
+Generated Notes:
+
+```
+Let's review the requirements from the system software that provides support for RPCs.
+
+1. **Client-Server Interaction Model**
+	- The RPC model is designed for **client-server interactions**:
+		- **Server**: Offers a potentially complex services (e.g., high-speed or complex computations, file services).
+		- **Client**: Does not need equivalent capabilities; only needs to send requests to the server to access the service or data it provides.
+
+2. **Synchronous Call Semantics**
+	- RPC aims to emulate regular **procedure call behavior** (hence, "remote procedure call"):
+	- When a client makes an RPC, the calling process/thread **blocks** and waits for the server to complete the requested procedure and return the result.
+	- This is similar to a **synchronous procedure call** in a single address space:
+		- Execution halts at the point of the procedure call.
+		- The thread does not advance until it receives results from the procedure, then proceeds with the next step.
+
+3. **Type Checking**
+	- Type checking mechanisms **helps ensure the correctness of data** passed between client and server. This is similar to a procedure call where, if you pass an argument of the wrong type to a procedure, you'll receive an error.
+	- The **type information helps optimize the RPC runtime by interpreting the bytes sent over the network correctly**.
+		- For example, identifying whether bytes represent integers, files, arrays, or other data structures, ensuring correct interpretation.
+
+4. **Cross-Machine Data Conversion**
+	- Since clients and servers may operate on **different machines**, they may have distinct data representations, for example: 
+		- **Endianness**: Some machines use **big-endian** (most significant byte first) or **little-endian** (least significant byte first) for integer storage.
+		- Machines may differ in representing floating-point numbers or negative values.
+	- The RPC system should hide all of these differences from the programmer, and should make sure that data is correctly transported.
+	- One way to deal with this conversion is for the RPC run-time in both endpoints to agree upon a **common data representation** for the data types.
+		- For instance, it can agree of that everything will be represented in the network format. 
+		- This avoids client-server negotiation over data representation, simplifying development.
+
+5. **Higher-Level Protocol**
+	- RPC should be more than just a **transport protocol** (like TCP/UDP):
+	- RPC should support different underlying transport protocols (e.g., UDP, TCP) without altering the client-server interaction model.
+	- RPC should incorporate some **higher-level mechanisms/features**, such as:
+		   - **Access Control** and **Authentication**: Ensure secure communication between clients and servers.
+           - **Fault Tolerance**: 
+               - For example, if a server does not respond, the RPC system can retry the request.
+               - Option to contact **replica servers** if the primary server is unresponsive, improving reliability.
+```
+
+### Example 4
+
+Transcript
+
+```
+To illustrate the structure of the RPC system I will walk you through an example. Consider a client and server system. The client wants to perform some arithmetic operations, let's say addition, subtraction, multiplication, but doesn't know how to. The server is the calculator process, and it knows how to perform all of these operations. In this scenario, whenever the client needs to perform some arithmetic operation. It needs to send the message over to the server that specifies what is the operation it wants performed, as well as the arguments. The server is the one that has the implementation of that operation. So it will take those arguments, perform the operation, and then return the results. To simplify all the communications related aspects of the programming, like creating sockets, allocating managing the buffers, for the arguments and for the results, and all the other detail, this communication pattern will use RPC. Let's consider in this example the client wants to perform an addition. It wants to add i and j and it wants to obtain the results of this computation in k. The client doesn't have the implementation of the addition process, only the server knows how to do it. However, with RPC the client is still allowed to call something that looks just like a regular procedure k equals add of i and j. In a regular program, when a procedure call is made the execution jumps to some other point in the address space where the implementation of that procedure is actually stored. So the program counter will be set to some value in that address space that corresponds to the first instruction of the procedure. In this example, when the RPC add is called the execution of the program will also jump to another location in the address space. But it won't be where the real implementation of add is, instead it will be in a stub implementation. >From the rest of the client's process it will look just like the real add, but internally what this stuff does is something entirely different. The responsibility of the client's stub is to create a buffer and populate that buffer with all of the appropriate information. In this case, it's the descriptor of the function that the client wants the server to perform, the add, as well as its arguments, the integers i and j. The stop code itself is automatically generated via some tools that are part of the RPC package so the programmer doesn't have to write this code. So when the client makes the call at here the call takes the execution of the client process into a portion of the RPC run time, and by that we mean the system software that implements all of the RPC functionality. In the first step here is that stub implementation. After the buffer is created, the RPC run time will send a message to the server process. This may be the TCP/IP sockets or some other transport protocol. What we're not showing in this figure is that there is some information about the server machine like the IP address and the port number where this server process is running. That is available to the client. And that information is used by the RPC run time to establish the connection, and to carry out all of the communication. On the server side when the packets are received for disconnection they will be handed off to the server stub. This is a code that will know how to parse and interpret all the received bytes in the packets that were delivered to the stub and it will also know how to determine that this is an RPC request for the procedure add with arguments i and j. The servers stop once it sees that it needs to perform this act. It will know that the remaining bytes need to be interpreted like two integers i and j. So it will know how many bytes to copy from the packet stream, how to allocate data structures for these particular integer variables to be created in the address piece of the server process. Once all this information is extracted on the server side these local variables are created in the address space. The stub is ready to make a call in the user level server process that has the actual implementation of all of the operations, including the add. Only at that point did the actual implementation of the add procedure will be called and the results of the edition of i and j will be computed and stored in a variable in the server process address space at that point. Once the result is computed, it will take the reverse path. It will go through the server step that will first create a buffer for that result and then it will send the response back via the appropriate client connection. That will arrive on the client side into the RPC run time. The packets will be received. The result will be extracted from those packets by the client side stub, be placed somewhere in memory in the client address space, and then ultimately the procedure will return to the client process. For the entire time while this is happening, the client process will be blocked on this add operation will be suspended here. It will not be able to continue. Which is exactly what happens when a client process makes a local procedure call. The execution of the client process will continue only once the results of that procedure call are available. 
+```
+
+Generated Notes:
+
+```
+## Example Scenario: Client-Server Arithmetic Operations
+
+This section illustrates the structure and functionality of the **Remote Procedure Call (RPC)** system through a practical example involving a **client-server architecture**. The **client** wishes to perform operations (for example, arithmetic operations such as addition, subtraction, multiplication) **without having the implementation details**, which reside on the **server**. The server takes the arguments, performs the operation, and then return the results back to the client.
+
+## Benefits of RPC
+
+- RPC ==simplifies the communication process by abstracting away the details== involved in operations like socket creation, buffer management, and data transfer.
+- The ==**client** can invoke operations **as if calling a local procedure**, enhancing **usability and readability**==.
+
+## Example: `add`
+
+Let's consider an example where the client wants to perform an addition. 
+
+### Step 1: Client Invocation
+
+The client wants to add `i` and `j` and obtain the result of the computation `k`. The client doesn't have the implementation of `add`.
+
+However, the ==RPC allows the client to call something that looks like a regular procedure== `k = add(i, j)`.
+
+Upon invoking the `add` operation, ==execution jumps to a **client stub**== instead of the actual implementation.
+
+#### Client Stub
+
+With a **procedure call**, the execution jumps to some other point in the address space where the implementation of that procedure is actually stored. The program counter will be set to some value in that address space that corresponds to the first instruction of the procedure.
+
+Similarly, when the RPC `add` is called, the execution of the program will jump to another location in the address space. However, **this location will not contain the real implementation of `add`**; rather, it will contain a ==stub implementation==. From the client's perspective it will look just like the real `add`, but internally it is entirely different.
+
+The **client stub** is responsible for:
+	 - **Creating a buffer**.
+	 - **Populating the buffer** with the function descriptor (`add`) and its arguments (`i` and `j`).
+
+The ==stub code is automatically generated== with tools that are part of the RPC package, relieving the programmer from manual coding tasks.
+
+#### RPC Runtime
+
+==The PRC runtime is the **system software** that **implements all of the RPC functionality**==.
+
+The ==**RPC runtime** manages the communication==:
+ - It sends the populated message (buffer) to the server using a transport protocol (e.g., TCP/IP).
+ - The client has prior knowledge of the server's IP address and port number for establishing the connection which it gives to the PRC runtime prior to the call.
+
+### Step 2: Server Side Processing
+
+On the server side, when the packets are received they will be handed off to the ==server stub==.
+
+The **server stub** is responsible for:
+- **Parsing and interpreting all the received bytes** in the packets that were delivered to the stub.
+- **Identifies the operation** (e.g., `add`) and **extracts the arguments** (`i` and `j`).
+	- When the server determines that `add` is being called, it knows the remaining bytes need to be interpreted like two integers `i` and `j`
+	- Therefore, it knows how many bytes to copy from the packet stream, and how to allocate data structures for these particular integer variables, and the local variables are created in the address space.
+- **Calling the actual Implementation**.
+	- The server stub calls the user-level server process that implements the arithmetic operations.
+	- The actual addition operation is performed, and the result is stored in a variable within the server's address space.
+- **Responding to the Client**.
+	- The server stub prepares a response:
+	     - Creates a buffer for the result.
+	     - Sends the response back to the client through the established connection.
+
+### Step 3: Client Receives the Response.
+
+The **client-side** stub (RPC runtime) **receives the packets** and **extracts and stores the result** in the client's memory.
+
+The ==original client process is blocked during this interaction, similar to a local procedure call, and resumes only after receiving the result==.
+```
+
+### Example 5
+
+Transcript
+
+```
+To generalize from the example that we saw in the previous video. We will now summarize the steps that have to take place in an RPC interaction between a client and a server. The first step, a server binding occurs. Here the client finds and discovers the server that supports the desired functionality. And that it will need to connect to. For connection oriented protocols, like TCP/IP that require that a connection be established between the client and the server process, that connection will actually be established in this step. Then, the client makes the actual Remote Procedure Call. This results in a call into the user stub, and at that point the rest of the client code will block. Next, the client stub will create a data buffer, and it will populate it with the values of the arguments that are passed to the procedure call. We call this process, marshalling the arguments. The arguments may be located at arbitrary non-contiguous locations in the client under space. But the RPC runtime will need to send a contiguous buffer to the sockets for transmission. So the marshal link process will take care of this and replace all the arguments into a buffer that will be passed to the sockets. Once the buffer is available, the RPC run time will send the message in the sending will involve whatever transmission protocol that both sides have agreed upon during the binding process. This may be TCP, UDP, or even shared memory based IPC if the client and the server are in the same machine. When the data is transferred onto the server machine, it's received by the RPC runtime and all of the necessary checks are performed to determine what is the correct server step that this message needs to be passed to. And in addition, it's possible to include certain access control checks at this particular step. The server stop will unmarshal the data. Umarshalling is clearly the reverse of marshalling. So this will take the byte stream that's coming from the receive buffers. It will extract the arguments and it will create whatever data structures are needed to hold the values of those arguments. One of the arguments are allocated and set to appropriate values the actual procedure call can be made. This calls the implementation of this procedure that's part of the server process. The server will computed the result of the operation, or potentially it will conclude that there is some kind of error message that needs to be returned. The result will be passed to the server side stub, and it will follow a similar reverse path in order to be returned back to the client. One more step is needed for all of this to work. Here we have as the zero initial step. That the client will need to find or discover the server, so that it can bind with it. But before that can happen somehow the server needs to do some things so that it can be found. The server will need to announce to the rest of the world what is the procedure that it knows how to perform, what are the argument types that are required for that procedure. What is its location? The IP address, the port number, any information that's necessary for that server to be discovered and so that somebody can bind with it. What that means is that the server also executes some registration step when this operation happens. 
+```
+
+Example Generated Notes:
+
+```
+## General Steps in an RPC Interaction
+
+This section summarizes the steps involved in a **Remote Procedure Call (RPC)** interaction between a **client** and a **server**.
+
+0. **Server Registration**
+	- The server needs to announce:
+		- the procedures it can perform
+		- the required argument types
+		- its location (IP address and port number).
+	- This registration step ==allows clients to discover and bind to the server effectively==.
+
+1. **Server Binding**
+	- The **client discovers the server** that supports the desired functionality. For connection oriented protocols (e.g. TCP/IP) that require that a connection be established between the client and the server process, that connection will be established in this step. 
+
+2. **Client makes the Remote Procedure Call**.
+	- This results in a call into the **client stub**, and ==at that point the rest of the client code will block==.
+
+3. **Marshaling Arguments**
+	- The **client stub** creates a **data buffer** and **populates** it with the **arguments for the procedure call**. This process is known as ==marshaling==.
+	- **Marshaling** involves:
+		- Collecting arguments from potentially non-contiguous locations in the client’s address space.
+		- Creating a contiguous buffer for transmission.
+
+4. **Sending the Message to the Server**
+	- Once the buffer is prepared, the **RPC runtime** sends the message. The transmission uses the agreed-upon protocol established during the binding process (e.g., TCP, UDP, or shared memory IPC if on the same machine).
+
+5. **Server Reception and Processing**
+	- The server receives the data through its **RPC runtime**.
+	- **Checks** are performed to determine the correct **server stub** for processing the message.
+	- Possible **access control checks** may also be included at this stage.
+
+6. **Unmarshaling Data**
+	- The **server stub** performs **unmarshaling**, which is the reverse of marshaling, which involves.
+		- **Creating data structures** to hold the values of the arguments.
+		- **Extracting the arguments** from the byte stream into the receive buffers.
+
+7. **Procedure Execution**
+	- Once the arguments are allocated and set, the **server stub calls the actual implementation of the procedure** within the server process.
+	- The **server computes the result of the operation** or determines if an **error** occurred and needs to be returned.
+
+8. **Returning the Result to the Client**
+	- The result is passed back to the **server stub**.
+	- The response follows a similar **reverse path back to the client**:
+
+9. **Client Receives the Result**
+	- The client-side stub receives the packets and extracts the result.
+	- The original client process resumes execution after receiving the result, completing the RPC interaction.
+```
+
+## Actual transcript to summarize.
 
 ```
 {{notes}}
