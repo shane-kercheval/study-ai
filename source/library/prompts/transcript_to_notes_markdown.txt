@@ -67,16 +67,16 @@ Generated Notes:
 **The benefits of RPC include:**
 
 - RPCs offers a ==higher-level interface== that **captures all aspects of data movement and communications**, including:
-	- **Communication establishment**: Sets up connections between client and server.
-	- **Requests and responses**: Manages sending requests and receiving responses efficiently.
-	- **Acknowledgements**: Handles communication confirmation without manual coding.
-	- etc.
+    - **Communication establishment**: Sets up connections between client and server.
+    - **Requests and responses**: Manages sending requests and receiving responses efficiently.
+    - **Acknowledgements**: Handles communication confirmation without manual coding.
+    - etc.
 
 - RPCs ==capture and automate much of the error handling==, so developers **do not need to explicitly implement error handling or management** that commonly occur in distributed systems.
 
 - RPCs ==hides the complexities of cross-machine interactions==.
-	- **Abstracts away** the **differences across machines** of different types and architectures.
-	- Abstracts away network reliability and machine failure issues, maintaining continuity in functionality.
+    - **Abstracts away** the **differences across machines** of different types and architectures.
+    - Abstracts away network reliability and machine failure issues, maintaining continuity in functionality.
 ```
 
 ### Example 3
@@ -93,36 +93,36 @@ Generated Notes:
 Let's review the requirements from the system software that provides support for RPCs.
 
 1. **Client-Server Interaction Model**
-	- The RPC model is designed for **client-server interactions**:
-		- **Server**: Offers a potentially complex services (e.g., high-speed or complex computations, file services).
-		- **Client**: Does not need equivalent capabilities; only needs to send requests to the server to access the service or data it provides.
+    - The RPC model is designed for **client-server interactions**:
+        - **Server**: Offers a potentially complex services (e.g., high-speed or complex computations, file services).
+        - **Client**: Does not need equivalent capabilities; only needs to send requests to the server to access the service or data it provides.
 
 2. **Synchronous Call Semantics**
-	- RPC aims to emulate regular **procedure call behavior** (hence, "remote procedure call"):
-	- When a client makes an RPC, the calling process/thread **blocks** and waits for the server to complete the requested procedure and return the result.
-	- This is similar to a **synchronous procedure call** in a single address space:
-		- Execution halts at the point of the procedure call.
-		- The thread does not advance until it receives results from the procedure, then proceeds with the next step.
+    - RPC aims to emulate regular **procedure call behavior** (hence, "remote procedure call"):
+    - When a client makes an RPC, the calling process/thread **blocks** and waits for the server to complete the requested procedure and return the result.
+    - This is similar to a **synchronous procedure call** in a single address space:
+        - Execution halts at the point of the procedure call.
+        - The thread does not advance until it receives results from the procedure, then proceeds with the next step.
 
 3. **Type Checking**
-	- Type checking mechanisms **helps ensure the correctness of data** passed between client and server. This is similar to a procedure call where, if you pass an argument of the wrong type to a procedure, you'll receive an error.
-	- The **type information helps optimize the RPC runtime by interpreting the bytes sent over the network correctly**.
-		- For example, identifying whether bytes represent integers, files, arrays, or other data structures, ensuring correct interpretation.
+    - Type checking mechanisms **helps ensure the correctness of data** passed between client and server. This is similar to a procedure call where, if you pass an argument of the wrong type to a procedure, you'll receive an error.
+    - The **type information helps optimize the RPC runtime by interpreting the bytes sent over the network correctly**.
+        - For example, identifying whether bytes represent integers, files, arrays, or other data structures, ensuring correct interpretation.
 
 4. **Cross-Machine Data Conversion**
-	- Since clients and servers may operate on **different machines**, they may have distinct data representations, for example: 
-		- **Endianness**: Some machines use **big-endian** (most significant byte first) or **little-endian** (least significant byte first) for integer storage.
-		- Machines may differ in representing floating-point numbers or negative values.
-	- The RPC system should hide all of these differences from the programmer, and should make sure that data is correctly transported.
-	- One way to deal with this conversion is for the RPC run-time in both endpoints to agree upon a **common data representation** for the data types.
-		- For instance, it can agree of that everything will be represented in the network format. 
-		- This avoids client-server negotiation over data representation, simplifying development.
+    - Since clients and servers may operate on **different machines**, they may have distinct data representations, for example: 
+        - **Endianness**: Some machines use **big-endian** (most significant byte first) or **little-endian** (least significant byte first) for integer storage.
+        - Machines may differ in representing floating-point numbers or negative values.
+    - The RPC system should hide all of these differences from the programmer, and should make sure that data is correctly transported.
+    - One way to deal with this conversion is for the RPC run-time in both endpoints to agree upon a **common data representation** for the data types.
+        - For instance, it can agree of that everything will be represented in the network format. 
+        - This avoids client-server negotiation over data representation, simplifying development.
 
 5. **Higher-Level Protocol**
-	- RPC should be more than just a **transport protocol** (like TCP/UDP):
-	- RPC should support different underlying transport protocols (e.g., UDP, TCP) without altering the client-server interaction model.
-	- RPC should incorporate some **higher-level mechanisms/features**, such as:
-		   - **Access Control** and **Authentication**: Ensure secure communication between clients and servers.
+    - RPC should be more than just a **transport protocol** (like TCP/UDP):
+    - RPC should support different underlying transport protocols (e.g., UDP, TCP) without altering the client-server interaction model.
+    - RPC should incorporate some **higher-level mechanisms/features**, such as:
+           - **Access Control** and **Authentication**: Ensure secure communication between clients and servers.
            - **Fault Tolerance**: 
                - For example, if a server does not respond, the RPC system can retry the request.
                - Option to contact **replica servers** if the primary server is unresponsive, improving reliability.
@@ -167,8 +167,8 @@ With a **procedure call**, the execution jumps to some other point in the addres
 Similarly, when the RPC `add` is called, the execution of the program will jump to another location in the address space. However, **this location will not contain the real implementation of `add`**; rather, it will contain a ==stub implementation==. From the client's perspective it will look just like the real `add`, but internally it is entirely different.
 
 The **client stub** is responsible for:
-	 - **Creating a buffer**.
-	 - **Populating the buffer** with the function descriptor (`add`) and its arguments (`i` and `j`).
+- **Creating a buffer**.
+- **Populating the buffer** with the function descriptor (`add`) and its arguments (`i` and `j`).
 
 The ==stub code is automatically generated== with tools that are part of the RPC package, relieving the programmer from manual coding tasks.
 
@@ -177,8 +177,8 @@ The ==stub code is automatically generated== with tools that are part of the RPC
 ==The PRC runtime is the **system software** that **implements all of the RPC functionality**==.
 
 The ==**RPC runtime** manages the communication==:
- - It sends the populated message (buffer) to the server using a transport protocol (e.g., TCP/IP).
- - The client has prior knowledge of the server's IP address and port number for establishing the connection which it gives to the PRC runtime prior to the call.
+- It sends the populated message (buffer) to the server using a transport protocol (e.g., TCP/IP).
+- The client has prior knowledge of the server's IP address and port number for establishing the connection which it gives to the PRC runtime prior to the call.
 
 ### Step 2: Server Side Processing
 
@@ -187,15 +187,15 @@ On the server side, when the packets are received they will be handed off to the
 The **server stub** is responsible for:
 - **Parsing and interpreting all the received bytes** in the packets that were delivered to the stub.
 - **Identifies the operation** (e.g., `add`) and **extracts the arguments** (`i` and `j`).
-	- When the server determines that `add` is being called, it knows the remaining bytes need to be interpreted like two integers `i` and `j`
-	- Therefore, it knows how many bytes to copy from the packet stream, and how to allocate data structures for these particular integer variables, and the local variables are created in the address space.
+    - When the server determines that `add` is being called, it knows the remaining bytes need to be interpreted like two integers `i` and `j`
+    - Therefore, it knows how many bytes to copy from the packet stream, and how to allocate data structures for these particular integer variables, and the local variables are created in the address space.
 - **Calling the actual Implementation**.
-	- The server stub calls the user-level server process that implements the arithmetic operations.
-	- The actual addition operation is performed, and the result is stored in a variable within the server's address space.
+    - The server stub calls the user-level server process that implements the arithmetic operations.
+    - The actual addition operation is performed, and the result is stored in a variable within the server's address space.
 - **Responding to the Client**.
-	- The server stub prepares a response:
-	     - Creates a buffer for the result.
-	     - Sends the response back to the client through the established connection.
+    - The server stub prepares a response:
+         - Creates a buffer for the result.
+         - Sends the response back to the client through the established connection.
 
 ### Step 3: Client Receives the Response.
 
@@ -220,48 +220,91 @@ Example Generated Notes:
 This section summarizes the steps involved in a **Remote Procedure Call (RPC)** interaction between a **client** and a **server**.
 
 0. **Server Registration**
-	- The server needs to announce:
-		- the procedures it can perform
-		- the required argument types
-		- its location (IP address and port number).
-	- This registration step ==allows clients to discover and bind to the server effectively==.
+    - The server needs to announce:
+        - the procedures it can perform
+        - the required argument types
+        - its location (IP address and port number).
+    - This registration step ==allows clients to discover and bind to the server effectively==.
 
 1. **Server Binding**
-	- The **client discovers the server** that supports the desired functionality. For connection oriented protocols (e.g. TCP/IP) that require that a connection be established between the client and the server process, that connection will be established in this step. 
+    - The **client discovers the server** that supports the desired functionality. For connection oriented protocols (e.g. TCP/IP) that require that a connection be established between the client and the server process, that connection will be established in this step. 
 
 2. **Client makes the Remote Procedure Call**.
-	- This results in a call into the **client stub**, and ==at that point the rest of the client code will block==.
+    - This results in a call into the **client stub**, and ==at that point the rest of the client code will block==.
 
 3. **Marshaling Arguments**
-	- The **client stub** creates a **data buffer** and **populates** it with the **arguments for the procedure call**. This process is known as ==marshaling==.
-	- **Marshaling** involves:
-		- Collecting arguments from potentially non-contiguous locations in the client’s address space.
-		- Creating a contiguous buffer for transmission.
+    - The **client stub** creates a **data buffer** and **populates** it with the **arguments for the procedure call**. This process is known as ==marshaling==.
+    - **Marshaling** involves:
+        - Collecting arguments from potentially non-contiguous locations in the client’s address space.
+        - Creating a contiguous buffer for transmission.
 
 4. **Sending the Message to the Server**
-	- Once the buffer is prepared, the **RPC runtime** sends the message. The transmission uses the agreed-upon protocol established during the binding process (e.g., TCP, UDP, or shared memory IPC if on the same machine).
+    - Once the buffer is prepared, the **RPC runtime** sends the message. The transmission uses the agreed-upon protocol established during the binding process (e.g., TCP, UDP, or shared memory IPC if on the same machine).
 
 5. **Server Reception and Processing**
-	- The server receives the data through its **RPC runtime**.
-	- **Checks** are performed to determine the correct **server stub** for processing the message.
-	- Possible **access control checks** may also be included at this stage.
+    - The server receives the data through its **RPC runtime**.
+    - **Checks** are performed to determine the correct **server stub** for processing the message.
+    - Possible **access control checks** may also be included at this stage.
 
 6. **Unmarshaling Data**
-	- The **server stub** performs **unmarshaling**, which is the reverse of marshaling, which involves.
-		- **Creating data structures** to hold the values of the arguments.
-		- **Extracting the arguments** from the byte stream into the receive buffers.
+    - The **server stub** performs **unmarshaling**, which is the reverse of marshaling, which involves.
+        - **Creating data structures** to hold the values of the arguments.
+        - **Extracting the arguments** from the byte stream into the receive buffers.
 
 7. **Procedure Execution**
-	- Once the arguments are allocated and set, the **server stub calls the actual implementation of the procedure** within the server process.
-	- The **server computes the result of the operation** or determines if an **error** occurred and needs to be returned.
+    - Once the arguments are allocated and set, the **server stub calls the actual implementation of the procedure** within the server process.
+    - The **server computes the result of the operation** or determines if an **error** occurred and needs to be returned.
 
 8. **Returning the Result to the Client**
-	- The result is passed back to the **server stub**.
-	- The response follows a similar **reverse path back to the client**:
+    - The result is passed back to the **server stub**.
+    - The response follows a similar **reverse path back to the client**:
 
 9. **Client Receives the Result**
-	- The client-side stub receives the packets and extracts the result.
-	- The original client process resumes execution after receiving the result, completing the RPC interaction.
+    - The client-side stub receives the packets and extracts the result.
+    - The original client process resumes execution after receiving the result, completing the RPC interaction.
+```
+
+
+### Example 6
+
+Transcript
+
+```
+An interface definition language is used to describe the interface that a particular server exports. At the minimum, this will include the name of the procedure and also the type of the different arguments that are used for this procedure as well as the result type. So you see this is very similar to defining a function prototype. Another important piece of information is to include a version number. If there are multiple servers that perform the same operation, the same procedure, the version number helps a client identify which server is most current, which server has the most current implementation of that procedure. Also the use of version numbers is useful when we are trying to perform upgrades in the system. For instance, we don't have to upgrade all the clients and all the servers at the same time. Using this version number however, the clients will be able to identify the server that supports exactly the type of procedure implementation that is compatible with the rest of the client program. So this is basically useful for so-called incremental upgrades. The RPC system can use an interface definition language for the interface specification that's completely agnostic to the programming languages that are otherwise used to write the client and the server processes. SunRPC which is an example of an RPC system that we will look at later in this lesson, uses an IDL that's called XDR. External data representation. And XDR is a completely different specification from any other programming language that's out there. We will describe XDR in more detail, but here is an example of something that's described with XDR. And you can notice that the definitions of things like the string variable with these angular brackets, that's not really something that's used in other programming languages. It's very XDR specific. If you would like, by the way, to read ahead and examine a SunRPC example and look at XDR in more detail, there are links provided in the instructor notes. The opposite of a language-agnostic choice for an IDL is to choose a language- specific IDL to describe the interfaces. For instance, the Java RMI, which is a Javaequivalent of RPC uses the actual, the same, programming language JAVA. To specify the interfaces that the RMI server is exporting. Here is an example of an interface specified for Java RMIs. Those of you that know Java will immediately recognize that this looks just like Java. For programmers that know Java, use of a language specific IDL is great because they don't have to learn yet another set of rules to, how to define data structures or procedures in another language. For those that don't know Java that are not familiar with the specific programming language that's supported by the server for instance. Then this becomes irrelevant if you have to learn something they might as well learn something simple and that is one of the goals that XDR has. Now let me iterate one more time that whatever the choice for the IDL language, this is used only for specification of the interface that the server will export. The interface, whatever is written with this IDL language will be used by the RPC system for tasks like automating the stop generation process. Generating the marshalling procedures. And to generate information that's used in the service discovery process. The IDL is not actually used for the actual implementation of the service. 
+```
+
+Example Generated Notes:
+
+```
+## Overview of IDL
+An ==**Interface Definition Language (IDL)** is used to describe the **interface** that a particular **server exports in a Remote Procedure Call (RPC) system**==. 
+
+**Key Components** of IDL inlcude
+- The **name** of the procedure being defined.
+- The **types of the different arguments** used for the procedure.
+- The **type of the result** returned by the procedure.
+- **Version Number**: 
+	- Essential for identifying the **most current implementation of a procedure**.
+	- Facilitates **incremental upgrades** by allowing clients to identify compatible server versions without needing simultaneous upgrades across all clients and servers.
+
+The RPC system can employ an ==IDL that is independent of the programming languages== used to implement the client and server processes.
+- **SunRPC** is an example that uses an IDL called **XDR (External Data Representation)**, which is a **specification distinct from any programming language**. 
+- XDR allows for the **definition of data types and structures in a way that is not tied to any specific programming language syntax**.
+
+==In contrast to language-agnostic IDLs, some RPC systems may utilize **language-specific IDLs**.==
+- **Java RMI (Remote Method Invocation)** employs Java itself as the IDL to specify interfaces that the RMI server exports.
+- The language-specific IDL approach is beneficial for Java programmers as it ==**eliminates** the need to learn a **new syntax** or **set of rules** for defining data structures and procedures==.
+
+## Role of IDL in RPC Systems
+
+Note that whatever the choice for the **IDL** language, it is ==used only for specification of the interface== that the server will export. It ==does not include the implementation==. 
+
+The ==IDL is used for==:
+- **Automating stub generation**: Facilitates the creation of stubs that handle communication between the client and server.
+- **Generating marshaling procedures**: Ensures that data is correctly packaged for transmission across the network.
+- **Service discovery processes**: Assists in the identification of available services and their interfaces.
+
+==The IDL is **not** used for the actual implementation of the service.==
 ```
 
 ## Actual transcript to summarize.
@@ -269,3 +312,5 @@ This section summarizes the steps involved in a **Remote Procedure Call (RPC)** 
 ```
 {{notes}}
 ```
+
+DO NOT FORGET TO INDENT 4 SPACES FOR SUBLISTS
