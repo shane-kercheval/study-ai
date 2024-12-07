@@ -1,7 +1,3 @@
-# conda activate ./env
-env:
-	conda env create -f environment.yml -p ./env
-
 ####
 # Commands that I use to start the docker container and run the study.py CLI.
 # The directories point to the notes that I have taken for the OMSCS program, which are stored in a
@@ -10,45 +6,47 @@ env:
 start:
 	docker-compose run -v /Users/shanekercheval/repos/omscs:/notes bash /bin/bash
 
+image-reduction:
+	uv run python image_reduction.py
 
 clean_markdown_notes:
-	python study.py format-notes \
+	uv run python study.py format-notes \
 		--model_type openai \
 		--model_name gpt-4o-mini \
 	    --temperature 0.5 \
 		--stream \
 		--clean_markdown \
-		--file ../obsidian_omscs/CS6200-GIOS/Module\ Notes/P2L5\ -\ 1\ -\ Thread\ Performance.md
+		--file ../obsidian_omscs/CS6200-GIOS/Module\ Notes/P2L5\ -\ Thread\ Performance.md
 
 study_gios:
-	python study.py study \
+	uv run python study.py study \
 		--notes_paths "../omscs/CS-6200-GIOS/flash-cards/*.yaml" \
 		--history_path "../omscs/CS-6200-GIOS/flash-cards/study-ai/history.yaml"
 
 smart_study_gios:
-	python study.py study \
+	uv run python study.py study \
 		--smart_cycle \
 		--notes_paths "../omscs/CS-6200-GIOS/flash-cards/*.yaml" \
 		--history_path "../omscs/CS-6200-GIOS/flash-cards/study-ai/history.yaml"
 
 search:
-	python study.py search \
+	uv run python study.py search \
 		--notes_paths "../omscs/CS-6200-GIOS/flash-cards/*.yaml" \
 		--db_path "../omscs/CS-6200-GIOS/flash-cards/study-ai/vector_db.parquet" \
 		--top_k 5 \
 		--similarity_threshold 0.3
 
 text_to_flashcards:
-	python study.py text-to-flashcards \
+	uv run python study.py text-to-flashcards \
 		--file ../obsidian_omscs/CS6200-GIOS/Module\ Notes/P1L2\ -\ 2\ -\ Intro\ to\ OS.md
 
 quiz:
-	python study.py quiz \
+	uv run python study.py quiz \
 	    --temperature 1 \
 		--file ../obsidian_omscs/CS6200-GIOS/Module\ Notes/P1L2\ -\ 1\ -\ Intro\ to\ OS.md
 
 quiz_local:
-	python study.py quiz \
+	uv run python study.py quiz \
 		--model_type openai_server \
 		--model_name http://localhost:1234/v1 \
 		--stream \
@@ -56,14 +54,14 @@ quiz_local:
 		--file ../obsidian_omscs/CS6200-GIOS/Module\ Notes/P1L2\ -\ 1\ -\ Intro\ to\ OS.md
 
 format_to_markdown:
-	python study.py format-notes \
+	uv run python study.py format-notes \
 		--model_type openai \
 		--model_name gpt-4o-mini \
 	    --temperature 0.5 \
 		--stream
 
 format_to_markdown_local:
-	python study.py format-notes \
+	uv run python study.py format-notes \
 		--model_type openai_server \
 		--model_name http://localhost:1234/v1 \
 	    --temperature 0.5 \
@@ -127,16 +125,16 @@ text_to_flashcards_file:
 # Project
 ####
 linting:
-	ruff check source/library
-	ruff check source/cli
-	ruff check study.py
-	ruff check tests
+	uv run ruff check source/library
+	uv run ruff check source/cli
+	uv run ruff check study.py
+	uv run ruff check tests
 
 unittests:
 	rm -f tests/test_files/log.log
 	# pytest tests
-	coverage run -m pytest --durations=0 tests
-	coverage html
+	uv run coverage run -m pytest --durations=0 tests
+	uv run coverage html
 
 # doctests:
 # 	python -m doctest source/library/utilities.py

@@ -1,0 +1,24 @@
+[project]
+name = "study-ai"
+version = "0.1.0"
+description = "CLI and notebooks for using LLMs to help study."
+requires-python = ">=3.12"
+
+dependencies = [
+    "click",
+    "coverage",
+    "helpsk",
+    "llm-workflow",
+    "pandas",
+    "pyarrow",
+    "pydantic",
+    "pypdf",
+    "pytest",
+    "python-dotenv",
+    "PyYAML",
+    "ruamel.yaml",
+    "ruff",
+    "torch>=2.5.1",
+    "torchvision>=0.20.1",
+    "sentence-transformers"
+]
